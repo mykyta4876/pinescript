@@ -1,0 +1,74 @@
+//@version=5
+indicator(title="Custom Trading Strategy", shorttitle="CTS", overlay=true)
+
+// Define input options
+input bool enableStrategy = true
+input bool enableOffset = true
+input int stopLossOffset = 10 // Default stop loss offset
+input int trailingStopLossCandle = 3 // Default trailing stop loss candle
+input string timeFrom = "02:55"
+input string timeTo = "13:00"
+input bool enableTakeProfitPips = true
+input int takeProfitPips = 50 // Default take profit pips
+input bool enableTakeProfitLines = true
+
+// Include Double ZiG Zag with HHLL indicator
+include "path/to/DoubleZiGZag_HHLL_indicator.pine"
+
+// Include Order Blocks & Breaker Blocks indicator
+include "path/to/OrderBlocks_BreakerBlocks_indicator.pine"
+// Strategy logic
+if enableStrategy
+    // Entry conditions
+    LL_condition = low < lowest(low, 10) // Check if LL is formed
+    HL_condition = high > highest(high, 10) // Check if HL is formed
+    greenLine_appeared = crossover(zigzag, 0) // Check if green line appears
+
+    // Long entry
+    if LL_condition or (greenLine_appeared and enableOffset)
+        strategy.entry("Long", strategy.long)
+
+    // Short entry
+    if HL_condition or (greenLine_appeared and enableOffset)
+        strategy.entry("Short", strategy.short)
+
+// Take Profit logic
+if enableTakeProfitPips
+    strategy.exit("TP Pips", "Long", profit = takeProfitPips)
+    strategy.exit("TP Pips", "Short", profit = takeProfitPips)
+
+if enableTakeProfitLines
+    // Logic to exit at brown or red lines (for long positions)
+    if close >= brownLine or close >= redLine
+        strategy.close("Long", comment="Brown/Red line hit")
+
+    // Logic to exit at blue or green lines (for short positions)
+    if close <= blueLine or close <= greenLine
+        strategy.close("Short", comment="Blue/Green line hit")
+
+// Stop Loss logic
+// Set stop loss under green or red line with offset
+if enableOffset
+    strategy.exit("Stop Loss", "Long", loss = greenLine - stopLossOffset)
+    strategy.exit("Stop Loss", "Short", loss = redLine + stopLossOffset)
+else
+    strategy.exit("Stop Loss", "Long", loss = greenLine)
+    strategy.exit("Stop Loss", "Short", loss = redLine)
+// Trailing Stop Loss logic
+var float trailStopLong = na
+var float trailStopShort = na
+
+if (timeframe.isintraday and bar_index > trailingStopLossCandle)
+    // Calculate trailing stop loss for long positions
+    if not na(trailStopLong)
+        trailStopLong := max(trailStopLong, low[trailingStopLossCandle])
+        strategy.exit("Trailing Stop Loss", "Long", stop = trailStopLong)
+
+    // Calculate trailing stop loss for short positions
+    if not na(trailStopShort)
+        trailStopShort := min(trailStopShort, high[trailingStopLossCandle])
+        strategy.exit("Trailing Stop Loss", "Short", stop = trailStopShort)
+
+// Time condition
+if (time >= timestamp(year, month, dayofmonth, timefrom, 00) and time <= timestamp(year, month, dayofmonth, timeto, 00))
+    strategy.close_all()
