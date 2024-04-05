@@ -1,5 +1,5 @@
 //@version=5
-indicator("OB & ZigZag Strategy", overlay = true
+strategy("OB & ZigZag Strategy", overlay = true
   , max_lines_count  = 500
   , max_labels_count = 500
   , max_boxes_count  = 500
@@ -9,7 +9,7 @@ indicator("OB & ZigZag Strategy", overlay = true
 //Settings
 //-----------------------------------------------------------------------------{
 //ZigZag Settings
-prd1     = input.int(2, 'ZigZag Period', minval = 2, maxval = 20, group = 'ZigZag Settings')
+prd1     = input.int(2, 'ZigZag Period', minval = 2, maxval = 100, group = 'ZigZag Settings')
 showzz   = input.bool(true, 'Show ZigZag Line', group = 'ZigZag Settings')
 showhhll = input.bool(true, 'Show HHLL Label', group = 'ZigZag Settings')
 upcol   = input(color.lime, 'Up', inline = 'zz1', group = 'ZigZag Settings')
@@ -38,6 +38,8 @@ var dir1 = 0
 iff_1 = not na(pl1) and na(ph1) ? -1 : dir1
 dir1 := not na(ph1) and na(pl1) ? 1 : iff_1
 
+var int trade_signal = na
+var int trade_signal_ob = na
 
 var max_array_size = 10  // [5, 2] matrix
 var zigzag1 = array.new_float(0)
@@ -81,7 +83,21 @@ if array.size(zigzag1) >= 6
             labelcol = dir1 == 1 ? array.get(zigzag1, 0) > array.get(zigzag1, 4) ? upcol : dncol : array.get(zigzag1, 0) < array.get(zigzag1, 4) ? dncol : upcol
             zzlabel := label.new(x=math.round(array.get(zigzag1, 1)), y=array.get(zigzag1, 0), text=hhlltxt, color=labelcol, textcolor=txtcol, style=dir1 == 1 ? label.style_label_down : label.style_label_up)
             zzlabel
+// Trading logic based on ZigZag
+    
+    if showhhll
+        if zzlabel.get_text() == "LL" 
+            trade_signal := 1  // Buy signal
+        else if zzlabel.get_text() == "HH"
+            trade_signal := -1  // Sell signal
+        else
+            trade_signal := 0
+    else
+        trade_signal := na
 
+
+// Additional code for entering a buy trade on LL with green or blue ZigZag line of Bullish OB
+//-----------------------------------------------------------------------------{
 //-----------------------------------------------------------------------------}
 //UDT's
 //-----------------------------------------------------------------------------{
@@ -113,6 +129,7 @@ swings(len)=>
 
     if os == 0 and os[1] != 0
         top := swing.new(high[length], bar_index[length])
+
     
     if os == 1 and os[1] != 1
         btm := swing.new(low[length], bar_index[length])
@@ -126,12 +143,10 @@ method display(ob id, css, break_css)=>
         box.new(id.loc, id.top, id.break_loc, id.btm, css.notransp()
           , bgcolor = css
           , xloc = xloc.bar_time)
-
         box.new(id.break_loc, id.top, time+1, id.btm, na
           , bgcolor = break_css
           , extend = extend.right
           , xloc = xloc.bar_time)
-        
         line.new(id.loc, id.top, id.break_loc, id.top, xloc.bar_time, color = css.notransp())
         line.new(id.loc, id.btm, id.break_loc, id.btm, xloc.bar_time, color = css.notransp())
         line.new(id.break_loc, id.top, time+1, id.top, xloc.bar_time, extend.right, break_css.notransp(), line.style_dashed)
@@ -194,6 +209,7 @@ if bull_break_conf > bull_break_conf[1] and showLabels
       , textcolor = bearCss.notransp()
       , style = label.style_label_down
       , size = size.tiny)
+    // trade_signal_ob := -1
 
 //-----------------------------------------------------------------------------}
 //Bearish OB
@@ -251,4 +267,38 @@ if barstate.islast
         for i = 0 to math.min(showBear-1, bearish_ob.size())
             get_ob = bearish_ob.get(i)
             get_ob.display(bearCss, bearBreakCss)
-//-----------------------------------------------------------------------------}
+
+
+
+var bullish_ob_color = dir1 == 1 ? bullCss : bearCss
+var bullish_ob_break_color = dir1 == 1 ? bullBreakCss : bearBreakCss
+
+
+risk_per_trade = close * 0.01 // example for 1% of the closing price
+
+if trade_signal == -1 and strategy.position_size >= 0
+    entry_price = close
+    stop_loss = entry_price + risk_per_trade
+    take_profit = entry_price - 2 * risk_per_trade
+    strategy.entry("Sell", strategy.short)
+    strategy.exit("exit", "Sell", stop = stop_loss, limit = take_profit)
+
+if trade_signal == 1 and strategy.position_size <= 0
+    entry_price = close
+    stop_loss = entry_price - risk_per_trade
+    take_profit = entry_price + 2 * risk_per_trade
+    strategy.entry("Buy", strategy.long)
+    strategy.exit("exit", "Buy", stop = stop_loss, limit = take_profit)
+
+
+// Assume 'lastHH' stores the last detected Higher High (HH) from the ZigZag
+// var float lastHH = na
+// if dir1 == 1 and not na(ph1)
+//     if na(lastHH) or ph1 > lastHH
+//         lastHH := ph1
+
+// // Detecting trade opportunities based on OB and ZigZag HH
+// for ob in bullish_ob
+//     if ob.top <= lastHH and ob.top != na and ob.breaker
+//         // Detected a bearish order block (with a red line) in a bullish context that is equal or below the ZigZag HH
+//         strategy.entry("Sell OB and ZigZag", strategy.short)

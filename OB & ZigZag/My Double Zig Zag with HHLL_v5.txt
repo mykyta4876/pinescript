@@ -13,10 +13,23 @@ zz1style = input.string(defval = "Dashed", title = "Zig Zag 1 Line Style", optio
 zz1width = input.int(defval = 2, title = "Zig zag 1 Line Width", minval = 1, maxval = 4)
 zz2width = input.int(defval = 3, title = "Zig zag 2 Line Width", minval = 1, maxval = 6)
 
-ph1 = ta.highestbars(high, prd1) == 0 ? high : na
-pl1 = ta.lowestbars(low, prd1) == 0 ? low : na
-ph2 = ta.highestbars(high, prd2) == 0 ? high : na
-pl2 = ta.lowestbars(low, prd2) == 0 ? low : na
+// Define the symbol
+symbol = syminfo.tickerid
+higherTimeframe = "30S" // 30-second timeframe
+
+// Fetch the high of the 30-second timeframe
+//hhigh = request.security(symbol, higherTimeframe, high)
+//hlow = request.security(symbol, higherTimeframe, low)
+
+//ph1 = ta.highestbars(hhigh, prd1 * 6) == 0 ? hhigh : na
+//pl1 = ta.lowestbars(hlow, prd1 * 6) == 0 ? hlow : na
+//ph2 = ta.highestbars(hhigh, prd2 * 6) == 0 ? hhigh : na
+//pl2 = ta.lowestbars(hlow, prd2 * 6) == 0 ? hlow : na
+
+ph1 = ta.highestbars(high, prd1 * 1) == 0 ? high : na
+pl1 = ta.lowestbars(low, prd1 * 1) == 0 ? low : na
+ph2 = ta.highestbars(high, prd2 * 1) == 0 ? high : na
+pl2 = ta.lowestbars(low, prd2 * 1) == 0 ? low : na
 
 var dir1 = 0
 var dir2 = 0
