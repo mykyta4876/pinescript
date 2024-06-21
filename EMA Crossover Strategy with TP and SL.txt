@@ -1,0 +1,51 @@
+//@version=4
+strategy("EMA Crossover Strategy with TP and SL", shorttitle="EMA Cross TP/SL", overlay=true)
+
+// User-defined input for moving averages
+shortEmaPeriod = input(50, title="Short EMA Period")
+longEmaPeriod = input(200, title="Long EMA Period")
+
+// Calculating moving averages
+shortEma = ema(close, shortEmaPeriod)
+longEma = ema(close, longEmaPeriod)
+
+// Plotting the EMAs
+plot(shortEma, title="50 EMA", color=color.blue)
+plot(longEma, title="200 EMA", color=color.red)
+
+// Define the crossover conditions
+longCondition = crossover(shortEma, longEma)
+shortCondition = crossunder(shortEma, longEma)
+
+// Define take profit and stop loss levels
+takeProfitLevel = 0.005  // 1%
+stopLossLevel = 0.05    // 10%
+
+if (strategy.opentrades == 0)
+    // Execute long trade
+    if (longCondition)
+        strategy.entry("Long", strategy.long)
+
+    // Execute short trade
+    if (shortCondition)
+        strategy.entry("Short", strategy.short)
+else
+    // Calculate take profit and stop loss prices for long positions
+    if (strategy.position_size > 0)
+        longTakeProfitPrice = strategy.position_avg_price * (1 + takeProfitLevel)
+        longStopLossPrice = strategy.position_avg_price * (1 - stopLossLevel)
+        strategy.exit("Long TP", from_entry="Long", limit=longTakeProfitPrice, stop=longStopLossPrice)
+
+    // Calculate take profit and stop loss prices for short positions
+    if (strategy.position_size < 0)
+        shortTakeProfitPrice = strategy.position_avg_price * (1 - takeProfitLevel)
+        shortStopLossPrice = strategy.position_avg_price * (1 + stopLossLevel)
+        strategy.exit("Short TP", from_entry="Short", limit=shortTakeProfitPrice, stop=shortStopLossPrice)
+
+// Ensure positions are managed separately
+var bool manageLong = strategy.position_size > 0
+var bool manageShort = strategy.position_size < 0
+
+// Plot signals on the chart
+plotshape(series=longCondition, location=location.belowbar, color=color.green, style=shape.labelup, text="LONG")
+plotshape(series=shortCondition, location=location.abovebar, color=color.red, style=shape.labeldown, text="SHORT")

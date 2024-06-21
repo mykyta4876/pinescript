@@ -1,0 +1,69 @@
+//@version=5
+strategy("Heikin Strategy", overlay=true)
+
+var float htfhigh = high
+var float htflow = low
+var float htfopen = open
+
+_flag_long = false
+_flag_short = false
+_index = 0
+
+_flag_middle = true
+if close < open
+    for i = 2 to 9
+        if i == 2
+            if close[1] < open[1] and close[2] < open[2] and close[2] > (open[0] + close[0]) / 2 and close[2] < open and close[1] > close[2]
+                _flag_short := true
+                break
+        else if i > 2
+            if close[i] > (open[0] + close[0]) / 2 and close[i] < open
+                _flag_middle := true
+                for j = 1 to (i-1)
+                    if close[j] < (open[0] + close[0]) / 2
+                        _flag_middle := false
+                        break
+                    
+    
+                if _flag_middle == true
+                    _flag_short := true
+                    break
+
+_flag_middle := true
+if close > open
+    for i = 2 to 9
+        if i == 2
+            if open[1] < close[1] and open[2] < close[2] and open[2] < (open[0] + close[0]) / 2 and open[2] < close[0] and open[1] > open[2]
+                _flag_long := true
+                break
+        else if i > 2
+            if open[i] < (open[0] + close[0]) / 2 and open[i] > close
+                _flag_middle := true
+                for j = 1 to (i-1)
+                    if open[j] > (open[0] + close[0]) / 2
+                        _flag_middle := false
+                        break
+
+                if _flag_middle == true
+                    _flag_long := true
+                    break 
+plotshape(series=_flag_long, title="P", style=shape.triangleup, location=location.belowbar, color=color.green, text="P", size=size.small)   
+plotshape(series=_flag_short, title="N", style=shape.triangledown, location=location.abovebar, color=color.red, text="N", size=size.small)
+
+
+//plotshape(series=_flag_long, title="PS", style=shape.triangleup, location=location.belowbar, offset = _index, color=color.green, text="PS", size=size.small)   
+//plotshape(series=_flag_short, title="NS", style=shape.triangledown, location=location.abovebar, offset = _index, color=color.red, text="NS", size=size.small)
+
+if (strategy.opentrades == 0)
+    if _flag_short == true
+        strategy.entry("Short", strategy.short) // Open short position
+        tp_level =  low - (high - low) * 0.8
+        // Define stop loss and take profit conditions
+        strategy.exit("Stop Loss/TP", "Short", stop=open, limit=tp_level)
+
+
+    if _flag_long == true
+        strategy.entry("Long", strategy.long) // Open short position
+        tp_level =  high + (high - low) * 0.8
+        // Define stop loss and take profit conditions
+        strategy.exit("Stop Loss/TP", "Long", stop=open, limit=tp_level)

@@ -1,0 +1,9 @@
+//@version=3
+study(title="ATR Stop-Loss", shorttitle="ATR-SL", overlay=true)
+source = input(close, title="Source")
+length = input(14, minval=1, title="Period")
+multiplier = input(1.6, minval=0.1, step=0.1, title="Multiplier")
+shortStopLoss = source + atr(length) * multiplier
+longStopLoss = source - atr(length) * multiplier
+plot(shortStopLoss, color=aqua, transp=0, linewidth=1, style=stepline, title="Short Stop Loss")
+plot(longStopLoss, color=fuchsia, transp=0, linewidth=1, style=stepline, title="Long Stop Loss")

@@ -1,0 +1,159 @@
+//@version=5
+//fix the first bar issue to follow the Dots Arrows v3
+indicator('TV Dots Reset Index v3', overlay=false)
+Lots = input(1.0, title='Lots')
+TickSize = input(1.0, title='TickSize')
+TickValue = input(1.0, title='TickValue')
+
+XBarsDelay = input(1, title='XBars Delay')
+
+MultiplierA = input(0.5, title='MultiplierA')
+
+TimeSetting = input('=====Time Settings=====', title='Time Settings')
+StartDay = input(0, title='Start day (YYYYMMDD)')
+StartTime = input(0, title='Start time (HHmm)')
+EndDay = input(0, title='End day (YYYYMMDD)')
+EndTime = input(0, title='End time (HHmm)')
+
+
+IsTradingTime(dbegin, tbegin, dend, tend) =>
+    yyyymmdd = year * 10000 + month * 100 + dayofmonth
+    hhmm = 100 * hour + minute
+
+    v1 = dbegin > 0 ? yyyymmdd > dbegin or yyyymmdd == dbegin and hhmm >= tbegin : true
+    v2 = dend > 0 ? yyyymmdd < dend or yyyymmdd == dend and (tend == 0 or hhmm < tend) : true
+
+    v1 and v2
+
+
+
+EntrySignal() =>
+
+    upArrow = close > open[XBarsDelay]
+    downArrow = close < open[XBarsDelay]
+
+    [upArrow, downArrow]
+
+CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition) =>
+    sum = 0.0
+    totalbuypositions = 0.0
+
+    if calc
+        sum := (close - nettedLongAvg) / TickSize * nettedLongPosition * TickValue
+        totalbuypositions := nettedLongPosition
+        totalbuypositions
+    else
+        sum := nz(sum[1])
+        totalbuypositions := nz(totalbuypositions[1])
+        totalbuypositions
+
+    [sum, totalbuypositions]
+
+CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition) =>
+    sum = 0.0
+    totalsellpositions = 0.0
+
+    if calc
+        sum := (nettedShortAvg - close) / TickSize * nettedShortPosition * TickValue
+        totalsellpositions := nettedShortPosition
+        totalsellpositions
+    else
+        sum := nz(sum[1])
+        totalsellpositions := nz(totalsellpositions[1])
+        totalsellpositions
+
+    [sum, totalsellpositions]
+
+Running_4775_Dots_v2_Reset(tradingTime, multiplier) =>
+
+
+
+    [upArrow, downArrow] = EntrySignal()
+
+    buy = upArrow and tradingTime
+    sell = downArrow and tradingTime
+
+
+    buyProfitCutoff = false
+    sellProfitCutoff = false
+
+    nettedLongPosition = 0.0
+    nettedShortPosition = 0.0
+
+    nettedLongAvg = 0.0
+    nettedShortAvg = 0.0
+
+    nettedLongPosition := buy ? nz(nettedLongPosition[1], 0) + Lots : nz(nettedLongPosition[1], 0)
+    nettedLongAvg := buy ? (nz(nettedLongPosition[1], 0) * nz(nettedLongAvg[1], 0) + Lots * close) / (nz(nettedLongPosition[1], 0) + Lots) : nz(nettedLongAvg[1], 0)
+
+    buyProfitCut = 0.0
+    buyProfitCut := nz(nettedLongPosition[1]) == 0 and nettedLongPosition > 0 ? close * multiplier : nettedLongPosition == 0 ? 0 : nz(buyProfitCut[1])
+
+    nettedShortPosition := sell ? nz(nettedShortPosition[1], 0) + Lots : nz(nettedShortPosition[1], 0)
+    nettedShortAvg := sell ? (nz(nettedShortPosition[1], 0) * nz(nettedShortAvg[1], 0) + Lots * close) / (nz(nettedShortPosition[1], 0) + Lots) : nz(nettedShortAvg[1], 0)
+
+    sellProfitCut = 0.0
+    sellProfitCut := nz(nettedShortPosition[1]) == 0 and nettedShortPosition > 0 ? close * multiplier : nettedShortPosition == 0 ? 0 : nz(sellProfitCut[1])
+
+
+
+    calc = tradingTime
+    [buyProfit, totalbuypositions] = CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition)
+    [sellProfit, totalsellpositions] = CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition)
+
+
+    buyProfitCutoff := buyProfitCut > 0 and buyProfit >= buyProfitCut
+    sellProfitCutoff := sellProfitCut > 0 and sellProfit >= sellProfitCut
+
+    exitbuy = buyProfitCutoff
+    exitsell = sellProfitCutoff
+
+
+    nettedLongPosition := exitbuy or exitsell ? 0 : nettedLongPosition
+    nettedLongAvg := exitbuy or exitsell ? 0 : nettedLongAvg
+
+    nettedShortPosition := exitbuy or exitsell ? 0 : nettedShortPosition
+    nettedShortAvg := exitbuy or exitsell ? 0 : nettedShortAvg
+
+    [buyProfitCutoff, sellProfitCutoff]
+
+tradingTime = IsTradingTime(StartDay, StartTime, EndDay, EndTime)
+
+[buyProfitCutoff1, sellProfitCutoff1] = Running_4775_Dots_v2_Reset(tradingTime, MultiplierA)
+
+var index = 0
+if buyProfitCutoff1
+    if index <= 0
+        index := 1
+        index
+    else
+        index := nz(index[1]) + 1
+        index
+
+else if sellProfitCutoff1
+    if index >= 0
+        index := -1
+        index
+    else
+        index := nz(index[1]) - 1
+        index
+
+var highestValue = 0
+var lowestValue = 0
+
+if index > 0 and index > highestValue
+    highestValue := index
+    highestValue
+if index < 0 and index < lowestValue
+    lowestValue := index
+    lowestValue
+
+plot(index, color=index > 0 ? color.lime : color.red, style=plot.style_histogram)
+plot(highestValue, color=color.new(color.green, 0), style=plot.style_line)
+plot(lowestValue, color=color.new(color.red, 0), style=plot.style_line)
+
+
+
+
+plot(close)
+	

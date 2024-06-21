@@ -1,0 +1,28 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © seriousquang
+
+//@version=5
+strategy("My Stochastic Strategy", overlay=true, margin_long=100, margin_short=100)
+
+periodK = input.int(title="K", minval=1, defval=9)
+periodD = input.int(title="D", minval=1, defval=3)
+smoothK = input.int(title="Smooth", minval=1, defval=3)
+src = input.source(title="Source", defval=close)
+
+obLevel = input.int(title="Overbought Level", defval=80)
+osLevel = input.int(title="Oversold Level", defval=20)
+
+k = ta.sma(ta.stoch(src, high, low, periodK), smoothK)
+d = ta.sma(k, periodD)
+
+
+shortCondition = ta.crossunder(d, 50)
+longCondition = ta.crossover(d, 20)
+
+if (shortCondition)
+    if (strategy.opentrades == 0)
+        strategy.entry("Short", strategy.short)
+
+if (longCondition)
+    if strategy.position_size < 0
+        strategy.close("Short", comment = "Long Close")

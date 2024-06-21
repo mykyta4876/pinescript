@@ -1,0 +1,96 @@
+//@version=5
+strategy("MFI and EMA Strategy", overlay=true)
+
+// Inputs for MFI
+length = input.int(14, title="MFI Length")
+os = input.int(20, title="Oversold Level")
+ob = input.int(80, title="Overbought Level")
+CurrentRes = input.bool(true, title="Use Current Chart Resolution?")
+CustomRes = input.timeframe("240", title="Custom Timeframe? Uncheck Box Above")
+
+// MFI Calculation
+res = CurrentRes ? timeframe.period : CustomRes
+rawMoneyFlow = hlc3 * volume
+
+positiveMoneyFlow() =>
+    a = 0.0
+    a := hlc3 > hlc3[1] ? a + rawMoneyFlow : a
+negativeMoneyFlow() =>
+    b = 0.0
+    b := hlc3 < hlc3[1] ? b + rawMoneyFlow : b
+
+moneyFlowRatio = ta.sma(positiveMoneyFlow(), length) / ta.sma(negativeMoneyFlow(), length)
+moneyFlowIndex = request.security(syminfo.tickerid, res, 100 - 100 / (1 + moneyFlowRatio))
+
+var int trend = 0
+
+// OB/OS Identification
+oversold = ta.crossover(moneyFlowIndex, os)
+overbought = ta.crossunder(moneyFlowIndex, ob)
+
+if barstate.isconfirmed
+    if (overbought == true)
+        trend := -1
+    else if (oversold == true)
+        trend := 1
+    else
+        trend := trend[1]
+
+// Inputs for EMA
+emaLength = input.int(200, title="EMA Length")
+emaSource = input(close, title="EMA Source")
+ema = ta.ema(emaSource, emaLength)
+
+// Plotting MFI
+plot(moneyFlowIndex, color=color.black, linewidth=2)
+plotshape(oversold, title="Oversold", location=location.absolute, color=color.green, style=shape.circle, size=size.small)
+plotshape(overbought, title="Overbought", location=location.absolute, color=color.red, style=shape.circle, size=size.small)
+
+h1 = hline(ob, "Overbought", color=color.red)
+h2 = hline(os, "Oversold", color=color.green)
+h3 = hline(40, "Bears", color=color.red)
+h4 = hline(60, "Bulls", color=color.green)
+fill(h4, h1, color=color.new(color.green, 90), title="Uptrend")
+fill(h3, h2, color=color.new(color.red, 90), title="Downtrend")
+fill(h3, h4, color=color.new(color.gray, 90), title="Transition Zone")
+
+// Plotting EMA
+plot(ema, title="200 EMA", color=color.blue, linewidth=2)
+
+crossover = ta.crossover(close, ema)
+crossunder = ta.crossunder(close, ema)
+// Strategy Conditions
+longCondition = trend == 1 and crossover
+shortCondition = trend == -1 and crossunder
+
+if (strategy.opentrades > 0)
+    if strategy.position_size < 0
+        if trend == 1
+            strategy.close("Short", comment = "Short Close")
+
+    if strategy.position_size > 0
+        if trend == -1
+            strategy.close("Long", comment = "Long Close")
+
+// Execute Trades
+if (longCondition)
+    strategy.entry("Long", strategy.long)
+
+if (shortCondition)
+    strategy.entry("Short", strategy.short)
+
+// Exit Conditions
+takeProfit = 0.005 // 0.5%
+stopLoss = 0.02 // 2%
+
+// Apply Exit Conditions
+if (strategy.position_size > 0)
+    strategy.exit("Take Profit/Stop Loss", "Long", limit=close * (1 + takeProfit), stop=close * (1 - stopLoss))
+if (strategy.position_size < 0)
+    strategy.exit("Take Profit/Stop Loss", "Short", limit=close * (1 - takeProfit), stop=close * (1 + stopLoss))
+
+// Alerts
+alertcondition(oversold, title="MFI Oversold", message="MFI Crossed Oversold")
+alertcondition(overbought, title="MFI Overbought", message="MFI Crossed Overbought")
+alertcondition(longCondition, title="Long Entry", message="Long Entry Signal")
+alertcondition(shortCondition, title="Short Entry", message="Short Entry Signal")

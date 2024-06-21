@@ -1,0 +1,448 @@
+//@version=5
+
+indicator('HA Losing Arrows v2', overlay=true, max_bars_back=5000)
+
+
+Lots = input(1.0, title='Lots', group='Common Settings')
+TickSize = input(1.0, title='TickSize', group='Common Settings')
+TickValue = input(1.0, title='TickValue', group='Common Settings')
+
+ShowHAArrow1 = input(true)
+ShowHAArrow2 = input(true)
+
+IchimokuArrowRestriction = input.bool(false, group='Restriction Settings')
+ADXArrowRestriction = input.bool(false, group='Restriction Settings')
+
+
+Multiplier = input(0.5, title='Multiplier', group='TV_Running_4775_Dots_Reset_v2 Set1')
+XBarsDelay = input(1, title='XBars Delay', group='TV_Running_4775_Dots_Reset_v2  Set1')
+
+Multiplier2 = input(0.5, title='Multiplier', group='TV_Running_4775_Dots_Reset_v2 Set2')
+XBarsDelay2 = input(1, title='XBars Delay', group='TV_Running_4775_Dots_Reset_v2  Set2')
+
+
+StartDay = input(0, title='Start day (YYYYMMDD)', group='Time Settings')
+StartTime = input(0, title='Start time (HHmm)', group='Time Settings')
+EndDay = input(0, title='End day (YYYYMMDD)', group='Time Settings')
+EndTime = input(0, title='End time (HHmm)', group='Time Settings')
+
+
+EntryOption1 = input.bool(true, group='Ichimoku Stra v1 Settings')
+EntryOption2 = input.bool(true, group='Ichimoku Stra v1 Settings')
+EntryOption3 = input.bool(true, group='Ichimoku Stra v1 Settings')
+
+conversionPeriods = input.int(9, minval=1, title="Conversion Line Length", group='Ichimoku Stra v1 Settings')
+basePeriods = input.int(26, minval=1, title="Base Line Length", group='Ichimoku Stra v1 Settings')
+laggingSpan2Periods = input.int(52, minval=1, title="Leading Span B Length", group='Ichimoku Stra v1 Settings')
+displacement = input.int(26, minval=1, title="Lagging Span", group='Ichimoku Stra v1 Settings')
+
+
+//ADX_Simple_v2_Set2
+deviation1 = 1.0
+deviation2 = 2.0
+
+
+adxperiod2 = input(17, title='MA Period', group='ADX Simple v2 Settings')
+small_adxlen2 = input(14, title='Small ADX Period', group='ADX Simple v2 Settings')
+big_adxlen2 = input(24, title='Big ADX Period', group='ADX Simple v2 Settings')
+Arrow6_Restriction = input.bool(false, group='ADX Simple v2 Settings')
+
+
+
+
+donchian(len) => math.avg(ta.lowest(len), ta.highest(len))
+
+Ichimoku(conversionPeriods,basePeriods,laggingSpan2Periods,displacement)=>	
+	conversionLine = donchian(conversionPeriods)
+	baseLine = donchian(basePeriods)
+	leadLine1 = math.avg(conversionLine, baseLine)
+	leadLine2 = donchian(laggingSpan2Periods)
+	
+	[conversionLine,baseLine,leadLine1,leadLine2]
+
+IchimokuEntryArrows(conversionLine,baseLine,leadLine1,leadLine2,EntryOption1,EntryOption2,EntryOption3)=>
+	buy = false
+	sell = false
+
+	if EntryOption1
+		buy := buy or (close>baseLine)
+		sell := sell or (close<baseLine)
+
+	if EntryOption2
+		buy := buy or (close > conversionLine)
+		sell := sell or (close < conversionLine)
+	
+	crossAbove = ta.crossover(close,conversionLine)
+	crossBelow = ta.crossunder(close,conversionLine)
+	
+	if EntryOption3
+		buy := buy or crossAbove
+		sell := sell or crossBelow
+	
+	upArrow = buy	
+	dnArrow = sell
+	
+			
+		
+	[upArrow, dnArrow]
+	 
+dirmov(len) =>
+    up = ta.change(high)
+    down = -ta.change(low)
+    plusDM = na(up) ? na : up > down and up > 0 ? up : 0
+    minusDM = na(down) ? na : down > up and down > 0 ? down : 0
+    truerange = ta.rma(ta.tr, len)
+    plus = fixnan(100 * ta.rma(plusDM, len) / truerange)
+    minus = fixnan(100 * ta.rma(minusDM, len) / truerange)
+    [plus, minus]
+
+adx(dilen, adxlen) =>
+    [plus, minus] = dirmov(dilen)
+    sum = plus + minus
+    adx = 100 * ta.rma(math.abs(plus - minus) / (sum == 0 ? 1 : sum), adxlen)
+    diff = plus - minus
+    [adx, diff]
+
+
+adx_v8(adxlen, dev1, dev2) =>
+    [sig, diff] = adx(adxlen, adxlen)
+    diffema = ta.ema(diff, adxlen)
+    std = ta.stdev(diff, adxlen)
+    bbup1 = diffema + dev1 * std
+    bblo1 = diffema - dev1 * std
+    bbup2 = diffema + dev2 * std
+    bblo2 = diffema - dev2 * std
+    [sig, diff, diffema, std, bbup1, bblo1, bbup2, bblo2]
+
+adx_v9(adxlen, dev1, dev2, small_adx, big_adx, mult1, mult2) =>
+    [small_sig, small_diff, small_diffema, small_std, small_bbup1, small_bblo1, small_bbup2, small_bblo2] = adx_v8(small_adx, dev1, dev2)
+    [big_sig, big_diff, big_diffema, big_std, big_bbup1, big_bblo1, big_bbup2, big_bblo2] = adx_v8(big_adx, dev1, dev2)
+    diff = mult1 * small_diff + mult2 * big_diff
+    diffema = ta.ema(diff, adxlen)
+    std = ta.stdev(diff, adxlen)
+    bbup1 = diffema + dev1 * std
+    bblo1 = diffema - dev1 * std
+    bbup2 = diffema + dev2 * std
+    bblo2 = diffema - dev2 * std
+    [diff, diffema, std, bbup1, bblo1, bbup2, bblo2]
+	
+ADX_Simple_v2(adxlen, dev1, dev2, small_adx, big_adx)=>	
+	[diff, diffema, std, bbup1, bblo1, bbup2, bblo2] = adx_v9(adxlen, dev1, dev2, small_adx, big_adx, 1, 1)
+
+	positive = 0
+	if diffema > 0
+		positive += 1
+		positive
+	if bbup1 > 0
+		positive += 1
+		positive
+	if bblo1 > 0
+		positive += 1
+		positive
+	if bbup2 > 0
+		positive += 1
+		positive
+	if bblo2 > 0
+		positive += 1
+		positive
+
+	negative = 0
+	if diffema < 0
+		negative += 1
+		negative
+	if bbup1 < 0
+		negative += 1
+		negative
+	if bblo1 < 0
+		negative += 1
+		negative
+	if bbup2 < 0
+		negative += 1
+		negative
+	if bblo2 < 0
+		negative += 1
+		negative
+
+
+	positive2 = 0
+	if diff > diffema
+		positive2 += 1
+		positive2
+	if diff > bbup1
+		positive2 += 1
+		positive2
+	if diff > bblo1
+		positive2 += 1
+		positive2
+	if diff > bbup2
+		positive2 += 1
+		positive2
+	if diff > bblo2
+		positive2 += 1
+		positive2
+
+	negative2 = 0
+	if diff < diffema
+		negative2 += 1
+		negative2
+	if diff < bbup1
+		negative2 += 1
+		negative2
+	if diff < bblo1
+		negative2 += 1
+		negative2
+	if diff < bbup2
+		negative2 += 1
+		negative2
+	if diff < bblo2
+		negative2 += 1
+		negative2
+
+	count = positive + positive2 - negative - negative2
+	avg = ta.ema(count, adxlen)
+	[count, avg]
+
+ADX_Simple_v2_Arrows(ADX_Sv2_sum2,ADX_Sv2_avg2,Arrow6_Restriction)=>
+	
+	buy = false
+	sell = false
+	
+	if Arrow6_Restriction==false
+		buy := ADX_Sv2_sum2>0
+		sell := ADX_Sv2_sum2<0
+	else
+		buy := (ADX_Sv2_sum2>0 and ADX_Sv2_sum2>ADX_Sv2_avg2)
+		sell := (ADX_Sv2_sum2<0 and ADX_Sv2_sum2<ADX_Sv2_avg2)
+		
+	upArrow = buy
+	dnArrow = sell
+	
+	[upArrow, dnArrow]
+
+IsTradingTime(dbegin, tbegin, dend, tend) =>
+    yyyymmdd = year * 10000 + month * 100 + dayofmonth
+    hhmm = 100 * hour + minute
+    v1 = dbegin > 0 ? yyyymmdd >= dbegin and hhmm >= tbegin : true
+    v2 = dend > 0 ? yyyymmdd <= dend and (tend == 0 or hhmm <= tend) : true
+
+    v1 and v2
+
+EntrySignal(XBarsDelay) =>
+
+    upArrow = close > open[XBarsDelay]
+    downArrow = close < open[XBarsDelay]
+
+    [upArrow, downArrow]
+
+CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition) =>
+    sum = 0.0
+    totalbuypositions = 0.0
+
+    if calc
+        sum := (close - nettedLongAvg) / TickSize * nettedLongPosition * TickValue
+        totalbuypositions := nettedLongPosition
+        totalbuypositions
+    else
+        sum := nz(sum[1])
+        totalbuypositions := nz(totalbuypositions[1])
+        totalbuypositions
+
+    [sum, totalbuypositions]
+
+CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition) =>
+    sum = 0.0
+    totalsellpositions = 0.0
+
+    if calc
+        sum := (nettedShortAvg - close) / TickSize * nettedShortPosition * TickValue
+        totalsellpositions := nettedShortPosition
+        totalsellpositions
+    else
+        sum := nz(sum[1])
+        totalsellpositions := nz(totalsellpositions[1])
+        totalsellpositions
+
+    [sum, totalsellpositions]
+
+
+Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay, multiplier) =>
+
+    [upArrow, downArrow] = EntrySignal(XBarsDelay)
+
+    buy = upArrow and tradingTime
+    sell = downArrow and tradingTime
+
+
+    buyProfitCutoff = false
+    sellProfitCutoff = false
+
+    nettedLongPosition = 0.0
+    nettedShortPosition = 0.0
+
+    nettedLongAvg = 0.0
+    nettedShortAvg = 0.0
+
+    nettedLongPosition := buy ? nz(nettedLongPosition[1], 0) + Lots : nz(nettedLongPosition[1], 0)
+    nettedLongAvg := buy ? (nz(nettedLongPosition[1], 0) * nz(nettedLongAvg[1], 0) + Lots * close) / (nz(nettedLongPosition[1], 0) + Lots) : nz(nettedLongAvg[1], 0)
+
+    buyProfitCut = 0.0
+    buyProfitCut := nettedLongPosition[1] == 0 and nettedLongPosition > 0 ? close * multiplier : nettedLongPosition == 0 ? 0 : nz(buyProfitCut[1])
+
+    nettedShortPosition := sell ? nz(nettedShortPosition[1], 0) + Lots : nz(nettedShortPosition[1], 0)
+    nettedShortAvg := sell ? (nz(nettedShortPosition[1], 0) * nz(nettedShortAvg[1], 0) + Lots * close) / (nz(nettedShortPosition[1], 0) + Lots) : nz(nettedShortAvg[1], 0)
+
+    sellProfitCut = 0.0
+    sellProfitCut := nettedShortPosition[1] == 0 and nettedShortPosition > 0 ? close * multiplier : nettedShortPosition == 0 ? 0 : nz(sellProfitCut[1])
+
+
+
+    calc = tradingTime
+    [buyProfit, totalbuypositions] = CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition)
+    [sellProfit, totalsellpositions] = CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition)
+
+
+    buyProfitCutoff := buyProfitCut > 0 and buyProfit >= buyProfitCut
+    sellProfitCutoff := sellProfitCut > 0 and sellProfit >= sellProfitCut
+
+    exitbuy = buyProfitCutoff
+    exitsell = sellProfitCutoff
+
+
+    nettedLongPosition := exitbuy or exitsell ? 0 : nettedLongPosition
+    nettedLongAvg := exitbuy or exitsell ? 0 : nettedLongAvg
+
+    nettedShortPosition := exitbuy or exitsell ? 0 : nettedShortPosition
+    nettedShortAvg := exitbuy or exitsell ? 0 : nettedShortAvg
+
+    [buyProfitCutoff, sellProfitCutoff]
+
+	
+tradingTime = IsTradingTime(StartDay, StartTime, EndDay, EndTime)
+[buyProfitCutoff1, sellProfitCutoff1] = Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay, Multiplier)
+[buyProfitCutoff2, sellProfitCutoff2] = Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay2, Multiplier2)
+
+
+
+var lastProfitCut1 = 0
+
+UpToDown1 = true
+dotbelow1 = sellProfitCutoff1
+dotabove1 = buyProfitCutoff1
+if UpToDown1
+	if lastProfitCut1>0
+		dotabove1 := false
+	if lastProfitCut1<0
+		dotbelow1 := false
+		
+if dotabove1
+	lastProfitCut1 := 1
+if dotbelow1
+	lastProfitCut1 := -1	
+
+	
+var lastProfitCut2 = 0
+
+UpToDown2 = false
+dotbelow2 = sellProfitCutoff2
+dotabove2 = buyProfitCutoff2
+if UpToDown2
+	if lastProfitCut2>0
+		dotabove2 := false
+	if lastProfitCut2<0
+		dotbelow2 := false
+		
+if dotabove2
+	lastProfitCut2 := 1
+if dotbelow2
+	lastProfitCut2 := -1	
+
+	
+plotshape(dotabove1 ? high : na, style=shape.circle, color=color.new(color.red, 0), location=location.abovebar, size=size.small)
+plotshape(dotbelow1 ? low : na, style=shape.circle, color=color.new(color.blue, 0), location=location.belowbar, size=size.small)
+
+plotshape(dotabove2 ? high : na, style=shape.circle, color=color.new(color.red, 0), location=location.abovebar, size=size.normal)
+plotshape(dotbelow2 ? low : na, style=shape.circle, color=color.new(color.blue, 0), location=location.belowbar, size=size.normal)
+
+var lastDotAbove1Open = float(na)
+var lastDotBelow1Open = float(na)
+
+upArrow1 = false
+dnArrow1 = false
+ 
+if dotabove1[1]
+	if na(lastDotBelow1Open)==false
+		if open>=lastDotBelow1Open
+			upArrow1 := true
+			
+	lastDotAbove1Open := open
+
+if dotbelow1[1]
+	if na(lastDotAbove1Open)==false
+		if open<=lastDotAbove1Open
+			dnArrow1 := true
+			
+	lastDotBelow1Open := open
+
+	
+
+upArrow2 = false
+dnArrow2 = false
+ 
+if dotabove2
+	if na(lastDotBelow1Open)==false
+		if close>=lastDotBelow1Open
+			upArrow2 := true
+				
+
+if dotbelow2
+	if na(lastDotAbove1Open)==false
+		if close<=lastDotAbove1Open
+			dnArrow2 := true
+				
+
+	
+	
+
+
+
+[conversionLine,baseLine,leadLine1,leadLine2] = Ichimoku(conversionPeriods,basePeriods,laggingSpan2Periods,displacement)
+[ichi_upArrow,ichi_dnArrow] = IchimokuEntryArrows(conversionLine,baseLine,leadLine1,leadLine2,EntryOption1,EntryOption2,EntryOption3)
+
+var lastIchiArrow = 0
+if ichi_upArrow
+	lastIchiArrow:=1
+if ichi_dnArrow
+	lastIchiArrow:=-1
+
+if IchimokuArrowRestriction
+	if lastIchiArrow<=0
+		upArrow1:=false
+		upArrow2:=false
+	
+	if lastIchiArrow>=0
+		dnArrow1:=false
+		dnArrow2:=false
+		
+[ADX_Sv2_sum2, ADX_Sv2_avg2] = ADX_Simple_v2(adxperiod2, deviation1, deviation2, small_adxlen2, big_adxlen2)
+[adx_upArrow, adx_dnArrow] = ADX_Simple_v2_Arrows(ADX_Sv2_sum2,ADX_Sv2_avg2,Arrow6_Restriction)
+
+var lastADXArrow = 0
+if adx_upArrow
+	lastADXArrow:=1
+if adx_dnArrow
+	lastADXArrow:=-1
+	
+if ADXArrowRestriction
+	if lastADXArrow<=0
+		upArrow1:=false
+		upArrow2:=false
+	
+	if lastADXArrow>=0
+		dnArrow1:=false
+		dnArrow2:=false
+	
+plotshape(ShowHAArrow1 and upArrow1, style=shape.triangleup, color=color.green, location=location.belowbar, size=size.small)
+plotshape(ShowHAArrow1 and dnArrow1, style=shape.triangledown, color=color.red, location=location.abovebar, size=size.small)
+	
+plotshape(ShowHAArrow2 and upArrow2[1], style=shape.triangleup, color=color.blue, location=location.belowbar, size=size.small)
+plotshape(ShowHAArrow2 and dnArrow2[1], style=shape.triangledown, color=color.yellow, location=location.abovebar, size=size.small)	

@@ -14,6 +14,10 @@ showBull = input.int(3, 'Show Last Bullish OB', minval = 0)
 showBear = input.int(3, 'Show Last Bearish OB', minval = 0)
 useBody  = input(false, 'Use Candle Body')
 
+var bGreenBreak = false
+var bRedBreak = false
+float vBreak = float(na)
+
 //Style
 bullCss      = input(color.new(#2157f3, 80), 'Bullish OB'   , inline = 'bullcss', group = 'Style')
 bullBreakCss = input(color.new(#ff1100, 80), 'Bullish Break', inline = 'bullcss', group = 'Style')
@@ -23,6 +27,13 @@ bearBreakCss = input(color.new(#0cb51a, 80), 'Bearish Break', inline = 'bearcss'
 
 showLabels = input(false, 'Show Historical Polarity Changes')
 
+//@variable The valid timeframe closest to 1/4 the size of the chart timeframe.
+string longTimeframe = timeframe.from_seconds(int(timeframe.in_seconds() * 5))
+
+// Fetch data from different timeframes using the security() function
+lclose = request.security(syminfo.tickerid, longTimeframe, close)
+lhigh = request.security(syminfo.tickerid, longTimeframe, high)
+llow = request.security(syminfo.tickerid, longTimeframe, low)
 
 //-----------------------------------------------------------------------------}
 //UDT's
@@ -58,6 +69,25 @@ swings(len)=>
     
     if os == 1 and os[1] != 1
         btm := swing.new(low[length], bar_index[length])
+
+    [top, btm]
+
+lswings(len, lhigh, llow)=>
+    var os = 0
+    var swing top = swing.new(na, na)
+    var swing btm = swing.new(na, na)
+    
+    upper = ta.highest(lhigh, len)
+    lower = ta.lowest(llow, len)
+
+    os := lhigh[len] > upper ? 0 
+      : llow[len] < lower ? 1 : os
+
+    if os == 0 and os[1] != 0
+        top := swing.new(lhigh[length], bar_index[length])
+    
+    if os == 1 and os[1] != 1
+        btm := swing.new(llow[length], bar_index[length])
 
     [top, btm]
 
@@ -102,6 +132,9 @@ min = useBody ? math.min(close, open) : low
 var bullish_ob = array.new<ob>(0)
 bull_break_conf = 0
 
+bRedBreak := false
+bGreenBreak := false
+
 if close > top.y and not top.crossed
     top.crossed := true
 
@@ -121,10 +154,12 @@ if bullish_ob.size() > 0
         element = bullish_ob.get(i)
     
         if not element.breaker 
-            //if math.min(close, open) < element.btm
-            if close < element.btm
+            if math.min(close, open) < element.btm
+                bRedBreak := true
+                vBreak := element.top
                 element.breaker := true
                 element.break_loc := time
+                alert("{RedBreak:" + str.tostring(vBreak) + "}", alert.freq_once_per_bar)
         else
             if close > element.top
                 bullish_ob.remove(i)
@@ -163,10 +198,12 @@ if bearish_ob.size() > 0
         element = bearish_ob.get(i)
 
         if not element.breaker 
-            //if math.max(close, open) > element.top
-            if close > element.top
+            if math.max(close, open) > element.top
+                bGreenBreak := true
+                vBreak := element.btm
                 element.breaker := true
                 element.break_loc := time
+                alert("{GreenBreak:" + str.tostring(vBreak) + "}", alert.freq_once_per_bar)
         else
             if close < element.btm
                 bearish_ob.remove(i)
@@ -201,5 +238,14 @@ if barstate.islast
         for i = 0 to math.min(showBear-1, bearish_ob.size())
             get_ob = bearish_ob.get(i)
             get_ob.display(bearCss, bearBreakCss)
+
+
+//{{plot("Break")}}
+//{"GreenBreak" :{{plot("Break")}}}
+plot(vBreak, "Break")
+plot(bGreenBreak ? 1 : 0, "bGreenBreak")
+plot(bRedBreak ? 1 : 0, "bRedBreak")
+//alertcondition(bGreenBreak, title="Order Green Break", message="Order Green Break")
+//alertcondition(bRedBreak, title="Order Red Break", message="Order Red Break")
 
 //-----------------------------------------------------------------------------}

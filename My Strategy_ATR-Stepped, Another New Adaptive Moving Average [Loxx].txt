@@ -1,0 +1,137 @@
+//@version=5
+strategy("My Strategy_ATR-Stepped, Another New Adaptive Moving Average [Loxx]", overlay=true, margin_long=100, margin_short=100)
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © loxx
+
+import loxx/loxxexpandedsourcetypes/4
+
+greencolor = #2DD204
+redcolor = #D2042D 
+
+// Define your capital
+var float capital = 1000000 // Example: $10,000
+
+// Calculate the lot size
+lot_size = capital / close
+
+adaptiveMovingAverage(float src, int length, atrper, mult)=>
+    float result = math.abs(src - nz(src[length]))
+    float effort = math.sum(ta.tr, length)
+    float alpha = effort != 0 ? result / effort : 0
+
+    float anama = 0.0
+    anama := (alpha * src) + ((1 - alpha) * nz(anama[1]))
+    float multout = mult 
+    float atr = ta.atr(atrper)
+    float trig = anama
+    float stepSize = multout * atr
+    float _diff = trig - nz(trig[1])
+    trig := nz(trig[1]) + ((_diff < stepSize and _diff > -stepSize) ? 0 : (_diff / stepSize) * stepSize)
+    float sig = trig[1]
+    [trig, sig]
+
+smthtype = input.string("Kaufman", "Heikin-Ashi Better Caculation Type", options = ["AMA", "T3", "Kaufman"], group = "Source Settings")
+
+srcin = input.string("Close", "Source", group= "Source Settings", 
+     options = 
+     ["Close", "Open", "High", "Low", "Median", "Typical", "Weighted", "Average", "Average Median Body", "Trend Biased", "Trend Biased (Extreme)", 
+     "HA Close", "HA Open", "HA High", "HA Low", "HA Median", "HA Typical", "HA Weighted", "HA Average", "HA Average Median Body", "HA Trend Biased", "HA Trend Biased (Extreme)",
+     "HAB Close", "HAB Open", "HAB High", "HAB Low", "HAB Median", "HAB Typical", "HAB Weighted", "HAB Average", "HAB Average Median Body", "HAB Trend Biased", "HAB Trend Biased (Extreme)"])
+
+per = input.int(30, "Period", group = "Basic Settings")
+
+filter = input.float(0.5, "ATR Multiple", minval = 0, group= "Basic Settings")
+filterperiod = input.int(15, "ATR Period", minval = 0, group= "Basic Settings")
+
+
+colorbars = input.bool(true, "Color bars?", group= "UI Options")
+showSigs = input.bool(true, "Show Signals?", group = "UI Options")
+
+kfl=input.float(0.666, title="* Kaufman's Adaptive MA (KAMA) Only - Fast End", group = "Moving Average Inputs")
+ksl=input.float(0.0645, title="* Kaufman's Adaptive MA (KAMA) Only - Slow End", group = "Moving Average Inputs")
+amafl = input.int(2, title="* Adaptive Moving Average (AMA) Only - Fast", group = "Moving Average Inputs")
+amasl = input.int(30, title="* Adaptive Moving Average (AMA) Only - Slow", group = "Moving Average Inputs")
+
+haclose  =  ohlc4
+haopen   = float(na)
+haopen  := na(haopen[1]) ? (open + close) / 2 : (nz(haopen[1]) + nz(haclose[1])) / 2
+hahigh   =math.max(high, math.max(haopen, haclose))
+halow    = math.min(low,  math.min(haopen, haclose))
+hamedian = (hahigh + halow) / 2
+hatypical = (hahigh + halow + haclose) / 3
+haweighted =  (hahigh + halow + haclose + haclose)/4 
+haaverage =  (haopen + hahigh + halow + haclose)/4
+
+float src = switch srcin
+	"Close" => loxxexpandedsourcetypes.rclose()
+	"Open" => loxxexpandedsourcetypes.ropen()
+	"High" => loxxexpandedsourcetypes.rhigh()
+	"Low" => loxxexpandedsourcetypes.rlow()
+	"Median" => loxxexpandedsourcetypes.rmedian()
+	"Typical" => loxxexpandedsourcetypes.rtypical()
+	"Weighted" => loxxexpandedsourcetypes.rweighted()
+	"Average" => loxxexpandedsourcetypes.raverage()
+    "Average Median Body" => loxxexpandedsourcetypes.ravemedbody()
+	"Trend Biased" => loxxexpandedsourcetypes.rtrendb()
+	"Trend Biased (Extreme)" => loxxexpandedsourcetypes.rtrendbext()
+	"HA Close" => loxxexpandedsourcetypes.haclose(haclose)
+	"HA Open" => loxxexpandedsourcetypes.haopen(haopen)
+	"HA High" => loxxexpandedsourcetypes.hahigh(hahigh)
+	"HA Low" => loxxexpandedsourcetypes.halow(halow)
+	"HA Median" => loxxexpandedsourcetypes.hamedian(hamedian)
+	"HA Typical" => loxxexpandedsourcetypes.hatypical(hatypical)
+	"HA Weighted" => loxxexpandedsourcetypes.haweighted(haweighted)
+	"HA Average" => loxxexpandedsourcetypes.haaverage(haaverage)
+    "HA Average Median Body" => loxxexpandedsourcetypes.haavemedbody(haclose, haopen)
+	"HA Trend Biased" => loxxexpandedsourcetypes.hatrendb(haclose, haopen, hahigh, halow)
+	"HA Trend Biased (Extreme)" => loxxexpandedsourcetypes.hatrendb(haclose, haopen, hahigh, halow)
+	"HAB Close" => loxxexpandedsourcetypes.habclose(smthtype, amafl, amasl, kfl, ksl)
+	"HAB Open" => loxxexpandedsourcetypes.habopen(smthtype, amafl, amasl, kfl, ksl)
+	"HAB High" => loxxexpandedsourcetypes.habhigh(smthtype, amafl, amasl, kfl, ksl)
+	"HAB Low" => loxxexpandedsourcetypes.hablow(smthtype, amafl, amasl, kfl, ksl)
+	"HAB Median" => loxxexpandedsourcetypes.habmedian(smthtype, amafl, amasl, kfl, ksl)
+	"HAB Typical" => loxxexpandedsourcetypes.habtypical(smthtype, amafl, amasl, kfl, ksl)
+	"HAB Weighted" => loxxexpandedsourcetypes.habweighted(smthtype, amafl, amasl, kfl, ksl)
+	"HAB Average" => loxxexpandedsourcetypes.habaverage(smthtype, amafl, amasl, kfl, ksl)
+    "HAB Average Median Body" => loxxexpandedsourcetypes.habavemedbody(smthtype, amafl, amasl, kfl, ksl)
+	"HAB Trend Biased" => loxxexpandedsourcetypes.habtrendb(smthtype, amafl, amasl, kfl, ksl)
+	"HAB Trend Biased (Extreme)" => loxxexpandedsourcetypes.habtrendbext(smthtype, amafl, amasl, kfl, ksl)
+	=> haclose
+
+
+[out, sig] = adaptiveMovingAverage(src, per, filterperiod, filter)
+
+goLong_pre = ta.crossover(out, sig)
+goShort_pre = ta.crossunder(out, sig)
+
+contSwitch = 0
+contSwitch := nz(contSwitch[1])
+contSwitch := goLong_pre ? 1 : goShort_pre ? -1 : contSwitch
+
+goLong = goLong_pre and ta.change(contSwitch)
+goShort = goShort_pre and ta.change(contSwitch)
+
+colorout = contSwitch == 1  ? greencolor : redcolor
+
+barcolor(colorbars ? colorout : na)
+plot(out, "ATRFANAMA", color = colorout, linewidth = 3)
+
+plotshape(showSigs and goLong, title = "Long", color = color.yellow, textcolor = color.yellow, text = "L", style = shape.triangleup, location = location.belowbar, size = size.tiny)
+plotshape(showSigs and goShort, title = "Short", color = color.fuchsia, textcolor = color.fuchsia, text = "S", style = shape.triangledown, location = location.abovebar, size = size.tiny)
+
+alertcondition(goLong, title="Long", message="ATR-Stepped, Another New Adaptive Moving Average [Loxx]: Long\nSymbol: {{ticker}}\nPrice: {{close}}")
+alertcondition(goShort, title="Short", message="ATR-Stepped, Another New Adaptive Moving Average [Loxx]: Short\nSymbol: {{ticker}}\nPrice: {{close}}")
+
+
+
+if (goLong == 1)
+	if strategy.position_size < 0
+		strategy.close("Short", comment = "Short Close")
+    // Check if there's an open trade with the specific entry name
+    strategy.entry("Long", strategy.long, qty = lot_size, comment="L")
+        
+if (goShort == 1)
+	if strategy.position_size > 0
+		strategy.close("Long", comment = "Long Close")
+    // Check if there's an open trade with the specific entry name
+	strategy.entry("Short", strategy.short, qty = lot_size, comment="S")

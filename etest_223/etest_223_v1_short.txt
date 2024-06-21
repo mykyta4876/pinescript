@@ -1,0 +1,222 @@
+//@version=5
+strategy("stest-d", overlay=true,pyramiding = 10)
+
+var float entry=0
+var float take_profit=0
+var float stop_loss=0
+
+
+// Input parameters
+positionsize = input(10.0, title="positionsize")
+EP = input(0.0, title="Entry Point Percentage EP")
+SP = input(70.0, title="Stop Point Percentage SP")
+R = input(100.0, title="Profit Reference Percentage R")
+L = input(30, title="Lookback Length L for Mean Body Size")
+LCC = 3
+
+MinBodyThreshold = input(0.0, title="Min Body/Mean %threshold")
+MaxBodyThreshold = input(300.0, title="Max Body/Mean %threshold")
+MinBodyCandleRatio = input(0.0, title="Min Body/Candle %threshold")
+
+session1 = input.session("0600-1300", "Session Time-1")
+session2 = input.session("1700-1900", "Session Time-2")
+
+startTime = input.time(timestamp("27 MAY 24 00:00 +0300"), "Trade Hour Start")
+// Function to check if current time is within the trading window
+isTradingWindow() =>
+    (not na(time(timeframe.period, session1))) or (not na(time(timeframe.period, session2))) 
+
+mSlow = 48
+mFast = 12
+// Input for EMAs
+lengthmSlow = input(mSlow, title="EMA mSlow Length")
+lengthmFast = input(mFast, title="EMA mFast Length")
+
+slopeFastThreshold = input(0.0, title="Fast Slope Threshold")
+slopeSlowThreshold = input(0.0, title="Slow Slope Threshold")
+slopeEntryThreshold = input(0.0, title="Entry Slope Threshold")
+slopeEntryPeriod = input(3, title="Entry Slope Period")
+
+// Calculate the EMAs
+emamSlow = ta.ema(close, lengthmSlow)
+emamFast = ta.ema(close, lengthmFast)
+
+prev_emamFast = ta.ema(close[1], lengthmFast)
+
+// Determine the opening and closing conditions
+openBelowEmamSlow = open < emamSlow
+openAboveEmamSlow = open > emamSlow
+closeAboveEmamFast = close > emamFast
+closeBelowEmamFast = close < emamFast
+
+prev_openBelowFast = open[1] < prev_emamFast
+prev_highBelowFast = high < emamFast
+prev_lowAboveFast = low > emamFast
+
+plotchar(bar_index, "bar_index", "",color=#43A047)
+
+// Plot EMAs for visual reference
+plot(emamSlow, color=#2196f3, title="mSlow EMA",linewidth=2)
+plot(emamFast, color=#ff528f, title="mFast EMA",linewidth=2)
+
+
+// Calculate the change in the moving average
+changeInFast = emamFast[0] - emamFast[mFast]
+changeInSlow = emamSlow[0] - emamSlow[mSlow]
+
+// Calculate the slope
+slopeFast = changeInFast / mFast
+slopeSlow = changeInSlow / mSlow
+
+
+plotchar(slopeFast, "Fast slope", "",color=#43A047)
+plotchar(slopeSlow, "slopeSlow", "",color=#43A047)
+
+
+// Calculate the mean body size of the last L candles
+mean_body_size = ta.sma(math.abs(close - open), L)
+prev_body_mean_ratio = 100*(math.abs(open-close)/mean_body_size)
+
+prev_bodycandle_ratio=0.0
+if(math.abs(high-low)>0)
+    prev_bodycandle_ratio := 100*(math.abs(open-close)/math.abs(high-low))
+
+// Initialize and calculate the Entry Reference (ER) for Long and Short
+var float er_long = 0.0
+var float er_short = 0.0
+
+var float prev_er_long = 0.0
+var float prev_er_short = 0.0
+
+entry_short = 0.0
+take_profit_short = 0.0
+stop_loss_short = 0.0
+
+slopeHighPeriod = slopeEntryPeriod
+slopeHighThreshold = slopeEntryThreshold
+slopeHigh = (high[0]-high[slopeHighPeriod-1])/slopeHighPeriod
+plotchar(slopeHigh, "High Slope", "",color=#43A047)
+
+trade_direction=0
+slopeOK = false
+sizeOK = false
+
+if prev_body_mean_ratio>=MinBodyThreshold and prev_body_mean_ratio<=MaxBodyThreshold and (prev_bodycandle_ratio>=MinBodyCandleRatio)
+    sizeOK := true
+
+if prev_lowAboveFast and (emamFast+prev_body_mean_ratio/2) >emamSlow and emamFast> emamSlow 
+    trade_direction:=1
+    if slopeHigh>slopeHighThreshold and slopeSlow>slopeSlowThreshold and slopeFast>slopeFastThreshold
+        slopeOK:=true
+
+if prev_highBelowFast and (emamFast-prev_body_mean_ratio/2) <emamSlow and emamFast< emamSlow 
+    trade_direction:=-1
+
+plotchar(trade_direction, "trade_direction", "",color=color.rgb(25, 27, 147))
+plotchar(slopeOK, "sLopeOK", "",color=color.rgb(25, 27, 147))
+plotchar(sizeOK, "sizeOK", "",color=color.rgb(25, 27, 147))
+
+er_long := math.abs(close - low)
+er_short := math.abs(close - high)
+//prev_er_long := math.abs(close - low)
+prev_er_long := math.abs(high - low)
+//prev_er_short := math.abs(close - high)
+prev_er_short := math.abs(low - high)     
+
+
+// Calculate the Entry Point (EP), Take Profit (P), and Stop Loss (SP) for both long and short
+entry_long = close + prev_er_long * EP / 100
+take_profit_long = close + mean_body_size * R / 100
+stop_loss_long = close - prev_er_long * SP / 100
+//stop_loss_long = close - mean_body_size * SP / 100
+
+entry_short := close - prev_er_short * EP / 100
+take_profit_short := close - mean_body_size * R / 100
+stop_loss_short := close + prev_er_short * SP / 100
+//stop_loss_short := close + prev_er_short * SP / 100
+
+prev_long = close > open
+prev_short = close < open
+cur_long = close > open
+cur_short = close < open
+
+
+if trade_direction>0
+    entry:=entry_long
+    take_profit:=take_profit_long
+    stop_loss:=stop_loss_long
+
+if trade_direction<0
+    entry:=entry_short
+    take_profit:=take_profit_short
+    stop_loss:=stop_loss_short
+
+slopeEntry = (entry[0]-entry[slopeEntryPeriod-1])/slopeEntryPeriod
+plotchar(slopeEntry, "Entry Slope", "",color=#43A047)
+
+// Plot the levels for visualization
+plot(entry, color=color.blue, title="Entry Level", style=plot.style_line, linewidth=1, offset = 1)
+plot(take_profit, color=#70fa00, title="Profit Level", style=plot.style_line, linewidth=1, offset = 1)
+plot(stop_loss, color=#ff527d, title="Loss Level", style=plot.style_line, linewidth=1, offset = 1)
+
+// plot(entry[1], color=color.blue, title="Entry Level", style=plot.style_line, linewidth=2)
+// plot(take_profit[1], color=#70fa00, title="Profit Level", style=plot.style_line, linewidth=2)
+// plot(stop_loss[1], color=#ff527d, title="Loss Level", style=plot.style_line, linewidth=2)
+
+plotchar(prev_body_mean_ratio, "Mean Ratio", "",color=#43A047)
+plotchar(mean_body_size, "Mean", "",color=#43A047)
+plotchar(math.abs(open-close), "CurBody", "",color=#43A047)
+plotchar(math.abs(open-close), "PrevBody", "",color=#43A047)
+plotchar(prev_bodycandle_ratio, "Boday CandleRatio", "",color=#43A047)
+plotchar(er_short, "er_short", "",color=#43A047)
+//plotchar(take_profit, "take_profit", "",color=#43A047)
+//!plotchar(stop_loss, "stop_loss", "",color=#43A047)
+//plotchar(entry_short, "entry_short", "",color=#43A047)
+//plotchar(take_profit_short, "take_profit_short", "",color=#43A047)
+
+plotchar(high[1], "prev_high", "",color=#43A047)
+plotchar(emamFast[1], "prev_fast", "",color=#43A047)
+
+plotchar(prev_highBelowFast, "prev_highBelowFast", "",color=#43A047)
+plotchar(openBelowEmamSlow, "openBelowEmamSlow", "",color=#43A047)
+
+plotchar(closeBelowEmamFast, "closeBelowEmamFast", "",color=#43A047)
+
+//bgcolor(prev_long?color.new(color.green,80):na, offset = 1)
+//bgcolor(prev_short?color.new(color.red,80):na, offset = 1)
+
+// Correction needed: 3 possible exit modes: Close after x candle, close before a new order, let all orders run until
+
+
+
+if barstate.isnew and isTradingWindow() and time >= startTime and sizeOK
+
+    if trade_direction>0 and slopeOK
+        if EP<=0
+            strategy.entry('L-' + str.tostring(bar_index), strategy.long, limit=entry_long, qty=positionsize,comment='L-' + str.tostring(bar_index) +'/'+ str.tostring(math.round(slopeHigh,2)))
+        else
+            strategy.entry('L-' + str.tostring(bar_index), strategy.long, stop=entry_long, qty=positionsize,comment='L-' + str.tostring(bar_index) +'/'+ str.tostring(math.round(slopeHigh,2)))
+        strategy.exit("xL" + str.tostring(bar_index), from_entry="L-" + str.tostring(bar_index), limit = take_profit_long, stop = stop_loss_long, comment_profit="TP-L"+ str.tostring(bar_index), comment_loss="SL-L"+ str.tostring(bar_index))
+
+
+    //if prev_openBelowFast and openBelowEmamSlow and prev_short
+    //if prev_short and openBelowEmamSlow  and closeBelowEmamFast
+    if trade_direction<0 and prev_highBelowFast and (emamFast+prev_body_mean_ratio/2) <emamSlow and false
+        if EP<=0
+            strategy.entry('S-' + str.tostring(bar_index), strategy.short, limit=entry_short, qty=positionsize)
+        else
+            strategy.entry('S-' + str.tostring(bar_index), strategy.short, stop=entry_short, qty=positionsize)
+
+        strategy.exit("xS" + str.tostring(bar_index), from_entry="S-" + str.tostring(bar_index), limit = take_profit_short, stop = stop_loss_short, comment_profit="TP-S"+ str.tostring(bar_index), comment_loss="SL-S"+ str.tostring(bar_index))
+
+longIsOpen = strategy.position_size > 0
+shortIsOpen = strategy.position_size < 0
+
+
+//if longIsOpen and (slopeHigh<slopeHighThreshold)
+if longIsOpen and slopeEntry<0
+    strategy.close_all(comment = "L-Slope Close")
+    //strategy.cancel_all()
+
+if shortIsOpen and (slopeEntry>0)
+    strategy.close_all(comment = "S-Slope Close")
