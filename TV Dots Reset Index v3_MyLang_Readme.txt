@@ -13,10 +13,6 @@ all other settings are not important if cannot be re-write in Mylang. if can, gr
 
 I can give you a login for my broker test account
 
-
-login: enlixir@gmail.com
-pswd: =1Bodhibodhi
-1Bodhibodhi
 If you download the desktop app and login, at the bottom left corner after the login screen, you will see the word "Algo"
 
 this is where you can create new custom indicators

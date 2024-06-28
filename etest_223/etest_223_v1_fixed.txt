@@ -187,8 +187,6 @@ plotchar(closeBelowEmamFast, "closeBelowEmamFast", "",color=#43A047)
 
 // Correction needed: 3 possible exit modes: Close after x candle, close before a new order, let all orders run until
 
-
-
 if barstate.isnew and isTradingWindow() and time >= startTime and sizeOK
 
     if trade_direction>0 and slopeOK
