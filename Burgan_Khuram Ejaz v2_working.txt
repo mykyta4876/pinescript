@@ -1,0 +1,496 @@
+//@version=5
+indicator(title="Burgan", shorttitle="Burgan", overlay=true,max_lines_count = 500,max_boxes_count = 500,max_labels_count = 500)
+
+//ZigZag
+//=======================================
+
+prd1 = 8
+prd2 = 20
+
+
+var dir1 = 0
+var dir2 = 0
+
+var max_array_size = 10 // [5, 2] matrix
+var zigzag1 = array.new_float()
+var zigzag2 = array.new_float()
+var fHH = array.new_float()
+var fLL = array.new_float()
+
+
+add_to_zigzag(pointer, value, bindex) =>
+    array.unshift(pointer, bindex)
+    array.unshift(pointer, value)
+    if array.size(pointer) > max_array_size
+        array.pop(pointer)
+        array.pop(pointer)
+    
+update_zigzag(pointer, value, bindex, dir) =>
+    if array.size(pointer) == 0
+        add_to_zigzag(pointer, value, bindex)
+    else
+        if (dir == 1 and value > array.get(pointer, 0)) or (dir == -1 and value < array.get(pointer, 0))
+            array.set(pointer, 0, value)
+            array.set(pointer, 1, bindex)
+        0.
+
+add_to_fHHLL(pointer, value, bindex) =>
+    array.unshift(pointer, bindex)
+    array.unshift(pointer, value)
+    if array.size(pointer) > 4
+        array.pop(pointer)
+        array.pop(pointer)
+
+if barstate.isconfirmed
+    ph1 = ta.highestbars(high, prd1) == 0 ? high : na
+    pl1 = ta.lowestbars(low, prd1) == 0 ? low : na
+    ph2 = ta.highestbars(high, prd2) == 0 ? high : na
+    pl2 = ta.lowestbars(low, prd2) == 0 ? low : na
+
+    dir1 := (ph1 and na(pl1)) ? 1 : ((pl1 and na(ph1)) ? -1 : dir1)
+    dir2 := (ph2 and na(pl2)) ? 1 : ((pl2 and na(ph2)) ? -1 : dir2)
+    oldzigzag1 = array.copy(zigzag1)
+    oldzigzag2 = array.copy(zigzag2)
+
+    dir1changed = ta.change(dir1)
+    if ph1 or pl1
+        if dir1changed 
+            add_to_zigzag(zigzag1, dir1 == 1 ? ph1 : pl1, bar_index)
+        else
+            update_zigzag(zigzag1, dir1 == 1 ? ph1 : pl1, bar_index, dir1)
+
+    dir2changed = ta.change(dir2)
+    if ph2 or pl2
+        if dir2changed
+            add_to_zigzag(zigzag2, dir2 == 1 ? ph2 : pl2, bar_index)
+        else
+            update_zigzag(zigzag2, dir2 == 1 ? ph2 : pl2, bar_index, dir2)
+
+    if array.size(zigzag1) >= 6
+        if array.get(zigzag1, 0) != array.get(oldzigzag1, 0) or array.get(zigzag1, 1) != array.get(oldzigzag1, 1)
+            if dir1 == 1
+                if array.get(zigzag1, 0) > array.get(zigzag1, 4)
+                    add_to_fHHLL(fHH, array.get(zigzag1, 0), array.get(zigzag1, 1))
+            else
+                if array.get(zigzag1, 0) < array.get(zigzag1, 4)
+                    add_to_fHHLL(fLL, array.get(zigzag1, 0), array.get(zigzag1, 1))
+
+    if array.size(zigzag2) >= 6
+        if array.get(zigzag2, 0) != array.get(oldzigzag2, 0) or array.get(zigzag2, 1) != array.get(oldzigzag2, 1)
+            if dir2 == 1
+                if array.get(zigzag2, 0) > array.get(zigzag2, 4)
+                    add_to_fHHLL(fHH, array.get(zigzag2, 0), array.get(zigzag2, 1))
+            else
+                if array.get(zigzag2, 0) < array.get(zigzag2, 4)
+                    add_to_fHHLL(fLL, array.get(zigzag2, 0), array.get(zigzag2, 1))
+
+//Burgan
+//=======================================
+
+///cancellationfib
+Showlowhightable=input.bool(false,"Show All Highs and Lows Numbers",group = "Table")
+ShowPNL=input.bool(false,"Show trade Status Table",group ="Table")
+cancelnumberfib=input.string("0.786","Cancellation Fib",group = "Fib Levels",options = ["0.786","0.85","0.9"])
+entrynumberfib=input.string("0.786","Enter Trade Fib",options = ["0.786","0.618"],group = "Fib Levels")
+usersicond=input.bool(true,"Use RSI condition",group = "Fib Levels")
+
+Showfibcur=true
+var lowarr=array.new_line(0)
+var higharr=array.new_line(0)
+//high to low
+var hightolow_start=array.new_int(0)
+var hightolow_end=array.new_int(0)
+var hightolow_0786_arr=array.new_float(0)
+var hightolow_1_arr=array.new_float(0)
+var indivhighs_arr=array.new_float(0)
+var indivlows_arr=array.new_float(0)
+var indivlow_arr=array.new_float(0)
+var indivhighs_arr_track=array.new_int(0)
+var hightolow_0786_track=array.new_int(0)
+var hightolow_1_track=array.new_int(0)
+var stoploss_short=array.new_float(0)
+
+var levelcancelfib_hightolow=array.new_float(0)
+//LOW TO high
+var lowtohigh_start=array.new_int(0)
+var lowtohigh_end=array.new_int(0)
+var lowtohigh_0786_arr=array.new_float(0)
+var lowtohigh_1_arr=array.new_float(0)
+var indivhighs_arr_lowtohigh=array.new_float(0)
+var indivlows_arr_lowtohigh=array.new_float(0)
+var indivlow_arr_lowtohigh=array.new_float(0)
+var indivhighs_arr_track_lowtohigh=array.new_int(0)
+var lowtohigh_0786_track=array.new_int(0)
+var lowtohigh_1_track=array.new_int(0)
+var stoploss_long=array.new_float(0)
+
+var levelcancelfib_lowtohigh=array.new_float(0)
+
+fibonacciLevelsHighToLow(h, l,float inputcancel) =>
+    float fib0_786 = h - (str.tonumber(entrynumberfib) * (h - l))
+    float fib1_000 = h - (1.000 * (h - l))
+    float fib0_500= h - (0.500 * (h - l))
+    float fib0_cancel= h - (inputcancel * (h - l))
+    [fib0_786, fib1_000,fib0_500,fib0_cancel]
+
+// Function to calculate Fibonacci levels from low to high
+fibonacciLevelsLowToHigh(h, l,float inputcancel) =>
+    float fib0_786 = l + (str.tonumber(entrynumberfib) * (h - l))
+    float fib1_000 = l + (1.000 * (h - l))
+    float fib0_500= l + (0.500 * (h - l))
+    float fib0_cancel= l + (inputcancel * (h - l))
+
+    [fib0_786, fib1_000,fib0_500,fib0_cancel]
+//high to low
+var curhigh=high
+var curlow=low
+var highest=high
+var lowest=low
+var barhigh=bar_index
+var barlow=bar_index
+//low to high
+var curhighk_lowtohigh=high
+var curlowk_lowtohigh=low
+var highestk_lowtohigh=high
+var lowestk_lowtohigh=low
+var barhighk_lowtohigh=bar_index
+var barlowk_lowtohigh=bar_index
+ma(source, length, type) =>
+    switch type
+        "SMA" => ta.sma(source, length)
+        "Bollinger Bands" => ta.sma(source, length)
+        "EMA" => ta.ema(source, length)
+        "SMMA (RMA)" => ta.rma(source, length)
+        "WMA" => ta.wma(source, length)
+        "VWMA" => ta.vwma(source, length)
+
+
+
+rsiLengthInput = input.int(14, minval=1, title="RSI Length", group="RSI Settings")
+rsiSourceInput = input.source(close, "Source", group="RSI Settings")
+maTypeInput = input.string("SMA", title="MA Type", options=["SMA", "Bollinger Bands", "EMA", "SMMA (RMA)", "WMA", "VWMA"], group="MA Settings", display = display.data_window)
+maLengthInput = input.int(14, title="MA Length", group="MA Settings", display = display.data_window)
+bbMultInput = input.float(2.0, minval=0.001, maxval=50, title="BB StdDev", group="MA Settings", display = display.data_window)
+showDivergence = input.bool(false, title="Show Divergence", group="RSI Settings", display = display.data_window)
+
+up = ta.rma(math.max(ta.change(rsiSourceInput), 0), rsiLengthInput)
+down = ta.rma(-math.min(ta.change(rsiSourceInput), 0), rsiLengthInput)
+rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down))
+rsiMA = ma(rsi, maLengthInput, maTypeInput)
+isBB = maTypeInput == "Bollinger Bands"
+
+var pos=0
+var cursl=0.0
+var curtp1=0.0
+var curtp2=0.0
+var curtp3=0.0
+var line slline=na
+var line tp1line=na
+var line tp2line=na
+var line tp3line=na
+var line entryline=na
+var box slbox=na
+var box tpbox=na
+int signals=0
+var curhighfib=0.0
+var curlowfib=0.0
+var curentry=0.0
+if barstate.isconfirmed
+    //high to low
+    if low<low[1] //theres a new low 
+        lowline=line.new(bar_index,low,bar_index+1,low,color = color.new(color.red,80),extend = extend.right)
+        array.push(lowarr,lowline)
+        if array.size(higharr)>0  and rsi<70
+            currenttrackslows=array.size(lowarr)
+            for i=array.size(higharr)-1 to 0
+                [fibhightolow0786,fibhightolow1,stoplossshort,cancellationlevelfib_hightolow]=fibonacciLevelsLowToHigh(line.get_y1(array.get(higharr,i)),low,str.tonumber(cancelnumberfib))
+                array.push(stoploss_short,stoplossshort)
+                array.push(hightolow_0786_arr,fibhightolow0786)
+                array.push(hightolow_1_arr,fibhightolow1)
+                array.push(hightolow_0786_track,currenttrackslows-1)
+                array.push(hightolow_1_track,currenttrackslows-1)
+                array.push(indivhighs_arr,line.get_y1(array.get(higharr,i)))
+                array.push(indivhighs_arr_track,currenttrackslows-1)
+                array.push(indivlows_arr,low)
+                array.push(hightolow_start,line.get_x1(array.get(higharr,i)))
+                array.push(hightolow_end,bar_index)
+                array.push(levelcancelfib_hightolow,cancellationlevelfib_hightolow)
+    //lowtohigh
+    if high>high[1]//thres an new high
+        highline=line.new(bar_index,high,bar_index+1,high,color = color.new(color.green,80),extend = extend.right)
+        array.push(higharr,highline)
+        if array.size(lowarr)>0  and  (usersicond?rsi>30:true)
+            currenttrackshighs=array.size(higharr)
+            for i=array.size(lowarr)-1 to 0
+                [fiblowtohigh0786,fiblowtohigh1,stoplosslong,cancellationlevelfib_lowtohigh]=fibonacciLevelsHighToLow(high,line.get_y1(array.get(lowarr,i)),str.tonumber(cancelnumberfib))
+                array.push(stoploss_long,stoplosslong)
+
+                array.push(lowtohigh_0786_arr,fiblowtohigh0786)
+                array.push(lowtohigh_1_arr,fiblowtohigh1)
+                array.push(lowtohigh_0786_track,currenttrackshighs-1)//
+                array.push(lowtohigh_1_track,currenttrackshighs-1)
+                array.push(indivhighs_arr_lowtohigh,high)
+                array.push(indivhighs_arr_track,currenttrackshighs-1)
+                array.push(indivlows_arr_lowtohigh,line.get_y1(array.get(lowarr,i)))
+                array.push(lowtohigh_start,line.get_x1(array.get(lowarr,i)))
+                array.push(lowtohigh_end,bar_index)
+                array.push(levelcancelfib_lowtohigh,cancellationlevelfib_lowtohigh)
+
+    //high to low
+    if array.size(lowarr)>0
+        for i=array.size(lowarr)-1 to 0
+            if low<line.get_y1(array.get(lowarr,i)) //and low<line.get_y1(array.get(lowarr,i))
+                line.delete(array.get(lowarr,i))
+                array.remove(lowarr,i)
+                if array.size(hightolow_0786_track)>0
+                    for j=array.size(hightolow_0786_track)-1 to 0
+                        if array.get(hightolow_0786_track,j)==i
+                            array.remove(hightolow_0786_arr,j)
+                            array.remove(hightolow_0786_track,j)
+                            array.remove(hightolow_1_track,j)
+                            array.remove(hightolow_1_arr,j)
+                            array.remove(indivhighs_arr,j)
+                            array.remove(indivhighs_arr_track,j)
+                            array.remove(indivlows_arr,j)
+                            array.remove(hightolow_start,j)
+                            array.remove(hightolow_end,j)
+                            array.remove(stoploss_short,j)
+                            array.remove(levelcancelfib_hightolow,j)
+
+    //low to high
+    if array.size(higharr)>0
+        for i=array.size(higharr)-1 to 0
+            if high>line.get_y1(array.get(higharr,i)) //and low<line.get_y1(array.get(lowarr,i))
+                line.delete(array.get(higharr,i))
+                array.remove(higharr,i)
+                if array.size(lowtohigh_0786_track)>0
+                    for j=array.size(lowtohigh_0786_track)-1 to 0
+                        if array.get(lowtohigh_0786_track,j)==i
+                            array.remove(lowtohigh_0786_arr,j)
+                            array.remove(lowtohigh_0786_track,j)
+                            array.remove(lowtohigh_1_track,j)
+                            array.remove(lowtohigh_1_arr,j)
+                            array.remove(indivhighs_arr_lowtohigh,j)
+                            array.remove(indivhighs_arr_track_lowtohigh,j)
+                            array.remove(indivlows_arr_lowtohigh,j)
+                            array.remove(lowtohigh_start,j)
+                            array.remove(lowtohigh_end,j)
+                            array.remove(stoploss_long,j)
+                            array.remove(levelcancelfib_lowtohigh,j)
+
+
+    //high to low
+    if array.size(higharr)>0 
+        for i=array.size(higharr)-1 to 0
+            if high>line.get_y1(array.get(higharr,i))// and low<line.get_y1(array.get(higharr,i))
+                line.delete(array.get(higharr,i))
+                array.remove(higharr,i)
+                
+    //low to high-red line
+    if array.size(lowarr)>0 
+        for i=array.size(lowarr)-1 to 0
+            if low<line.get_y1(array.get(lowarr,i))// and low<line.get_y1(array.get(higharr,i))
+                line.delete(array.get(lowarr,i))
+                array.remove(lowarr,i)                
+    //high to low-green line
+    bool isshort=false
+    if array.size(hightolow_0786_arr)>0 and pos==0// and strategy.position_size[1]==0       
+        for i=array.size(hightolow_0786_arr)-1 to 0
+            if high>array.get(hightolow_0786_arr,i) and high<array.get(hightolow_1_arr,i) and (usersicond?rsi>70:true)
+                isshort:=true
+                //slbox:=box.new(bar_index,array.get(hightolow_1_arr,i),bar_index+1,close,bgcolor=color.new(color.red,80),border_color=color.new(color.red,80))
+                //tpbox:=box.new(bar_index,close,bar_index+1,array.get(stoploss_short,i),bgcolor=color.new(color.lime,80),border_color=color.new(color.lime,80))
+                curhighfib:=array.get(hightolow_1_arr,i)//line.new(line.get)
+                curlowfib:=array.get(indivlows_arr,i)
+                //strategy.entry("Short",strategy.short)
+                cursl:=array.get(hightolow_1_arr,i)
+                curentry:=close
+                pos:=-1
+                loss=cursl-curentry
+                curtp1:=close-(loss*1)
+                curtp2:=close-(loss*2)
+                curtp3:=close-(loss*3)
+                entryline:=line.new(bar_index,close,bar_index+1,close,color = color.yellow)
+                slline:=line.new(bar_index,cursl,bar_index+1,cursl,color = color.red)
+                tp1line:=line.new(bar_index,curtp1,bar_index+1,curtp1,color = color.green)
+                tp2line:=line.new(bar_index,curtp2,bar_index+1,curtp2,color = color.lime)
+                tp3line:=line.new(bar_index,curtp3,bar_index+1,curtp3,color = color.lime)
+                label.new(bar_index-1,close,"Entry",color = na,textcolor = color.white,style = label.style_none)
+                label.new(bar_index-1,cursl,"Stop Loss",color = na,textcolor = color.white,style = label.style_none)
+                label.new(bar_index-1,curtp1,"Tp 1",color = na,textcolor = color.white,style = label.style_none)
+                label.new(bar_index-1,curtp2,"Tp 2",color = na,textcolor = color.white,style = label.style_none)
+                label.new(bar_index-1,curtp3,"Tp 3",color = na,textcolor = color.white,style = label.style_none)
+                //strategy.exit("Short Exit","Short",stop=array.get(hightolow_1_arr,i),limit=array.get(stoploss_short,i),comment_loss = "Loss",comment_profit = "Profit")
+                diffbars=bar_index-array.get(hightolow_start,i)
+                //line.new(diffbars>=5000?bar_index-5000:array.get(hightolow_start,i),array.get(hightolow_1_arr,i),Showfibcur?array.get(hightolow_end,i):bar_index,array.get(indivlows_arr,i),color = color.red,style = line.style_dashed)
+                signals:=-1
+                array.clear(hightolow_0786_arr)
+                array.clear(hightolow_0786_track)
+                array.clear(hightolow_1_track)
+                array.clear(hightolow_1_arr)
+                array.clear(indivhighs_arr)
+                array.clear(indivhighs_arr_track)   
+                array.clear(indivlows_arr)
+                array.clear(hightolow_start)
+                array.clear(hightolow_end)
+                array.clear(stoploss_short)
+                array.clear(levelcancelfib_hightolow)
+                break             
+            else if high>array.get(levelcancelfib_hightolow,i) and  (usersicond?rsi<=70:true)
+                array.remove(hightolow_0786_arr,i)
+                array.remove(hightolow_0786_track,i)
+                array.remove(hightolow_1_track,i)
+                array.remove(hightolow_1_arr,i)
+                array.remove(indivhighs_arr,i)
+                array.remove(indivhighs_arr_track,i)
+                array.remove(indivlows_arr,i)
+                array.remove(hightolow_start,i)
+                array.remove(hightolow_end,i)
+                array.remove(stoploss_short,i)
+                array.remove(levelcancelfib_hightolow,i)
+  //low to high
+  //else if when disable
+    //if only if enable
+    if usersicond?true:not isshort
+        if array.size(lowtohigh_0786_arr)>0 and pos==0 //and strategy.position_size[1]==0       
+            for i=array.size(lowtohigh_0786_arr)-1 to 0
+                if low<array.get(lowtohigh_0786_arr,i) and high>array.get(lowtohigh_1_arr,i) and  (usersicond?rsi<30:true)
+
+                    //slbox:=box.new(bar_index,close,bar_index+1,array.get(lowtohigh_1_arr,i),bgcolor=color.new(color.red,80),border_color=color.new(color.red,80))
+                    //tpbox:=box.new(bar_index,array.get(stoploss_long,i),bar_index+1,close,bgcolor=color.new(color.lime,80),border_color=color.new(color.lime,80))
+                    curhighfib:=array.get(lowtohigh_1_arr,i)//line.new(line.get)
+                    curlowfib:=array.get(indivhighs_arr_lowtohigh,i)
+                    //strategy.entry("Long",strategy.long)
+                    pos:=1
+                    cursl:=array.get(lowtohigh_1_arr,i)
+                    loss=close-cursl
+                    curentry:=close
+                    curtp1:=close+(loss*1)
+                    curtp2:=close+(loss*2)
+                    curtp3:=close+(loss*3)
+                    entryline:=line.new(bar_index,close,bar_index+1,close,color = color.yellow)
+                    slline:=line.new(bar_index,cursl,bar_index+1,cursl,color = color.red)
+                    tp1line:=line.new(bar_index,curtp1,bar_index+1,curtp1,color = color.green)
+                    tp2line:=line.new(bar_index,curtp2,bar_index+1,curtp2,color = color.lime)
+                    tp3line:=line.new(bar_index,curtp3,bar_index+1,curtp3,color = color.lime)
+                    label.new(bar_index-1,close,"Entry",color = na,textcolor = color.white,style = label.style_none)
+                    label.new(bar_index-1,cursl,"Stop Loss",color = na,textcolor = color.white,style = label.style_none)
+                    label.new(bar_index-1,curtp1,"Tp 1",color = na,textcolor = color.white,style = label.style_none)
+                    label.new(bar_index-1,curtp2,"Tp 2",color = na,textcolor = color.white,style = label.style_none)
+                    label.new(bar_index-1,curtp3,"Tp 3",color = na,textcolor = color.white,style = label.style_none)
+
+                    //strategy.exit("Long Exit","Long",stop=array.get(lowtohigh_1_arr,i),limit=array.get(stoploss_long,i),comment_loss = "Loss",comment_profit = "Profit")
+                    diffbars=bar_index-array.get(lowtohigh_start,i)
+                    //line.new(diffbars>=5000?bar_index-5000:array.get(lowtohigh_start,i),array.get(lowtohigh_1_arr,i),Showfibcur?array.get(lowtohigh_end,i):bar_index,array.get(indivhighs_arr_lowtohigh,i),color = color.green,style = line.style_dashed)
+                    signals:=1
+                    array.clear(lowtohigh_0786_arr)
+                    array.clear(lowtohigh_0786_track)
+                    array.clear(lowtohigh_1_track)
+                    array.clear(lowtohigh_1_arr)
+                    array.clear(indivhighs_arr_lowtohigh)
+                    array.clear(indivhighs_arr_track_lowtohigh)   
+                    array.clear(indivlows_arr_lowtohigh)
+                    array.clear(lowtohigh_start)
+                    array.clear(lowtohigh_end)
+                    array.clear(stoploss_long)
+                    array.clear(levelcancelfib_lowtohigh)
+                    break             
+                else if low<array.get(levelcancelfib_lowtohigh,i) and  (usersicond?rsi>=30:true)
+                    array.remove(lowtohigh_0786_arr,i)
+                    array.remove(lowtohigh_0786_track,i)
+                    array.remove(lowtohigh_1_track,i)
+                    array.remove(lowtohigh_1_arr,i)
+                    array.remove(indivhighs_arr_lowtohigh,i)
+                    array.remove(indivhighs_arr_track_lowtohigh,i)
+                    array.remove(indivlows_arr_lowtohigh,i)
+                    array.remove(lowtohigh_start,i)
+                    array.remove(lowtohigh_end,i)
+                    array.remove(stoploss_long,i)
+                    array.remove(levelcancelfib_lowtohigh,i)
+
+            
+
+table levels=table.new(position.top_right,100,100,color.gray,color.gray)
+
+if barstate.isconfirmed and Showlowhightable
+    table.cell(levels,0,0,"Number of Fibo[High to low]",text_color = color.white)
+    table.cell(levels,0,1,str.tostring(array.size(hightolow_1_arr)),text_color = color.white)
+    table.cell(levels,0,2,"Number of Fibo[low to high]",text_color = color.white)
+    table.cell(levels,0,3,str.tostring(array.size(lowtohigh_1_arr)),text_color = color.white)
+    table.cell(levels,0,4,"Number of high",text_color = color.white)
+    table.cell(levels,0,5,str.tostring(array.size(higharr)),text_color = color.white)
+    table.cell(levels,0,6,"Number of Lows",text_color = color.white)
+    table.cell(levels,0,7,str.tostring(array.size(lowarr)),text_color = color.white)
+bool tp3=false
+bool slt=false
+//plot(cursl,color = color.green)
+if pos==1 and high>curtp1
+    pos:=2
+else if pos==2 and high>curtp2
+    pos:=3
+else if pos==3 and high>curtp3
+    pos:=0
+    tp3:=true
+else if pos>0 and low<cursl
+    pos:=0
+    slt:=true
+
+
+if pos==-1 and low<curtp1 
+    pos:=-2
+else if pos==-2 and low<curtp2
+    pos:=-3
+else if pos==-3 and low<curtp3
+    pos:=0
+    tp3:=true
+else if pos<0 and high>cursl
+    pos:=0
+    slt:=true
+
+if pos!=0
+    box.set_right(slbox,bar_index+1)
+    box.set_right(tpbox,bar_index+1)
+    line.set_x2(entryline,bar_index+1)
+    line.set_x2(slline,bar_index+1)
+    line.set_x2(tp1line,bar_index+1)
+    line.set_x2(tp2line,bar_index+1)
+    line.set_x2(tp3line,bar_index+1)
+
+
+alertcondition(pos>0 and pos[1]<=0,"Long")
+alertcondition(pos<0 and pos[1]>=0,"Short")
+alertcondition((pos==2 and pos[1]!=2) or (pos==-2 and pos[1]!=-2),"Tp 1 Hit")
+alertcondition((pos==2 and pos[1]!=3) or (pos==-2 and pos[1]!=-3),"Tp 2 Hit ")
+alertcondition(tp3,"Tp 3 Hit ")
+alertcondition(slt,"SL Hit ")
+
+plotshape(pos>0 and pos[1]<=0, title="Long", text="Long", style=shape.labelup, textcolor=color.black, size=size.tiny, location=location.belowbar, color=color.lime, transp=0)
+plotshape(pos<0 and pos[1]>=0, title="Short", text="Short", style=shape.labeldown, textcolor=color.white, size=size.tiny, location=location.abovebar, color=color.red, transp=0)
+
+var line myline = na
+if pos>0 and pos[1]<=0
+    //myline:=line.new(bar_index,low, fLL_pos, math.round(fLL), color = color.purple)
+    if bar_index == math.round(array.get(fLL, 1))
+        myline:=line.new(math.round(array.get(fLL, 3)), math.round(array.get(fLL, 2)), bar_index,low, color = color.purple)
+    else
+        myline:=line.new(math.round(array.get(fLL, 1)), math.round(array.get(fLL, 0)), bar_index,low, color = color.purple)
+
+if pos<0 and pos[1]>=0
+    //myline:=line.new(bar_index,high, fHH_pos, math.round(fHH), color = color.purple)
+    if bar_index == math.round(array.get(fHH, 1))
+        myline:=line.new(math.round(array.get(fHH, 3)), math.round(array.get(fHH, 2)), bar_index,high, color = color.purple)
+    else
+        myline:=line.new(math.round(array.get(fHH, 1)), math.round(array.get(fHH, 0)), bar_index,high, color = color.purple)
+
+statustable=table.new(position.middle_right,10,10,border_color = color.black,frame_color = color.black,border_width = 2,frame_width = 2)
+
+if barstate.islast and ShowPNL
+    table.cell(statustable,0,0,"TP1: "+(pos!=0?str.tostring(curtp1,"#.##"):""),bgcolor = (pos>=2 or pos<=-2)?#012299:color.red,text_color = color.white)
+    table.cell(statustable,1,0,"TP2: "+(pos!=0?str.tostring(curtp2,"#.##"):""),bgcolor =  (pos>=3 or pos<=-3)?#012299:color.red,text_color = color.white)
+    table.cell(statustable,2,0,"TP3: "+(pos!=0?str.tostring(curtp2,"#.##"):""),bgcolor =  (pos>=4 or pos<=-4)?#012299:color.red,text_color = color.white)
+    table.cell(statustable,0,1,"Position: "+(pos>0?"Buy":pos<0?"Sell":"None"),bgcolor =  pos>0?color.green:pos<0?color.red:#012299,text_color = color.white)
+    table.cell(statustable,1,1,close>close[1]?"Bullish":"Bearish",bgcolor = close>close[1]?color.lime:color.red,text_color = color.white)
+    table.cell(statustable,2,1,"RSI: "+str.tostring(rsi,"#.##"),bgcolor = #012299,text_color = color.white)
+
+
+

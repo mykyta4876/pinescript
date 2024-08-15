@@ -1,0 +1,101 @@
+//@version=5
+indicator("Paras Indicator Zigzag 15m", "Paras Indicator  Zigzag 15m", overlay = true)
+
+//=================================common===================================================
+symbol_name = syminfo.tickerid
+
+//============================================================================================
+
+
+//====================================MACD=======================
+
+// Get the time of the bar 'bars_ago' bars ago
+bar_time = time[1]
+
+// Convert the time to a string
+bar_time_str = str.tostring(bar_time, "yyyy-MM-dd HH:mm:ss")
+
+price_ago = str.tostring(close[1])
+// Getting inputs
+fast_length = input(title = "Fast Length", defval = 12)
+slow_length = input(title = "Slow Length", defval = 26)
+src = input(title = "Source", defval = close)
+signal_length = input.int(title = "Signal Smoothing",  minval = 1, maxval = 50, defval = 9, display = display.data_window)
+sma_source = input.string(title = "Oscillator MA Type",  defval = "EMA", options = ["SMA", "EMA"], display = display.data_window)
+sma_signal = input.string(title = "Signal Line MA Type", defval = "EMA", options = ["SMA", "EMA"], display = display.data_window)
+// Calculating
+
+fast_ma = sma_source == "SMA" ? ta.sma(src[1], fast_length) : ta.ema(src[1], fast_length)
+slow_ma = sma_source == "SMA" ? ta.sma(src[1], slow_length) : ta.ema(src[1], slow_length)
+macd = fast_ma - slow_ma
+signal = sma_signal == "SMA" ? ta.sma(macd, signal_length) : ta.ema(macd, signal_length)
+hist = macd - signal
+
+macd_str = str.tostring(macd)
+signal_str = str.tostring(signal)
+
+//================================================================
+
+
+
+//==============================zig==================================
+import DevLucem/ZigLib/1 as ZigZag
+
+////////
+// Fetch Ingredients 
+// [
+Depth = input.int(12, 'Depth', minval=1, step=1, group="ZigZag Config")
+Deviation = input.int(5, 'Deviation', minval=1, step=1, group="ZigZag Config")
+Backstep = input.int(2, 'Backstep', minval=2, step=1, group="ZigZag Config")
+line_thick = input.int(2, 'Line Thickness', minval=1, maxval=4, group="Lines")
+labels = input(0, "Labels Transparency", group="Labels")
+upcolor = input(color.lime, 'Bull Color', group="Colors")
+dncolor = input(color.red, 'Bear Color', group="Colors")
+lines = input(0, "Lines Transparency", group="Lines")
+background = input(80, "Background Transparency", group="Colors")
+label_size = switch input.int(3, "Label SIze", minval=1, maxval=5, group="Labels")
+    1 => size.tiny
+    2 => size.small
+    3 => size.normal
+    4 => size.large
+    5 => size.huge
+repaint = input(true, 'Repaint Levels')
+extend = input(false, "Extend ZigZag", group="Lines")
+// ]
+
+// // Bake it with a simple oven this time
+[direction, z1, z2] = ZigZag.zigzag(low[1], high[1], Depth, Deviation, Backstep)
+string nowPoint = ""
+var float lastPoint = z1.price[1]
+if bool(ta.change(direction))
+    lastPoint := z1.price[1]
+
+if repaint
+    nowPoint := direction<0? (z2.price<lastPoint? "LL": "HL"): (z2.price>lastPoint? "HH": "LH")
+else
+    if direction != direction[1]
+        nowPoint := direction[1]<0? (z2.price[1]<lastPoint[1]? "LL": "HL"): (z2.price[1]>lastPoint[1]? "HH": "LH")
+
+if barstate.isconfirmed
+    ema21 = ta.ema(src[1], 21)
+    ema21_str = str.tostring(ema21)
+    ema100 = ta.ema(src[1], 100)
+    ema100_str = str.tostring(ema100)
+    ema200 = ta.ema(src[1], 200)
+    ema200_str = str.tostring(ema200)
+
+    [_vwap, _stdevUpper, _] = ta.vwap(src[1], true, 1)
+    vwap_str = str.tostring(_vwap)
+
+    if nowPoint == "HH" and z2.price != z2.price[1]
+        alert("zig15^" + symbol_name + "^" + bar_time_str + ';HH,' + bar_time_str + ',' + price_ago + ',' + macd_str + ',' + signal_str + ',' + ema21_str + ',' + ema100_str + ',' + ema200_str + ',' + vwap_str, alert.freq_once_per_bar)
+        
+    if nowPoint == "LH" and z2.price != z2.price[1]
+        alert("zig15^" + symbol_name + "^" + bar_time_str + ';LH,' + bar_time_str + ',' + price_ago + ',' + macd_str + ',' + signal_str + ',' + ema21_str + ',' + ema100_str + ',' + ema200_str + ',' + vwap_str, alert.freq_once_per_bar)
+        
+    if nowPoint == "HL" and z2.price != z2.price[1]
+        alert("zig15^" + symbol_name + "^" + bar_time_str + ';HL,' + bar_time_str + ',' + price_ago + ',' + macd_str + ',' + signal_str + ',' + ema21_str + ',' + ema100_str + ',' + ema200_str + ',' + vwap_str, alert.freq_once_per_bar)
+        
+    if nowPoint == "LL" and z2.price != z2.price[1]
+        alert("zig15^" + symbol_name + "^" + bar_time_str + ';LL,' + bar_time_str + ',' + price_ago + ',' + macd_str + ',' + signal_str + ',' + ema21_str + ',' + ema100_str + ',' + ema200_str + ',' + vwap_str, alert.freq_once_per_bar)
+//======================================================================

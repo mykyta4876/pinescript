@@ -1,0 +1,176 @@
+study(title='HALosingArrow v2 02', overlay=true)
+
+Lots = input( title='Lots', type=input.float, defval=1.0, minval=1, maxval=10)
+TickSize = input(title='TickSize', type=input.float, defval=1.0, minval=1, maxval=10)
+TickValue = input(title='TickValue', type=input.float, defval=1.0, minval=1, maxval=10)
+
+Multiplier = input(title='Multiplier', type=input.float, defval=0.005, minval=0.001, maxval=10)
+XBarsDelay = input(title='XBars Delay', type=input.integer, defval=1, minval=1, maxval=10)
+
+Multiplier2 = input(title='Multiplier', type=input.float, defval=0.005, minval=0.001, maxval=10)
+XBarsDelay2 = input(title='XBars Delay', type=input.integer, defval=1, minval=1, maxval=10)
+
+
+StartDay = input(0, title='Start day (YYYYMMDD)', type=input.integer, minval=0, maxval=99999999)
+StartTime = input(0, title='Start time (HHmm)', type=input.integer, minval=0, maxval=9999)
+EndDay = input(0, title='End day (YYYYMMDD)', type=input.integer, minval=0, maxval=99999999)
+EndTime = input(0, title='End time (HHmm)', type=input.integer, minval=0, maxval=9999)
+
+var lastDotAbove1Open = float(na)
+var lastDotBelow1Open = float(na)
+var lastProfitCut1 = 0
+
+IsTradingTime(dbegin, tbegin, dend, tend) =>
+    yyyymmdd = year * 10000 + month * 100 + dayofmonth
+    hhmm = 100 * hour + minute
+    v1 = dbegin > 0 ? yyyymmdd >= dbegin and hhmm >= tbegin : true
+    v2 = dend > 0 ? yyyymmdd <= dend and (tend == 0 or hhmm <= tend) : true
+
+    true
+
+EntrySignal(XBarsDelay) =>
+
+    upArrow = close > open[XBarsDelay]
+    downArrow = close < open[XBarsDelay]
+
+    [upArrow, downArrow]
+
+CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition) =>
+    sum = 0.0
+    totalbuypositions = 0.0
+
+    if calc
+        sum := (close - nettedLongAvg) / TickSize * nettedLongPosition * TickValue
+        totalbuypositions := nettedLongPosition
+        totalbuypositions
+    else
+        sum := nz(sum[1])
+        totalbuypositions := nz(totalbuypositions[1])
+        totalbuypositions
+
+    [sum, totalbuypositions]
+
+CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition) =>
+    sum = 0.0
+    totalsellpositions = 0.0
+
+    if calc
+        sum := (nettedShortAvg - close) / TickSize * nettedShortPosition * TickValue
+        totalsellpositions := nettedShortPosition
+        totalsellpositions
+    else
+        sum := nz(sum[1])
+        totalsellpositions := nz(totalsellpositions[1])
+        totalsellpositions
+
+    [sum, totalsellpositions]
+
+
+Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay, multiplier) =>
+
+    [upArrow, downArrow] = EntrySignal(XBarsDelay)
+
+    buy = upArrow and tradingTime
+    sell = downArrow and tradingTime
+
+
+    buyProfitCutoff = false
+    sellProfitCutoff = false
+
+    nettedLongPosition = 0.0
+    nettedShortPosition = 0.0
+
+    nettedLongAvg = 0.0
+    nettedShortAvg = 0.0
+
+    nettedLongPosition := buy ? nz(nettedLongPosition[1], 0) + Lots : nz(nettedLongPosition[1], 0)    
+    nettedLongAvg := buy ? (nz(nettedLongPosition[1], 0) * nz(nettedLongAvg[1], 0) + Lots * close) / (nz(nettedLongPosition[1], 0) + Lots) : nz(nettedLongAvg[1], 0)
+
+    buyProfitCut = 0.0
+    buyProfitCut := nettedLongPosition[1] == 0 and nettedLongPosition > 0 ? close * multiplier : nettedLongPosition == 0 ? 0 : nz(buyProfitCut[1])
+
+    nettedShortPosition := sell ? nz(nettedShortPosition[1], 0) + Lots : nz(nettedShortPosition[1], 0)
+    nettedShortAvg := sell ? (nz(nettedShortPosition[1], 0) * nz(nettedShortAvg[1], 0) + Lots * close) / (nz(nettedShortPosition[1], 0) + Lots) : nz(nettedShortAvg[1], 0)
+
+    sellProfitCut = 0.0
+    sellProfitCut := nettedShortPosition[1] == 0 and nettedShortPosition > 0 ? close * multiplier : nettedShortPosition == 0 ? 0 : nz(sellProfitCut[1])
+
+    calc = tradingTime
+    [buyProfit, totalbuypositions] = CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition)
+    [sellProfit, totalsellpositions] = CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition)
+
+    buyProfitCutoff := buyProfitCut > 0 and buyProfit >= buyProfitCut
+    sellProfitCutoff := sellProfitCut > 0 and sellProfit >= sellProfitCut
+
+    exitbuy = buyProfitCutoff
+    exitsell = sellProfitCutoff
+
+    nettedLongPosition := exitbuy or exitsell ? 0 : nettedLongPosition
+    nettedLongAvg := exitbuy or exitsell ? 0 : nettedLongAvg
+
+    nettedShortPosition := exitbuy or exitsell ? 0 : nettedShortPosition
+    nettedShortAvg := exitbuy or exitsell ? 0 : nettedShortAvg
+
+    [buyProfitCutoff, sellProfitCutoff]
+
+tradingTime = IsTradingTime(StartDay, StartTime, EndDay, EndTime)
+
+[buyProfitCutoff1, sellProfitCutoff1] = Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay, Multiplier)
+plot(buyProfitCutoff1 ? 1 : 0, title="buyProfitCutoff1", color=color.green, style=plot.style_line)
+plot(sellProfitCutoff1 ? 1 : 0, title="sellProfitCutoff1", color=color.green, style=plot.style_line)
+[buyProfitCutoff2, sellProfitCutoff2] = Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay2, Multiplier2)
+plot(buyProfitCutoff2 ? 1 : 0, title="buyProfitCutoff2", color=color.green, style=plot.style_line)
+plot(sellProfitCutoff2 ? 1 : 0, title="sellProfitCutoff2", color=color.green, style=plot.style_line)
+
+
+UpToDown1 = true
+dotbelow1 = sellProfitCutoff1
+dotabove1 = buyProfitCutoff1
+if UpToDown1
+    if lastProfitCut1>0
+        dotabove1 := false
+    else
+        dotabove1 := dotabove1[1]
+
+    if lastProfitCut1<0
+        dotbelow1 := false
+    else
+        dotbelow1 := dotbelow1[1]
+        
+if dotabove1
+    lastProfitCut1 := 1
+else 
+    if dotbelow1
+        lastProfitCut1 := -1
+    else
+        lastProfitCut1 := lastProfitCut1[1]
+
+if dotabove1[1]
+    lastDotAbove1Open := open
+else
+    lastDotAbove1Open := lastDotAbove1Open[1]
+
+if dotbelow1[1]
+    lastDotBelow1Open := open
+else
+    lastDotBelow1Open := lastDotBelow1Open[1]
+    
+plot(lastDotAbove1Open, title="lastDotAbove1Open", color=color.green, style=plot.style_line)
+plot(lastDotBelow1Open, title="lastDotBelow1Open", color=color.green, style=plot.style_line)
+upArrow2 = false
+dnArrow2 = false
+ 
+if buyProfitCutoff2
+    if na(lastDotBelow1Open)==false
+        if close>=lastDotBelow1Open
+            upArrow2 := true
+            
+if sellProfitCutoff2
+    if na(lastDotAbove1Open)==false
+        if close<=lastDotAbove1Open
+            dnArrow2 := true
+
+//plot(upArrow2[1] ? low - (high - low ) * 0.2 : 0, title="Up", color=color.blue, style=plot.style_circles)
+//plot(dnArrow2[1] ? high + (high - low ) * 0.2: 0, title="Down", color=color.red, style=plot.style_circles)
+plot(upArrow2[1] ? open : 0, title="Up", color=color.blue, style=plot.style_circles)
+plot(dnArrow2[1] ? open: 0, title="Down", color=color.red, style=plot.style_circles)

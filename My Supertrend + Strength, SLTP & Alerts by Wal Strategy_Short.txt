@@ -1,0 +1,205 @@
+
+//@version=5
+// inputs: Supertrend
+strategy('My Supertrend + Strength, SLTP Strategy Short', shorttitle='Supertrend + Strength Strategy Short', overlay=true)
+
+// Tooltips {
+string tt_AlertType = 'Alerts could be set in 3 different ways. First-> Only the first event call during the bar triggers the alert; Close-> Only when Close; Real Time-> every time the event call during the bar'
+//string tt_input_Swing_ATR = 'If Swing Low/High is greater than this ATR, this ATR will be used instead. This value is important to avoid long StopLoss due to spikes'
+// }
+
+
+// Define your capital
+var float capital = 1000000 // Example: $10,000
+
+// Calculate the lot size
+lot_size = capital / close
+
+Periods = input.int(title='Period', defval=10, group='SuperTrend')
+Multiplier = input.float(title='ST Multiplier', step=0.1, defval=1.8, group='SuperTrend')
+
+entry_point_delta = (high - low) * 0.1
+init_sl_delta = (high - low) * 0.3
+
+src = hl2
+
+Up = hl2 - Multiplier * ta.atr(Periods)
+Dn = hl2 + Multiplier * ta.atr(Periods)
+
+float TrendUp = na
+float TrendDown = na
+int trend = na
+
+TrendUp := close[1] > TrendUp[1] ? math.max(Up, TrendUp[1]) : Up
+TrendDown := close[1] < TrendDown[1] ? math.min(Dn, TrendDown[1]) : Dn
+
+trend := close > TrendDown[1] ? 1 : close < TrendUp[1] ? -1 : nz(trend[1], 1)
+Tsl = trend == 1 ? TrendUp : TrendDown
+
+color linecolor = trend == 1 ? color.new(color.green, 35) : color.new(color.orange, 35)
+
+plot(Tsl, color=linecolor, style=plot.style_line, linewidth=2, title='SuperTrend')
+
+
+// Relleno
+leadLine1 = ohlc4
+leadLine2 = trend == 1 ? TrendUp : TrendDown
+
+p1 = plot(leadLine1, editable=0, display=display.none)
+p2 = plot(leadLine2, editable=0, display=display.none)
+fill(p1, p2, color=leadLine1 > leadLine2 ? color.new(color.green, 90): color.new(color.orange, 90))
+
+// StopLoss + TakeProfit
+source = input.source(close, title='SL-TP Source', group='StopLoss ATR')
+length = input.int(14, minval=1, title='Period', group='StopLoss ATR')
+slmultiplier = input.float(1.5, minval=0.1, step=0.1, title='SL Multiplier', group='StopLoss ATR')
+tpmulpiplier = input.float(2.0, minval=0.1, step=0.1, title='TP Multiplier', group='StopLoss ATR')
+_atr = ta.atr(length)
+StopLoss = trend == 1 ? source - _atr * slmultiplier : source + _atr * slmultiplier
+TakeProfit = trend == 1 ? source + _atr * tpmulpiplier : source - _atr * tpmulpiplier
+
+// calculo de Strength
+Length = input(16, title='Strength: Period of Evaluation', group='Absolute Strenght Histogram')
+Smooth = input(2, title='Strength: HAL Period of Smoothing', group='Absolute Strenght Histogram')
+
+HALsrc = input(close, title='Strength: Source', group='Absolute Strenght Histogram')
+ma_type = input.string(title='Strength: MA', defval='EMA', options=['EMA', 'WMA', 'SMA', 'SMMA', 'HMA'], group='Absolute Strenght Histogram')
+
+ma(type, src, len) =>
+    float result = 0
+    if type == 'SMA'  // Simple
+        result := ta.sma(src, len)
+        result
+    if type == 'EMA'  // Exponential
+        result := ta.ema(src, len)
+        result
+    if type == 'WMA'  // Weighted
+        result := ta.wma(src, len)
+        result
+    if type == 'SMMA'  // Smoothed
+        w = ta.wma(src, len)
+        result := na(w[1]) ? ta.sma(src, len) : (w[1] * (len - 1) + src) / len
+        result
+    if type == 'HMA'  // Hull
+        result := ta.wma(2 * ta.wma(src, len / 2) - ta.wma(src, len), math.round(math.sqrt(len)))
+        result
+    result
+
+//----
+Price = HALsrc
+
+//----
+Price1 = ma('SMA', Price, 1)
+Price2 = ma('SMA', Price[1], 1)
+
+//RSI
+Bulls = 0.5 * (math.abs(Price1 - Price2) + Price1 - Price2)
+Bears = 0.5 * (math.abs(Price1 - Price2) - (Price1 - Price2))
+
+AvgBulls = ma(ma_type, Bulls, Length)
+AvgBears = ma(ma_type, Bears, Length)
+
+SmthBulls = ma(ma_type, AvgBulls, Smooth)
+SmthBears = ma(ma_type, AvgBears, Smooth)
+
+
+// Enabling Options
+show_histo = input.bool(true, title="Show Histogam", group='Display')
+show_barColors = input.bool(false, title="Enable Colored Bars", group='Display')
+show_signals = input.bool(true, title="Show Signals", group='Display')
+show_sltp = input.bool(true, title="Show ATR SL/TP", group='Display')
+
+plot(show_sltp ? StopLoss : na, color=color.new(color.blue, 0), linewidth=2, style=plot.style_circles, title='Stop Loss')
+plot(show_sltp ? TakeProfit : na, color=color.new(color.orange, 0), linewidth=2, style=plot.style_circles, title='Take Profit')
+
+upSignal = show_signals ? trend == 1 and trend[1] == -1 : na
+plotshape(upSignal ? TrendUp : na, title='UpTrend Begins', text='Up', location=location.absolute, style=shape.labelup, size=size.tiny, color=color.new(color.aqua, 0), textcolor=color.new(color.white, 0))
+
+dnSignal = show_signals ? trend == -1 and trend[1] == 1 : na
+plotshape(dnSignal ? TrendDown : na, title='DownTrend Begins', text='Down', location=location.absolute, style=shape.labeldown, size=size.tiny, color=color.new(color.orange, 0), textcolor=color.new(color.white, 0))
+
+
+difference = math.abs(SmthBulls - SmthBears)
+graytrans = color.new(color.gray, 80)
+difference_color = difference > SmthBulls ? SmthBears < SmthBears[1] ? color.orange : color.red : difference > SmthBears ? SmthBulls < SmthBulls[1] ? color.blue : color.green : graytrans
+plotshape(show_histo ? HALsrc :  na, title='Strenght', location=location.bottom, style=shape.circle, size=size.tiny, color=difference_color)
+
+StrenghDn = show_signals ? difference > SmthBulls ? true : false : na
+StrenghUp = show_signals ? difference > SmthBears ? true : false : na
+//plotshape(StrenghDn ? TrendDown : na, title='Strengh DownTrend', location=location.absolute, style=shape.triangledown, size=size.tiny, color=color.new(color.red, 0))
+//plotshape(StrenghUp ? TrendUp : na, title='Strengh UpTrend', location=location.absolute, style=shape.triangleup, size=size.tiny, color=color.new(color.green, 0))
+
+SellSignal = show_signals ? StrenghDn ? difference[1] < SmthBulls[1] ? true : false : false : na
+BuySignal = show_signals ? StrenghUp ? difference[1] < SmthBears[1] ? true : false : false : na
+plotshape(SellSignal ? TrendDown : na, title='Sell', text='Sell', location=location.absolute, style=shape.labeldown, size=size.tiny, color=color.new(color.red, 0), textcolor=color.new(color.white, 0))
+plotshape(BuySignal ? TrendUp : na, title='Buy', text='Buy', location=location.absolute, style=shape.labelup, size=size.tiny, color=color.new(color.green, 0), textcolor=color.new(color.white, 0))
+
+
+// Managing Alerts
+
+Bullist_Alert_enable = input.bool(title="Bulliish Alert", defval=true, group='Alert Configurations')
+Bearish_alert_enable = input.bool(title="Bearish Alert", defval=true, group='Alert Configurations')
+alert_Choice = input.string(title='    Alert Type', defval='First', options=['First', 'Close', 'Real Time'], group='Alert Configurations', tooltip=tt_AlertType)
+
+
+GoLow = not(difference[1] > SmthBulls[1]) and (difference > SmthBulls)
+GoHigh = not(difference[1] > SmthBears[1]) and (difference > SmthBears)
+
+//plotshape(show_signals and (GoHigh or GoLow), title='Signal', location=location.top, style=shape.circle, size=size.auto, color=difference_color, display=display.all)
+
+AlertType = alert_Choice == 'First' ? alert.freq_once_per_bar : alert_Choice == 'Close' ? alert.freq_once_per_bar_close : alert.freq_all
+
+if Bullist_Alert_enable and GoHigh and trend == 1
+    alert("Bullist Strength is " + str.tostring(difference, "#.000") + " (" + alert_Choice + ")", AlertType)
+else if Bearish_alert_enable and GoLow and trend == -1
+    alert("Bearish Strength is " + str.tostring(difference, "#.000") + " (" + alert_Choice + ")", AlertType)
+
+
+// Coloreando Bars
+barcolor(show_barColors ? difference_color :  na)
+
+
+var float short_entry_price = na
+var float long_entry_price = na
+var float tp_level = 0
+var float sl_level = 0
+bar_open_time = time
+bar_hour = hour(bar_open_time)
+
+
+flag_tradingtime = true
+if (trend == 1)
+    // Check if there's an open trade with the specific entry name
+    if (strategy.opentrades > 0)
+        if strategy.position_size < 0
+            strategy.close("Short", comment = "Short Close")
+        
+if (trend != 1)
+    // Check if there's an open trade with the specific entry name
+    if (strategy.opentrades == 0)
+        if flag_tradingtime == true
+            short_entry_price := TrendDown - entry_point_delta
+            strategy.entry("Short", strategy.short, qty = lot_size, limit=short_entry_price, comment="S")
+            sl_level := 0
+            tp_level := 0
+    else
+        //short_entry_price := short_entry_price[1]
+        if strategy.position_size > 0
+            strategy.close("Long", comment = "Long Close")
+
+        //tp_level := TrendDown - (TrendDown - TrendUp) * 2
+        if tp_level == 0
+            tp_level := TakeProfit
+        else if tp_level > TakeProfit
+            tp_level := TakeProfit
+        
+        if sl_level == 0
+            sl_level := TrendDown - init_sl_delta
+        
+        else
+            if sl_level > StopLoss
+            //if strategy.closedtrades.entry_price(strategy.closedtrades - 1) < up
+                sl_level := StopLoss
+
+        strategy.exit("Short TP/SL", from_entry="Short", limit=tp_level, stop=sl_level)
+

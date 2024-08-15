@@ -1,0 +1,38 @@
+//@version=5
+indicator("Custom AVWAP Anchored to Local Min/Max", overlay=true)
+
+// Input for number of days
+daysLookback = input.int(22, title="Number of Days for Lookback")
+
+// Calculate the number of periods in the given number of days
+periodsLookback = daysLookback // Assuming a resolution of 1 minute
+
+// Initialize variables
+var float avwap = na
+var int maxIndex = na
+var int minIndex = na
+var float localMax = na
+var float localMin = na
+
+// Calculate the highest and lowest points in the lookback period
+if barstate.isconfirmed // Make sure we only check once per day
+    localMax = ta.highest(high, periodsLookback)
+    localMin = ta.lowest(low, periodsLookback)
+    maxIndex = ta.highestbars(high, periodsLookback)
+    minIndex = ta.lowestbars(low, periodsLookback)
+
+    if maxIndex < 0
+        if minIndex >= 0
+            avwap := ta.vwap(low[minIndex])
+    else if minIndex < 0
+        if maxIndex >= 0
+            avwap := ta.vwap(high[maxIndex])
+    else
+        // Anchor AVWAP to the appropriate point
+        if maxIndex < minIndex
+            avwap := ta.vwap(low[minIndex])
+        else
+            avwap := ta.vwap(high[maxIndex])
+
+// Plot AVWAP
+plot(avwap, color=color.new(color.blue, 0), title="Anchored AVWAP")

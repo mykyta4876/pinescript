@@ -1,0 +1,63 @@
+//@version=5
+indicator("CF Filter", overlay=false)
+
+// Function to calculate the CF Filter
+cffilter(x, low, high, drift) =>
+    var float a = 2 * math.pi / high
+    var float b = 2 * math.pi / low
+
+    // Drift adjustment
+    var float[] x_adj = na
+    if (na(x_adj))
+        x_adj := array.new_float(bar_index + 1)
+    for i = 0 to bar_index
+        val = x[i]
+        if (drift)
+            val := val - (x[0] - x[bar_index] / (bar_index - 1)) * bar_index
+        array.set(x_adj, i, val)
+
+    var float[] J = array.new_float()
+    var float[] Bj = array.new_float()
+    for i = 1 to bar_index + 1
+        array.push(J, i)
+        array.push(Bj, (math.sin(b * i) - math.sin(a * i)) / (math.pi * i))
+
+    var float B0 = (b - a) / math.pi
+    array.unshift(Bj, B0)
+    
+    float y = 0.0
+    for i = 0 to bar_index
+        float B = -.5 * array.get(Bj, 0)
+        for j = 1 to bar_index - i - 2
+            B := B - array.get(Bj, j)
+        float A = -array.get(Bj, 0)
+        for j = 1 to bar_index - i - 2
+            A := A - array.get(Bj, j)
+        for j = 1 to i
+            A := A - array.get(Bj, j)
+        A := A - B
+
+        float sum1 = array.get(Bj, 0) * array.get(x_adj, i)
+        for j = 1 to bar_index - i - 2
+            sum1 := sum1 + array.get(Bj, j) * array.get(x_adj, i + 1 + j)
+            
+        float sum2 = B * array.get(x_adj, bar_index - 1)
+        for j = 1 to i
+            sum2 := sum2 + array.get(Bj, j) * array.get(x_adj, i - j)
+        y := sum1 + sum2 + A * array.get(x_adj, 0)
+    
+    float cycle = y
+    float trend = array.get(x_adj, bar_index - 1) - y
+    
+    [cycle, trend]
+float cycle = na
+float trend = na
+
+if bar_index > 10
+
+    // Apply the CF filter
+    [cycle, trend] = cffilter(close, 6, 32, true)
+
+// Plotting the results
+plot(cycle, color=color.red, title="Cycle Component")
+plot(trend, color=color.blue, title="Trend Component")

@@ -1,0 +1,525 @@
+//@version=5
+indicator("Paras Indicator", "Paras Indicator", overlay = true)
+
+
+//=================================common===================================================
+symbol_name = syminfo.tickerid
+
+// Get current date and time components
+currentYear = year
+currentMonth = month
+currentDay = dayofmonth
+currentHour = hour
+currentMinute = minute
+
+// Convert components to strings
+yearStr = str.tostring(currentYear)
+monthStr = str.tostring(currentMonth)
+dayStr = str.tostring(currentDay)
+hourStr = str.tostring(currentHour)
+minuteStr = str.tostring(currentMinute)
+
+// Construct the datetime string
+// Format the datetime string
+formattedDateTime = str.tostring(currentYear) + "-" + str.tostring(currentMonth) + "-" + str.tostring(currentDay) + " " + str.tostring(currentHour) + ":" + str.tostring(currentMinute)
+price = str.tostring(close[0])
+
+//============================================================================================
+
+
+//==================================Multi Time Frame OB Indicator===============================
+// Input settings
+const string tm = "[Length] Use Length to adjust cordinate of the orderblocks\n[Full] Use whole candle body"
+const string tn = "Mitigation method for when to trigger order blocks"
+const string ts = 'Show Last number of orderblocks'
+const string gv = "Volumetric Order Blocks"
+
+obshow         = input.bool  (true                , "Show Last"                      ,                                               ts,          '1',         gv)
+oblast         = input.int   (5                   , ""                               ,  0,                   50,                 1 ,     inline = '1', group = gv)
+obmode         = input.string("Length"            , "Construction "                  , ["Length",                           "Full"], tm,          '3',         gv)
+len            = input.int   (5                   , ""                               ,  1,                  20,                  1 ,     inline = '3', group = gv)
+obmiti         = input.string("Close"             , "Mitigation Method"              , ["Close",           "Wick",           "Avg"], tn,               group = gv)
+overlap        = input.bool  (true                , "Hide Overlap"                   ,                                                                 group = gv, tooltip = "Most recent order block will be preserved")
+
+tf1 = input.timeframe("1", "Timeframe 1", group="Table")
+tf2 = input.timeframe("3", "Timeframe 2", group="Table")
+tf3 = input.timeframe("5", "Timeframe 3", group="Table")
+tf4 = input.timeframe("10", "Timeframe 4", group="Table")
+tf5 = input.timeframe("15", "Timeframe 5", group="Table")
+tf6 = input.timeframe("30", "Timeframe 6", group="Table")
+tf7 = input.timeframe("45", "Timeframe 7", group="Table")
+tf8 = input.timeframe("60", "Timeframe 8", group="Table")
+tf9 = input.timeframe("120", "Timeframe 9", group="Table")
+tf10 = input.timeframe("180", "Timeframe 10", group="Table")
+tf11 = input.timeframe("240", "Timeframe 11", group="Table")
+tf12 = input.timeframe("D", "Timeframe 12", group="Table")
+tf13 = input.timeframe("W", "Timeframe 13", group="Table")
+tf14 = input.timeframe("M", "Timeframe 14", group="Table")
+nobs = input.int(3, "Number of order blocks", minval=1, maxval=5, group="Table")
+table_text_color = input.color(color.white, "Text color", group="Table")
+table_text_size_ = input.string("Normal", "Text size", ["Tiny", "Small", "Normal", "Large"], group="Table")
+table_pos_ = input.string("Bottom Right", "Table position", ["Top Left", "Top Center", "Top Right", "Middle Left", "Middle Center", "Middle Right", "Bottom Left", "Bottom Center", "Bottom Right"], group="Table")
+input_limit = input.int(20, "Process only last N order blocks", minval=5, group="Table")
+input_limit_calc_bars = input.int(3000, "Process only last N bars", minval=100, group="Table")
+
+// Function to handle overlap
+f_overlap(num_, price_, bt_, tb_, dir_) =>
+    if num_.size() > 1
+        for i = num_.size() - 2 to 0
+            sbtm = dir_ == 1 ? bt_.get(i) : tb_.get(i)
+            cbtm = dir_ == 1 ? bt_.get(num_.size() - 1) : tb_.get(num_.size() - 1)
+            stop = dir_ == 1 ? tb_.get(i) : bt_.get(i)
+            ctop = dir_ == 1 ? tb_.get(num_.size() - 1) : bt_.get(num_.size() - 1)
+
+            if (sbtm > cbtm and sbtm < ctop) or (stop < ctop and sbtm > cbtm) or (stop > ctop and sbtm < cbtm) or (stop < ctop and stop > cbtm)
+                num_.remove(i)
+                price_.remove(i)
+                bt_.remove(i)
+                tb_.remove(i)
+
+// Same as the "fnOB" but uses less memory so it can be used in the request.security function
+fnOB_req() =>
+    var num_buy = array.new<int>(0, na)
+    var num_sell = array.new<int>(0, na)
+    var price_buy = array.new<float>(0, na)
+    var price_sell = array.new<float>(0, na)
+    var bt_buy = array.new<float>(0, na)
+    var bt_sell = array.new<float>(0, na)
+    var tb_buy = array.new<float>(0, na)
+    var tb_sell = array.new<float>(0, na)
+    
+    var int dir = 0
+
+    up = ta.highest  (len)
+    dn = ta.lowest   (len)
+    pv = ta.pivothigh(volume, len, len)
+
+    dir := high[len] > up ? -1 : low[len] < dn ? 1 : dir[1]
+
+    atr = ta.atr(len)
+
+    btmP =  obmode == "Length" ? (high[len] - 1 * atr[len]) < low[len] ? low[len] : (high[len] - 1 * atr[len]) : low[len]
+    topP =  obmode == "Length" ? (low[len] + 1 * atr[len]) > high[len] ? high[len] : (low[len] + 1 * atr[len]) : high[len]
+
+    if pv
+        if dir == 1
+            if num_buy.size() >= input_limit
+                num_buy.shift()
+                price_buy.shift()
+                bt_buy.shift()
+                tb_buy.shift()
+            num_buy.push(math.round(volume[len]))
+            price_buy.push(math.avg(topP, low[len]))
+            bt_buy.push(low[len])
+            tb_buy.push(topP)
+        if dir == -1
+            if num_sell.size() >= input_limit
+                num_sell.shift()
+                price_sell.shift()
+                bt_sell.shift()
+                tb_sell.shift()
+            num_sell.push(math.round(volume[len]))
+            price_sell.push(math.avg(btmP, high[len]))
+            bt_sell.push(high[len])
+            tb_sell.push(btmP)
+
+    buy_size_ = num_buy.size()
+    if buy_size_ > 0 and barstate.isconfirmed
+        int id_ = na
+        for i = buy_size_ - 1 to 0
+            float btm = bt_buy.get(i)
+            float avg = price_buy.get(i)
+            for j = 0 to len - 1
+                if obmiti == "Close" ? math.min(close[j], open[j]) < btm : obmiti == "Wick" ? low[j] < btm : obmiti == "Avg" ? low[j] < avg : na
+                    id_ := i
+                    break
+        if not na(id_)
+            num_buy.remove(id_)
+            price_buy.remove(id_)
+            bt_buy.remove(id_)
+            tb_buy.remove(id_)
+
+    sell_size_ = num_sell.size()
+    if sell_size_ > 0 and barstate.isconfirmed
+        int id1_ = na
+        for i = sell_size_ - 1 to 0
+            float top = bt_sell.get(i)
+            float avg = price_sell.get(i) 
+            for j = 0 to len - 1
+                if obmiti == "Close" ? math.max(close[j], open[j]) > top : obmiti == "Wick" ? high[j] > top : obmiti == "Avg" ? high[j] > avg : na
+                    id1_ := i
+                    break
+        if not na(id1_)
+            num_sell.remove(id1_)
+            price_sell.remove(id1_)
+            bt_sell.remove(id1_)
+            tb_sell.remove(id1_)
+
+    if overlap
+        f_overlap(num_buy, price_buy, bt_buy, tb_buy, 1)
+        f_overlap(num_sell, price_sell, bt_sell, tb_sell, -1)
+
+    [num_buy, price_buy, num_sell, price_sell]
+
+// Variables and logic for table content
+ntfs = 14
+
+var string table_text_size = na
+var string table_pos = na
+
+if barstate.islastconfirmedhistory
+    table_text_size := switch table_text_size_
+        "Tiny" => size.tiny
+        "Small" => size.small
+        "Normal" => size.normal
+        "Large" => size.large
+    table_pos := switch table_pos_
+        "Top Left" => position.top_left
+        "Top Center" => position.top_center
+        "Top Right" => position.top_right
+        "Middle Left" => position.middle_left
+        "Middle Center" => position.middle_center
+        "Middle Right" => position.middle_right
+        "Bottom Left" => position.bottom_left
+        "Bottom Center" => position.bottom_center
+        "Bottom Right" => position.bottom_right
+
+[num_buy1, price_buy1, num_sell1, price_sell1] = request.security(syminfo.tickerid, tf1, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy2, price_buy2, num_sell2, price_sell2] = request.security(syminfo.tickerid, tf2, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy3, price_buy3, num_sell3, price_sell3] = request.security(syminfo.tickerid, tf3, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy4, price_buy4, num_sell4, price_sell4] = request.security(syminfo.tickerid, tf4, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy5, price_buy5, num_sell5, price_sell5] = request.security(syminfo.tickerid, tf5, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy6, price_buy6, num_sell6, price_sell6] = request.security(syminfo.tickerid, tf6, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy7, price_buy7, num_sell7, price_sell7] = request.security(syminfo.tickerid, tf7, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy8, price_buy8, num_sell8, price_sell8] = request.security(syminfo.tickerid, tf8, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy9, price_buy9, num_sell9, price_sell9] = request.security(syminfo.tickerid, tf9, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy10, price_buy10, num_sell10, price_sell10] = request.security(syminfo.tickerid, tf10, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy11, price_buy11, num_sell11, price_sell11] = request.security(syminfo.tickerid, tf11, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy12, price_buy12, num_sell12, price_sell12] = request.security(syminfo.tickerid, tf12, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy13, price_buy13, num_sell13, price_sell13] = request.security(syminfo.tickerid, tf13, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+[num_buy14, price_buy14, num_sell14, price_sell14] = request.security(syminfo.tickerid, tf14, fnOB_req(), calc_bars_count=input_limit_calc_bars)
+
+var data = matrix.new<string>(0, 1 + nobs * 2 * 2)
+var string prev_table_content = ""
+var string curr_table_content = ""
+
+nrows_ = data.rows()
+if nrows_ >= 1
+    for i = data.rows() - 1 to 0
+        data.remove_row(i)
+
+tfformat(tf) =>
+    if str.length(tf) >= 1
+        sl = str.length(tf)
+        ew_ = str.substring(tf, sl - 1, sl)
+        switch ew_
+            "M" => str.replace(tf, "M", " MONTH")
+            "W" => str.replace(tf, "W", " WEEK")
+            "D" => str.replace(tf, "D", " DAY")
+            "S" => tf
+            => (str.tonumber(tf) / 60 > 0 and not str.contains(str.tostring(str.tonumber(tf) / 60), ".")) ? (str.tostring(int(str.tonumber(tf) / 60)) + " HR") : (tf + " MIN")
+    else
+        "Chart"
+
+f_add(tf_, num_buy_, price_buy_, num_sell_, price_sell_) =>
+    arr1 = array.from(tfformat(tf_))
+    sell_size_ = num_sell_.size()
+    for i = 0 to nobs - 1
+        index_ = sell_size_ - nobs + i
+        if index_ < sell_size_ and index_ >= 0
+            arr1.push(str.tostring(num_sell_.get(index_)))
+            arr1.push(str.tostring(math.round_to_mintick(price_sell_.get(index_))))
+        else
+            arr1.push("-")
+            arr1.push("-")
+    buy_size_ = num_buy_.size()
+    for i = 0 to nobs - 1
+        index_ = buy_size_ - 1 - i
+        if index_ < buy_size_ and index_ >= 0
+            arr1.push(str.tostring(num_buy_.get(index_)))
+            arr1.push(str.tostring(math.round_to_mintick(price_buy_.get(index_))))
+        else
+            arr1.push("-")
+            arr1.push("-")
+    data.add_row(array_id=arr1)
+
+if barstate.islast
+    f_add(tf1, num_buy1, price_buy1, num_sell1, price_sell1)
+    f_add(tf2, num_buy2, price_buy2, num_sell2, price_sell2)
+    f_add(tf3, num_buy3, price_buy3, num_sell3, price_sell3)
+    f_add(tf4, num_buy4, price_buy4, num_sell4, price_sell4)
+    f_add(tf5, num_buy5, price_buy5, num_sell5, price_sell5)
+    f_add(tf6, num_buy6, price_buy6, num_sell6, price_sell6)
+    f_add(tf7, num_buy7, price_buy7, num_sell7, price_sell7)
+    f_add(tf8, num_buy8, price_buy8, num_sell8, price_sell8)
+    f_add(tf9, num_buy9, price_buy9, num_sell9, price_sell9)
+    f_add(tf10, num_buy10, price_buy10, num_sell10, price_sell10)
+    f_add(tf11, num_buy11, price_buy11, num_sell11, price_sell11)
+    f_add(tf12, num_buy12, price_buy12, num_sell12, price_sell12)
+    f_add(tf13, num_buy13, price_buy13, num_sell13, price_sell13)
+    f_add(tf14, num_buy14, price_buy14, num_sell14, price_sell14)
+
+// Construct current table content
+curr_table_content := ""
+if data.rows() > 0
+    for i = 0 to data.rows() - 1
+        for j = 0 to data.columns() - 1
+            curr_table_content := curr_table_content + data.get(i, j) + ","
+        curr_table_content := curr_table_content + "#"
+
+ma = ta.sma(close, 14)
+xUp = ta.crossover(close, ma)
+
+// Compare previous and current table content to trigger alert
+if barstate.isconfirmed and (prev_table_content != curr_table_content or prev_table_content == "")
+    alert("mtf^" + symbol_name + "^" + formattedDateTime + ";" + curr_table_content, alert.freq_once_per_bar)
+    prev_table_content := curr_table_content
+
+plot(ma)
+
+var table t = na
+
+if obshow
+    if table_text_size == na
+        table_text_size = size.tiny
+    if barstate.islastconfirmedhistory
+        t := table.new(table_pos, 1 + nobs * 2 * 2, 2 + ntfs, #020202, #757575, 1, #757575, 0)
+
+        t.merge_cells(0, 0, 0, 1)
+        t.cell(0, 0, "Interval", text_color=table_text_color, text_size=table_text_size)
+
+    if not na(t)
+        for i = 2 to 1 + ntfs
+            for j = 0 to nobs * 2 * 2
+                t.cell_set_text(j, i, "+")
+
+    // Columns
+    for i = 0 to nobs * 2 - 1   
+        int scol = 1 + i * 2
+
+        if barstate.islastconfirmedhistory
+            t.merge_cells(scol, 0, scol + 1, 0)
+            t.cell(scol, 0, (i < nobs ? "SELL" : "BUY") + " OB-" + str.tostring(i < nobs ? (nobs - i) : (i - nobs + 1)), bgcolor=#020202, text_color=table_text_color, text_size=table_text_size)
+
+            t.cell(scol, 1, "Number", bgcolor=#020202, text_color=table_text_color, text_size=table_text_size)
+            t.cell(scol + 1, 1, "Price", bgcolor=#020202, text_color=table_text_color, text_size=table_text_size)
+
+        // Rows
+        if data.rows() > 0
+            for j = 1 to ntfs
+                color col_ = j % 2 != 0 ? #454545 : #020202
+                if i == 0
+                    t.cell(0, 1 + j, data.get(j - 1, 0), bgcolor=col_, text_color=table_text_color, text_size=table_text_size, text_halign=text.align_left)
+                t.cell(scol, 1 + j, data.get(j - 1, scol), bgcolor=col_, text_color=table_text_color, text_size=table_text_size, text_halign=text.align_right)
+                t.cell(scol + 1, 1 + j, data.get(j - 1, scol + 1), bgcolor=col_, text_color=table_text_color, text_size=table_text_size, text_halign=text.align_right)
+//==============================================================
+
+
+
+//====================================MACD=======================
+// Getting inputs
+fast_length = input(title = "Fast Length", defval = 12)
+slow_length = input(title = "Slow Length", defval = 26)
+src = input(title = "Source", defval = close)
+signal_length = input.int(title = "Signal Smoothing",  minval = 1, maxval = 50, defval = 9, display = display.data_window)
+sma_source = input.string(title = "Oscillator MA Type",  defval = "EMA", options = ["SMA", "EMA"], display = display.data_window)
+sma_signal = input.string(title = "Signal Line MA Type", defval = "EMA", options = ["SMA", "EMA"], display = display.data_window)
+// Calculating
+fast_ma = sma_source == "SMA" ? ta.sma(src, fast_length) : ta.ema(src, fast_length)
+slow_ma = sma_source == "SMA" ? ta.sma(src, slow_length) : ta.ema(src, slow_length)
+macd = fast_ma - slow_ma
+signal = sma_signal == "SMA" ? ta.sma(macd, signal_length) : ta.ema(macd, signal_length)
+hist = macd - signal
+
+macd_str = str.tostring(macd)
+signal_str = str.tostring(signal)
+
+flag_over = ta.crossover(macd, signal) and macd < hist
+flag_under = ta.crossunder(macd, signal) and macd > hist
+
+if flag_over
+    alert("macd^" + symbol_name + "^" + formattedDateTime + ";" + "MACDover," + formattedDateTime + "," + price + "," + macd_str + "," + signal_str, alert.freq_once_per_bar)
+if flag_under
+    alert("macd^" + symbol_name + "^" + formattedDateTime + ";" + "MACDunder," + formattedDateTime + "," + price + "," + macd_str + "," + signal_str, alert.freq_once_per_bar)
+
+//================================================================
+
+
+
+//==============================zig==================================
+import DevLucem/ZigLib/1 as ZigZag
+
+////////
+// Fetch Ingredients 
+// [
+Depth = input.int(12, 'Depth', minval=1, step=1, group="ZigZag Config")
+Deviation = input.int(5, 'Deviation', minval=1, step=1, group="ZigZag Config")
+Backstep = input.int(2, 'Backstep', minval=2, step=1, group="ZigZag Config")
+line_thick = input.int(2, 'Line Thickness', minval=1, maxval=4, group="Lines")
+labels = input(0, "Labels Transparency", group="Labels")
+upcolor = input(color.lime, 'Bull Color', group="Colors")
+dncolor = input(color.red, 'Bear Color', group="Colors")
+lines = input(0, "Lines Transparency", group="Lines")
+background = input(80, "Background Transparency", group="Colors")
+label_size = switch input.int(3, "Label SIze", minval=1, maxval=5, group="Labels")
+    1 => size.tiny
+    2 => size.small
+    3 => size.normal
+    4 => size.large
+    5 => size.huge
+repaint = input(true, 'Repaint Levels')
+extend = input(false, "Extend ZigZag", group="Lines")
+// ]
+
+// // Bake it with a simple oven this time
+[direction, z1, z2] = ZigZag.zigzag(low, high, Depth, Deviation, Backstep)
+string nowPoint = ""
+var float lastPoint = z1.price[1]
+if bool(ta.change(direction))
+    lastPoint := z1.price[1]
+
+// // Let it Cool And Serve
+line zz = na
+label point = na
+
+if repaint
+    zz := line.new(z1, z2, xloc.bar_time, extend? extend.right: extend.none, color.new(direction>0? upcolor: dncolor, lines), width=line_thick)
+    nowPoint := direction<0? (z2.price<lastPoint? "LL": "HL"): (z2.price>lastPoint? "HH": "LH")
+    point := label.new(z2, nowPoint, xloc.bar_time, yloc.price, 
+     color.new(direction<0? upcolor: dncolor, labels), direction>0? label.style_label_down: label.style_label_up, color.new(direction>0? upcolor: dncolor, labels), label_size)
+    if direction == direction[1]
+        line.delete(zz[1])
+        label.delete(point[1])
+    else
+        line.set_extend(zz[1], extend.none)
+else
+    if direction != direction[1]
+        zz := line.new(z1[1], z2[1], xloc.bar_time, extend.none, color.new(direction>0? upcolor: dncolor, lines), width=line_thick)
+        nowPoint := direction[1]<0? (z2.price[1]<lastPoint[1]? "LL": "HL"): (z2.price[1]>lastPoint[1]? "HH": "LH")
+        point := label.new(z2[1], nowPoint, xloc.bar_time, yloc.price, 
+         color.new(direction[1]<0? upcolor: dncolor, labels), direction[1]>0? label.style_label_down: label.style_label_up, color.new(direction[1]>0? upcolor: dncolor, labels), label_size)
+bgcolor(direction<0? color.new(dncolor, background): color.new(upcolor, background), title='Direction Background')
+plotarrow(direction, "direction", display=display.status_line)
+
+ema21 = ta.ema(src, 21)
+ema21_str = str.tostring(ema21)
+ema100 = ta.ema(src, 100)
+ema100_str = str.tostring(ema100)
+ema200 = ta.ema(src, 200)
+ema200_str = str.tostring(ema200)
+
+[_vwap, _stdevUpper, _] = ta.vwap(src, true, 1)
+vwap_str = str.tostring(_vwap)
+
+if nowPoint == "HH" and z2.price != z2.price[1]
+    alert("zig1^" + symbol_name + "^" + formattedDateTime + ';HH,' + formattedDateTime + ',' + price + ',' + macd_str + ',' + signal_str + ',' + ema21_str + ',' + ema100_str + ',' + ema200_str + ',' + vwap_str, alert.freq_once_per_bar)
+    
+if nowPoint == "LH" and z2.price != z2.price[1]
+    alert("zig1^" + symbol_name + "^" + formattedDateTime + ';LH,' + formattedDateTime + ',' + price + ',' + macd_str + ',' + signal_str + ',' + ema21_str + ',' + ema100_str + ',' + ema200_str + ',' + vwap_str, alert.freq_once_per_bar)
+    
+if nowPoint == "HL" and z2.price != z2.price[1]
+    alert("zig1^" + symbol_name + "^" + formattedDateTime + ';HL,' + formattedDateTime + ',' + price + ',' + macd_str + ',' + signal_str + ',' + ema21_str + ',' + ema100_str + ',' + ema200_str + ',' + vwap_str, alert.freq_once_per_bar)
+    
+if nowPoint == "LL" and z2.price != z2.price[1]
+    alert("zig1^" + symbol_name + "^" + formattedDateTime + ';LL,' + formattedDateTime + ',' + price + ',' + macd_str + ',' + signal_str + ',' + ema21_str + ',' + ema100_str + ',' + ema200_str + ',' + vwap_str, alert.freq_once_per_bar)
+//======================================================================
+
+
+
+//====================================zig15=============================
+close_15min = request.security(syminfo.tickerid, "15", close)
+low_15min = request.security(syminfo.tickerid, "15", low)
+high_15min = request.security(syminfo.tickerid, "15", high)
+
+is_5min_confirmed = (minute(time) % 15 == 14)
+if is_5min_confirmed and barstate.isconfirmed
+    // // Bake it with a simple oven this time
+    [direction_15, z1_15, z2_15] = ZigZag.zigzag(low_15min, high_15min, Depth, Deviation, Backstep)
+    string nowPoint_15 = ""
+    var float lastPoint_15 = z1_15.price[1]
+    if bool(ta.change(direction_15))
+        lastPoint_15 := z1_15.price[1]
+
+    nowPoint_15 := direction_15<0? (z2_15.price<lastPoint_15? "LL": "HL"): (z2_15.price>lastPoint_15? "HH": "LH")
+
+    price_15 = str.tostring(close_15min)
+    ema21_15 = ta.ema(close_15min, 21)
+    ema21_15_str = str.tostring(ema21_15)
+    ema100_15 = ta.ema(close_15min, 100)
+    ema100_15_str = str.tostring(ema100_15)
+    ema200_15 = ta.ema(close_15min, 200)
+    ema200_15_str = str.tostring(ema200_15)
+
+    fast_ma_15 = ta.sma(close_15min, fast_length)
+    slow_ma_15 = ta.sma(close_15min, slow_length)
+    macd_15 = fast_ma_15 - slow_ma_15
+    signal_15 = ta.sma(macd_15, signal_length)
+
+    macd_15_str = str.tostring(macd_15)
+    signal_15_str = str.tostring(signal_15)
+
+    [_vwap_15, _stdevUpper_15, _] = ta.vwap(close_15min, true, 1)
+    vwap_15_str = str.tostring(_vwap_15)
+
+    if nowPoint_15 == "HH" and z2_15.price != z2_15.price[1]
+        alert("zig15^" + symbol_name + "^" + formattedDateTime + ';HH,' + formattedDateTime + ',' + price_15 + ',' + macd_15_str + ',' + signal_15_str + ',' + ema21_15_str + ',' + ema100_15_str + ',' + ema200_15_str + ',' + vwap_15_str, alert.freq_once_per_bar)
+        
+    if nowPoint_15 == "LH" and z2_15.price != z2_15.price[1]
+        alert("zig15^" + symbol_name + "^" + formattedDateTime + ';LH,' + formattedDateTime + ',' + price_15 + ',' + macd_15_str + ',' + signal_15_str + ',' + ema21_15_str + ',' + ema100_15_str + ',' + ema200_15_str + ',' + vwap_15_str, alert.freq_once_per_bar)
+        
+    if nowPoint_15 == "HL" and z2_15.price != z2_15.price[1]
+        alert("zig15^" + symbol_name + "^" + formattedDateTime + ';HL,' + formattedDateTime + ',' + price_15 + ',' + macd_15_str + ',' + signal_15_str + ',' + ema21_15_str + ',' + ema100_15_str + ',' + ema200_15_str + ',' + vwap_15_str, alert.freq_once_per_bar)
+        
+    if nowPoint_15 == "LL" and z2_15.price != z2_15.price[1]
+        alert("zig15^" + symbol_name + "^" + formattedDateTime + ';LL,' + formattedDateTime + ',' + price_15 + ',' + macd_15_str + ',' + signal_15_str + ',' + ema21_15_str + ',' + ema100_15_str + ',' + ema200_15_str + ',' + vwap_15_str, alert.freq_once_per_bar)
+
+//======================================================================
+
+
+
+//====================================zig2=============================
+close_2h = request.security(syminfo.tickerid, "120", close)
+low_2h = request.security(syminfo.tickerid, "120", low)
+high_2h = request.security(syminfo.tickerid, "120", high)
+
+is_2h_confirmed = (minute(time) % 120 == 119)
+if is_2h_confirmed and barstate.isconfirmed
+    // // Bake it with a simple oven this time
+    [direction_2h, z1_2h, z2_2h] = ZigZag.zigzag(low_2h, high_2h, Depth, Deviation, Backstep)
+    string nowPoint_2h = ""
+    var float lastPoint_2h = z1_2h.price[1]
+    if bool(ta.change(direction_2h))
+        lastPoint_2h := z1_2h.price[1]
+
+    nowPoint_2h := direction_2h<0? (z2_2h.price<lastPoint_2h? "LL": "HL"): (z2_2h.price>lastPoint_2h? "HH": "LH")
+
+    price_2h = str.tostring(close_2h)
+    ema21_2h = ta.ema(close_2h, 21)
+    ema21_2h_str = str.tostring(ema21_2h)
+    ema100_2h = ta.ema(close_2h, 100)
+    ema100_2h_str = str.tostring(ema100_2h)
+    ema200_2h = ta.ema(close_2h, 200)
+    ema200_2h_str = str.tostring(ema200_2h)
+
+    fast_ma_2h = ta.sma(close_2h, fast_length)
+    slow_ma_2h = ta.sma(close_2h, slow_length)
+    macd_2h = fast_ma_2h - slow_ma_2h
+    signal_2h = ta.sma(macd_2h, signal_length)
+
+    macd_2h_str = str.tostring(macd_2h)
+    signal_2h_str = str.tostring(signal_2h)
+
+    [_vwap_2h, _stdevUpper_2h, _] = ta.vwap(close_2h, true, 1)
+    vwap_2h_str = str.tostring(_vwap_2h)
+
+    if nowPoint_2h == "HH" and z2_2h.price != z2_2h.price[1]
+        alert("zig2^" + symbol_name + "^" + formattedDateTime + ';HH,' + formattedDateTime + ',' + price_2h + ',' + macd_2h_str + ',' + signal_2h_str + ',' + ema21_2h_str + ',' + ema100_2h_str + ',' + ema200_2h_str + ',' + vwap_2h_str, alert.freq_once_per_bar)
+        
+    if nowPoint_2h == "LH" and z2_2h.price != z2_2h.price[1]
+        alert("zig2^" + symbol_name + "^" + formattedDateTime + ';LH,' + formattedDateTime + ',' + price_2h + ',' + macd_2h_str + ',' + signal_2h_str + ',' + ema21_2h_str + ',' + ema100_2h_str + ',' + ema200_2h_str + ',' + vwap_2h_str, alert.freq_once_per_bar)
+        
+    if nowPoint_2h == "HL" and z2_2h.price != z2_2h.price[1]
+        alert("zig2^" + symbol_name + "^" + formattedDateTime + ';HL,' + formattedDateTime + ',' + price_2h + ',' + macd_2h_str + ',' + signal_2h_str + ',' + ema21_2h_str + ',' + ema100_2h_str + ',' + ema200_2h_str + ',' + vwap_2h_str, alert.freq_once_per_bar)
+        
+    if nowPoint_2h == "LL" and z2_2h.price != z2_2h.price[1]
+        alert("zig2^" + symbol_name + "^" + formattedDateTime + ';LL,' + formattedDateTime + ',' + price_2h + ',' + macd_2h_str + ',' + signal_2h_str + ',' + ema21_2h_str + ',' + ema100_2h_str + ',' + ema200_2h_str + ',' + vwap_2h_str, alert.freq_once_per_bar)

@@ -1,0 +1,58 @@
+
+//@version=5
+strategy("My Sma Strategy Short", overlay=true, margin_long=100, margin_short=100)
+
+// StopLoss + TakeProfit
+source = input.source(close, title='SL-TP Source', group='StopLoss ATR')
+length = input.int(14, minval=1, title='Period', group='StopLoss ATR')
+slmultiplier = input.float(1.5, minval=0.1, step=0.1, title='SL Multiplier', group='StopLoss ATR')
+_atr = ta.atr(length)
+
+var int trend = na
+
+sma0 = ta.sma(close, 20)
+delta = close - sma0
+
+plot(sma0,title="Long SMA",color=color.yellow,linewidth=2)
+plot(close,color=color.blue,linewidth=2)
+
+flag_buy = false
+flag_sell = false
+
+if barstate.isconfirmed
+    if (ta.crossover(delta, 0))
+        flag_buy := true
+
+    if (ta.crossunder(delta, 0))
+        flag_sell := true
+
+//plotshape(series=flag_buy, title="P", style=shape.triangleup, location=location.belowbar, color=color.green, text="Buy", size=size.small)   
+//plotshape(series=flag_sell, title="N", style=shape.triangledown, location=location.abovebar, color=color.red, text="Sell", size=size.small)
+
+trend := flag_buy ? 1 : flag_sell ? -1 : nz(trend[1], 1)
+
+StopLoss = trend == 1 ? source - _atr * slmultiplier : source + _atr * slmultiplier
+
+plot(StopLoss, color=color.new(color.blue, 0), linewidth=2, style=plot.style_circles, title='Stop Loss')
+
+var float sl_level = 0
+
+if (trend == 1)
+    if (strategy.opentrades > 0)
+        if strategy.position_size < 0
+            strategy.close("Short", comment = "Short Close")
+       
+else
+    if (strategy.opentrades > 0)
+        if sl_level > StopLoss
+        //if strategy.opentrades.entry_price(0) > dn
+            sl_level := StopLoss
+
+            strategy.exit("Short TP/SL", from_entry="Short", stop=sl_level)
+
+if (flag_sell)
+    // Check if there's an open trade with the specific entry name
+    if (strategy.opentrades == 0)
+        strategy.entry("Short", strategy.short)
+        strategy.exit("Short TP/SL", from_entry="Short", stop=StopLoss)
+        sl_level := StopLoss

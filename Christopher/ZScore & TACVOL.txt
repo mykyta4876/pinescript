@@ -1,0 +1,26 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+
+//@version=5
+indicator("ZScore & TACVOL")
+zscore_period = input.int(20, minval=1, title = "ZScore Period", group = "ZScore")
+zscore_color = input.color(defval = color.blue, title = "ZScore Color", group = "ZScore")
+tacvol_color = input.color(defval = color.red, title = "TACVOL Color", group = "ZScore")
+
+x = 0
+STDEV1 = ta.stdev(close, zscore_period)[x]
+SMA1 = ta.sma(close, zscore_period)[x]
+
+f_zscore_symbol(_close, _stdev, _sma) =>
+    nRes = (_close - _sma) / _stdev
+
+[CLOSE4H_1, STDEV4H_1, SMA4H_1]         = request.security(syminfo.tickerid, "240", [close[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_1, STDEV1D_1, SMA1D_1]         = request.security(syminfo.tickerid, "1D", [close[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+
+TACVOL4H_1 = f_zscore_symbol(CLOSE4H_1, STDEV4H_1, SMA4H_1)
+TACVOL1D_1 = f_zscore_symbol(CLOSE1D_1, STDEV1D_1, SMA1D_1)
+TACVOL = (TACVOL4H_1 + TACVOL1D_1)/2
+
+ZSCORE_1 = f_zscore_symbol(close, STDEV1, SMA1)
+
+plot(ZSCORE_1, 'ZSCORE', zscore_color)
+plot(TACVOL, 'TACVOL', tacvol_color)

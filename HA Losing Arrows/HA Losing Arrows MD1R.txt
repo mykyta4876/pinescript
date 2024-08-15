@@ -1,0 +1,250 @@
+//@version=5
+
+indicator('HA Losing Arrows v2.MD1R', overlay=true, max_bars_back=5000)
+
+
+Lots = input(1.0, title='Lots', group='Common Settings')
+TickSize = input(1.0, title='TickSize', group='Common Settings')
+TickValue = input(1.0, title='TickValue', group='Common Settings')
+
+Multiplier = input(0.5, title='Multiplier', group='TV_Running_4775_Dots_Reset_v2 Set1')
+XBarsDelay = input(1, title='XBars Delay', group='TV_Running_4775_Dots_Reset_v2  Set1')
+
+Multiplier2 = input(0.5, title='Multiplier', group='TV_Running_4775_Dots_Reset_v2 Set2')
+XBarsDelay2 = input(1, title='XBars Delay', group='TV_Running_4775_Dots_Reset_v2  Set2')
+
+
+StartDay = input(0, title='Start day (YYYYMMDD)', group='Time Settings')
+StartTime = input(0, title='Start time (HHmm)', group='Time Settings')
+EndDay = input(0, title='End day (YYYYMMDD)', group='Time Settings')
+EndTime = input(0, title='End time (HHmm)', group='Time Settings')
+
+
+//ADX_Simple_v2_Set2
+adxlen = input(14, title='ADX Length')
+deviation1 = 1.0
+deviation2 = 2.0
+
+
+IsTradingTime(dbegin, tbegin, dend, tend) =>
+    yyyymmdd = year * 10000 + month * 100 + dayofmonth
+    hhmm = 100 * hour + minute
+    v1 = dbegin > 0 ? yyyymmdd >= dbegin and hhmm >= tbegin : true
+    v2 = dend > 0 ? yyyymmdd <= dend and (tend == 0 or hhmm <= tend) : true
+
+    v1 and v2
+
+EntrySignal(XBarsDelay) =>
+
+    upArrow = close > open[XBarsDelay]
+    downArrow = close < open[XBarsDelay]
+
+    [upArrow, downArrow]
+
+CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition) =>
+    sum = 0.0
+
+    if calc
+        sum := (close - nettedLongAvg) / TickSize * nettedLongPosition * TickValue
+    else
+        sum := nz(sum[1])
+
+    sum
+
+CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition) =>
+    sum = 0.0
+
+    if calc
+        sum := (nettedShortAvg - close) / TickSize * nettedShortPosition * TickValue
+    else
+        sum := nz(sum[1])
+
+    sum
+
+Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay, multiplier) =>
+
+    [upArrow, downArrow] = EntrySignal(XBarsDelay)
+
+    buy = upArrow and tradingTime
+    sell = downArrow and tradingTime
+
+
+    buyProfitCutoff = false
+    sellProfitCutoff = false
+
+    nettedLongPosition = 0.0
+    nettedShortPosition = 0.0
+
+    nettedLongAvg = 0.0
+    nettedShortAvg = 0.0
+
+    nettedLongPosition := buy ? nz(nettedLongPosition[1], 0) + Lots : nz(nettedLongPosition[1], 0)
+    nettedLongAvg := buy ? (nz(nettedLongPosition[1], 0) * nz(nettedLongAvg[1], 0) + Lots * close) / (nz(nettedLongPosition[1], 0) + Lots) : nz(nettedLongAvg[1], 0)
+
+    buyProfitCut = 0.0
+    buyProfitCut := nettedLongPosition[1] == 0 and nettedLongPosition > 0 ? close * multiplier : nettedLongPosition == 0 ? 0 : nz(buyProfitCut[1])
+
+    nettedShortPosition := sell ? nz(nettedShortPosition[1], 0) + Lots : nz(nettedShortPosition[1], 0)
+    nettedShortAvg := sell ? (nz(nettedShortPosition[1], 0) * nz(nettedShortAvg[1], 0) + Lots * close) / (nz(nettedShortPosition[1], 0) + Lots) : nz(nettedShortAvg[1], 0)
+
+    sellProfitCut = 0.0
+    sellProfitCut := nettedShortPosition[1] == 0 and nettedShortPosition > 0 ? close * multiplier : nettedShortPosition == 0 ? 0 : nz(sellProfitCut[1])
+
+    calc = tradingTime
+    buyProfit = CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition)
+    sellProfit = CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition)
+
+
+    buyProfitCutoff := buyProfitCut > 0 and buyProfit >= buyProfitCut
+    sellProfitCutoff := sellProfitCut > 0 and sellProfit >= sellProfitCut
+
+    nettedLongPosition := buyProfitCutoff or sellProfitCutoff ? 0 : nettedLongPosition
+    nettedLongAvg := buyProfitCutoff or sellProfitCutoff ? 0 : nettedLongAvg
+
+    nettedShortPosition := buyProfitCutoff or sellProfitCutoff ? 0 : nettedShortPosition
+    nettedShortAvg := buyProfitCutoff or sellProfitCutoff ? 0 : nettedShortAvg
+
+    [buyProfitCutoff, sellProfitCutoff]
+
+
+
+dirmov(len) =>
+    up = ta.change(high)
+    down = -ta.change(low)
+    plusDM = na(up) ? na : up > down and up > 0 ? up : 0
+    minusDM = na(down) ? na : down > up and down > 0 ? down : 0
+    truerange = ta.rma(ta.tr, len)
+    plus = fixnan(100 * ta.rma(plusDM, len) / truerange)
+    minus = fixnan(100 * ta.rma(minusDM, len) / truerange)
+    [plus, minus]
+
+adx(dilen, adxlen) =>
+    [plus, minus] = dirmov(dilen)
+    sum = plus + minus
+    adx = 100 * ta.rma(math.abs(plus - minus) / (sum == 0 ? 1 : sum), adxlen)
+    diff = plus - minus
+    [adx, diff]
+
+
+adx_v8(adxlen, dev1, dev2) =>
+    [sig, diff] = adx(adxlen, adxlen)
+    diffema = ta.ema(diff, adxlen)
+    std = ta.stdev(diff, adxlen)
+    bbup1 = diffema + dev1 * std
+    bblo1 = diffema - dev1 * std
+    bbup2 = diffema + dev2 * std
+    bblo2 = diffema - dev2 * std
+    [sig, diff, diffema, std, bbup1, bblo1, bbup2, bblo2]
+
+
+ADX_Simple_v3_adx_v8(adxlen, dev1, dev2)=>
+	[sig, diff, diffema, std, bbup1, bblo1, bbup2, bblo2] = adx_v8(adxlen, dev1, dev2)	
+	positive = 0
+	if diffema > 0
+		positive += 1
+		positive
+	if bbup1 > 0
+		positive += 1
+		positive
+	if bblo1 > 0
+		positive += 1
+		positive
+	if bbup2 > 0
+		positive += 1
+		positive
+	if bblo2 > 0
+		positive += 1
+		positive
+
+	negative = 0
+	if diffema < 0
+		negative += 1
+		negative
+	if bbup1 < 0
+		negative += 1
+		negative
+	if bblo1 < 0
+		negative += 1
+		negative
+	if bbup2 < 0
+		negative += 1
+		negative
+	if bblo2 < 0
+		negative += 1
+		negative
+
+
+	positive2 = 0
+	if diff > diffema
+		positive2 += 1
+		positive2
+	if diff > bbup1
+		positive2 += 1
+		positive2
+	if diff > bblo1
+		positive2 += 1
+		positive2
+	if diff > bbup2
+		positive2 += 1
+		positive2
+	if diff > bblo2
+		positive2 += 1
+		positive2
+
+	negative2 = 0
+	if diff < diffema
+		negative2 += 1
+		negative2
+	if diff < bbup1
+		negative2 += 1
+		negative2
+	if diff < bblo1
+		negative2 += 1
+		negative2
+	if diff < bbup2
+		negative2 += 1
+		negative2
+	if diff < bblo2
+		negative2 += 1
+		negative2
+
+	count = positive + positive2 - negative - negative2
+	avg = ta.ema(count, adxlen)
+	
+	[count, avg]
+
+	
+[count, avg] = ADX_Simple_v3_adx_v8(adxlen, deviation1, deviation2)
+
+tradingTime = IsTradingTime(StartDay, StartTime, EndDay, EndTime)
+[buyProfitCutoff1, sellProfitCutoff1] = Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay, Multiplier)
+[buyProfitCutoff2, sellProfitCutoff2] = Running_4775_Dots_v2_Reset(tradingTime, XBarsDelay2, Multiplier2)
+
+dotbelow2 = sellProfitCutoff2
+dotabove2 = buyProfitCutoff2
+
+var lastDotAbove1Open = float(na)
+var lastDotBelow1Open = float(na)
+
+if buyProfitCutoff1[1]
+	lastDotAbove1Open := open
+
+if sellProfitCutoff1[1]
+	lastDotBelow1Open := open
+
+upArrow2 = false
+dnArrow2 = false
+
+if buyProfitCutoff2
+    if na(lastDotBelow1Open)==false
+        if close>=lastDotBelow1Open and count > avg
+            upArrow2 := true
+                
+
+if sellProfitCutoff2
+    if na(lastDotAbove1Open)==false
+        if close<=lastDotAbove1Open and count < avg
+            dnArrow2 := true
+    
+plotshape(upArrow2[1], style=shape.triangleup, color=color.blue, location=location.belowbar, size=size.small)
+plotshape(dnArrow2[1], style=shape.triangledown, color=color.yellow, location=location.abovebar, size=size.small)

@@ -1,0 +1,318 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © TheMacroStrategist
+
+//@version=5
+
+// # ========================================================================= #
+// #                   |   Indicator  |
+// # ========================================================================= #
+
+SCRIPT_NAME = "Chris V5"
+
+indicator(
+ title                = SCRIPT_NAME,
+ shorttitle           = SCRIPT_NAME,
+ overlay              = false,
+ max_lines_count      = 500,
+ max_labels_count     = 500,
+ max_boxes_count      = 500 
+ )
+// # ========================================================================= #
+// #                   |   Indicator  |
+// # ========================================================================= #
+
+// # ========================================================================= #
+// #                   |   Inputs  |
+// # ========================================================================= #
+
+i_table_chris_position = input.string(defval = "Top Right", title = "Big Table Position", options=["Top Right", "Middle Right", "Bottom Right", "Top Left", "Middle Left", "Bottom Left", "Middle Center", "Top Center", "Bottom Center"], group = "Table Positions")
+i_table_chris2_position = input.string(defval = "Top Left", title = "Big Table Position", options=["Top Right", "Middle Right", "Bottom Right", "Top Left", "Middle Left", "Bottom Left", "Middle Center", "Top Center", "Bottom Center"], group = "Table Positions")
+table_bg_color = input.color(defval = color.white, title = "Table Background Color", group = "Table")
+table_border_color = input.color(defval = color.black, title = "Table Borders Color", group = "Table") 
+table_border_width = input.int(defval = 1, title = "Table Borders Width", group = "Table") 
+table_frame_color = input.color(defval = color.black, title = "Table Frame Color", group = "Table")
+table_frame_width = input.int(defval = 3, title = "Table Frame Width", group = "Table") 
+
+sec1 = input.symbol(defval = "SPY", title = "Ticker 1", group = "Tickers")
+sec2 = input.symbol(defval = "QQQ", title = "Ticker 2", group = "Tickers")
+sec3 = input.symbol(defval = "IWM", title = "Ticker 3", group = "Tickers")
+sec4 = input.symbol(defval = "TLT", title = "Ticker 4", group = "Tickers")
+sec5 = input.symbol(defval = "SLV", title = "Ticker 5", group = "Tickers")
+sec6 = input.symbol(defval = "GLD", title = "Ticker 6", group = "Tickers")
+sec7 = input.symbol(defval = "USO", title = "Ticker 7", group = "Tickers")
+sec8 = input.symbol(defval = "VIX", title = "Ticker 8", group = "Tickers")
+sec9 = input.symbol(defval = "EURUSD", title = "Ticker 9", group = "Tickers")
+sec10 = input.symbol(defval = "USDJPY", title = "Ticker 10", group = "Tickers")
+
+kc_length = input.int(20, minval=1, group = "KC")
+kc_mult = input.float(2.0, "Multiplier", group = "KC")
+kc_src = input.source(close, title="Source", group = "KC")
+kc_exp = input.bool(true, "Use Exponential MA", group = "KC")
+kc_BandsStyle = input.string("Average True Range", options = ["Average True Range", "True Range", "Range"], title="Bands Style", group = "KC")
+kc_atrlength = input.int(10, "ATR Length", group = "KC")
+
+zscore_period = input.int(20, minval=1, title = "ZScore Period", group = "ZScore")
+
+// # ========================================================================= #
+// #                   |   Inputs  |
+// # ========================================================================= #
+
+// # ========================================================================= #
+// #                   |   General  |
+// # ========================================================================= #
+
+f_security(_sym, _res, _src) => 
+    request.security(_sym, _res, _src[1], barmerge.gaps_off, barmerge.lookahead_on)
+
+// # ========================================================================= #
+// #                   |   Calculations  |
+// # ========================================================================= #
+
+esma(source, length)=>
+	s = ta.sma(source, length)
+	e = ta.ema(source, length)
+	kc_exp ? e : s
+
+x = 0
+
+[CLOSE_1, HIGH_1, LOW_1, TR_1, ATR_1, RMA_1, STDEV1, SMA1]         = request.security(sec1 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_2, HIGH_2, LOW_2, TR_2, ATR_2, RMA_2, STDEV2, SMA2]         = request.security(sec2 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_3, HIGH_3, LOW_3, TR_3, ATR_3, RMA_3, STDEV3, SMA3]         = request.security(sec3 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_4, HIGH_4, LOW_4, TR_4, ATR_4, RMA_4, STDEV4, SMA4]         = request.security(sec4 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_5, HIGH_5, LOW_5, TR_5, ATR_5, RMA_5, STDEV5, SMA5]         = request.security(sec5 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_6, HIGH_6, LOW_6, TR_6, ATR_6, RMA_6, STDEV6, SMA6]         = request.security(sec6 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_7, HIGH_7, LOW_7, TR_7, ATR_7, RMA_7, STDEV7, SMA7]         = request.security(sec7 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_8, HIGH_8, LOW_8, TR_8, ATR_8, RMA_8, STDEV8, SMA8]         = request.security(sec8 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_9, HIGH_9, LOW_9, TR_9, ATR_9, RMA_9, STDEV9, SMA9]         = request.security(sec9 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_10, HIGH_10, LOW_10, TR_10, ATR_10, RMA_10, STDEV10, SMA10] = request.security(sec10, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+
+pip() => syminfo.mintick * (syminfo.type == "forex" ? 10 : 1)
+
+f_kc_symbol(_src, _high, _low, _tr, _atr, _rma) =>
+
+    kc_ma = esma(_src, kc_length)
+
+    kc_rangema = kc_BandsStyle == "True Range" ? _tr : kc_BandsStyle == "Average True Range" ? _atr : _rma
+    upper = kc_ma + (kc_rangema * kc_mult)// * pip())
+    lower = kc_ma - (kc_rangema * kc_mult)// * pip())
+
+    [upper, lower]
+
+[UPPER_1, LOWER_1] = f_kc_symbol(CLOSE_1, HIGH_1, LOW_1, TR_1, ATR_1, RMA_1)
+[UPPER_2, LOWER_2] = f_kc_symbol(CLOSE_2, HIGH_2, LOW_2, TR_2, ATR_2, RMA_2)
+[UPPER_3, LOWER_3] = f_kc_symbol(CLOSE_3, HIGH_3, LOW_3, TR_3, ATR_3, RMA_3)
+[UPPER_4, LOWER_4] = f_kc_symbol(CLOSE_4, HIGH_4, LOW_4, TR_4, ATR_4, RMA_4)
+[UPPER_5, LOWER_5] = f_kc_symbol(CLOSE_5, HIGH_5, LOW_5, TR_5, ATR_5, RMA_5)
+[UPPER_6, LOWER_6] = f_kc_symbol(CLOSE_6, HIGH_6, LOW_6, TR_6, ATR_6, RMA_6)
+[UPPER_7, LOWER_7] = f_kc_symbol(CLOSE_7, HIGH_7, LOW_7, TR_7, ATR_7, RMA_7)
+[UPPER_8, LOWER_8] = f_kc_symbol(CLOSE_8, HIGH_8, LOW_8, TR_8, ATR_8, RMA_8)
+[UPPER_9, LOWER_9] = f_kc_symbol(CLOSE_9, HIGH_9, LOW_9, TR_9, ATR_9, RMA_9)
+[UPPER_10, LOWER_10] = f_kc_symbol(CLOSE_10, HIGH_10, LOW_10, TR_10, ATR_10, RMA_10)
+
+[kc_upper, kc_lower] = f_kc_symbol(close, high, low, ta.tr(true), ta.atr(kc_atrlength), ta.rma(high - low, kc_length))
+
+
+
+f_zscore_symbol(_close, _stdev, _sma) =>
+
+    nRes = (_close - _sma) / _stdev
+
+ZSCORE_1 = f_zscore_symbol(CLOSE_1, STDEV1, SMA1)
+ZSCORE_2 = f_zscore_symbol(CLOSE_2, STDEV2, SMA2)
+ZSCORE_3 = f_zscore_symbol(CLOSE_3, STDEV3, SMA3)
+ZSCORE_4 = f_zscore_symbol(CLOSE_4, STDEV4, SMA4)
+ZSCORE_5 = f_zscore_symbol(CLOSE_5, STDEV5, SMA5)
+ZSCORE_6 = f_zscore_symbol(CLOSE_6, STDEV6, SMA6)
+ZSCORE_7 = f_zscore_symbol(CLOSE_7, STDEV7, SMA7)
+ZSCORE_8 = f_zscore_symbol(CLOSE_8, STDEV8, SMA8)
+ZSCORE_9 = f_zscore_symbol(CLOSE_9, STDEV9, SMA9)
+ZSCORE_10 = f_zscore_symbol(CLOSE_10, STDEV10, SMA10)
+
+[D_CLOSE_TABLE_2, D_VOLUME_TABLE_2, PREV_D_CLOSE_TABLE_2, PREV_D_VOLUME_TABLE_2] = request.security(syminfo.tickerid, "D", [close, volume, close[1], volume[1]], barmerge.gaps_off, barmerge.lookahead_on)
+[W_CLOSE_TABLE_2, W_VOLUME_TABLE_2, PREV_W_CLOSE_TABLE_2, PREV_W_VOLUME_TABLE_2] = request.security(syminfo.tickerid, "W", [close, volume, close[1], volume[1]], barmerge.gaps_off, barmerge.lookahead_on)
+[M_CLOSE_TABLE_2, M_VOLUME_TABLE_2, PREV_M_CLOSE_TABLE_2, PREV_M_VOLUME_TABLE_2] = request.security(syminfo.tickerid, "M", [close, volume, close[1], volume[1]], barmerge.gaps_off, barmerge.lookahead_on)
+[M3_CLOSE_TABLE_2, M3_VOLUME_TABLE_2] = request.security(syminfo.tickerid, "3M", [close, volume], barmerge.gaps_off, barmerge.lookahead_on)
+[M6_CLOSE_TABLE_2, M6_VOLUME_TABLE_2] = request.security(syminfo.tickerid, "6M", [close, volume], barmerge.gaps_off, barmerge.lookahead_on)
+
+
+f_variation_rate(_start, _end) =>
+    _res = ((_end - _start) / _start) * 100
+
+DoD_CLOSE_perc = f_variation_rate(PREV_D_CLOSE_TABLE_2, D_CLOSE_TABLE_2)
+WoW_CLOSE_perc = f_variation_rate(PREV_W_CLOSE_TABLE_2, W_CLOSE_TABLE_2)
+MoM_CLOSE_perc = f_variation_rate(PREV_M_CLOSE_TABLE_2, M_CLOSE_TABLE_2)
+
+DoD_VOLUME_perc = f_variation_rate(PREV_D_VOLUME_TABLE_2, D_VOLUME_TABLE_2)
+WoW_VOLUME_perc = f_variation_rate(PREV_W_VOLUME_TABLE_2, W_VOLUME_TABLE_2)
+MoM_VOLUME_perc = f_variation_rate(PREV_M_VOLUME_TABLE_2, M_VOLUME_TABLE_2)
+
+// # ========================================================================= #
+// #                   |   Calculations  |
+// # ========================================================================= #
+
+
+// # ========================================================================= #
+// #                   |   Display  |
+// # ========================================================================= #
+
+table_chris_position = switch i_table_chris_position
+    "Top Right" => position.top_right
+    "Middle Right" => position.middle_right
+    "Bottom Right" => position.bottom_right
+    "Top Left" => position.top_left
+    "Middle Left" => position.middle_left
+    "Bottom Left" => position.bottom_left
+    "Middle Center" => position.middle_center
+    "Top Center" => position.top_center
+    "Bottom Center" => position.bottom_center
+
+table_chris2_position = switch i_table_chris2_position
+    "Top Right" => position.top_right
+    "Middle Right" => position.middle_right
+    "Bottom Right" => position.bottom_right
+    "Top Left" => position.top_left
+    "Middle Left" => position.middle_left
+    "Bottom Left" => position.bottom_left
+    "Middle Center" => position.middle_center
+    "Top Center" => position.top_center
+    "Bottom Center" => position.bottom_center
+
+var chris_table = table.new(
+ position       = table_chris_position,
+ columns        = 5,
+ rows           = 11,
+ bgcolor        = table_bg_color,
+ frame_color    = table_frame_color,
+ frame_width    = table_frame_width,
+ border_color   = table_border_color,
+ border_width   = table_border_width 
+ )
+
+if barstate.islast
+
+    // Headers
+    table.cell(table_id = chris_table, column = 0, row = 0, text = "TICKER")
+    table.cell(table_id = chris_table, column = 1, row = 0, text = "SPOT")
+    table.cell(table_id = chris_table, column = 2, row = 0, text = "TOP RANGE")
+    table.cell(table_id = chris_table, column = 3, row = 0, text = "BOTTOM RANGE")
+    table.cell(table_id = chris_table, column = 4, row = 0, text = "Z-SCORE")
+
+    // Tickers
+    table.cell(table_id = chris_table, column = 0, row = 1, text = sec1)
+    table.cell(table_id = chris_table, column = 0, row = 2, text = sec2)
+    table.cell(table_id = chris_table, column = 0, row = 3, text = sec3)
+    table.cell(table_id = chris_table, column = 0, row = 4, text = sec4)
+    table.cell(table_id = chris_table, column = 0, row = 5, text = sec5)
+    table.cell(table_id = chris_table, column = 0, row = 6, text = sec6)
+    table.cell(table_id = chris_table, column = 0, row = 7, text = sec7)
+    table.cell(table_id = chris_table, column = 0, row = 8, text = sec8)
+    table.cell(table_id = chris_table, column = 0, row = 9, text = sec9)
+    table.cell(table_id = chris_table, column = 0, row = 10, text = sec10)
+
+    // Spot
+    table.cell(table_id = chris_table, column = 1, row = 1, text = str.tostring(CLOSE_1, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 2, text = str.tostring(CLOSE_2, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 3, text = str.tostring(CLOSE_3, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 4, text = str.tostring(CLOSE_4, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 5, text = str.tostring(CLOSE_5, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 6, text = str.tostring(CLOSE_6, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 7, text = str.tostring(CLOSE_7, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 8, text = str.tostring(CLOSE_8, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 9, text = str.tostring(CLOSE_9, "#.##"))
+    table.cell(table_id = chris_table, column = 1, row = 10, text = str.tostring(CLOSE_10, "#.##"))
+
+    // Top Range
+    table.cell(table_id = chris_table, column = 2, row = 1, text = str.tostring(UPPER_1, "#.#####"))
+    table.cell(table_id = chris_table, column = 2, row = 2, text = str.tostring(UPPER_2, "#.##"))
+    table.cell(table_id = chris_table, column = 2, row = 3, text = str.tostring(UPPER_3, "#.##"))
+    table.cell(table_id = chris_table, column = 2, row = 4, text = str.tostring(UPPER_4, "#.##"))
+    table.cell(table_id = chris_table, column = 2, row = 5, text = str.tostring(UPPER_5, "#.##"))
+    table.cell(table_id = chris_table, column = 2, row = 6, text = str.tostring(UPPER_6, "#.##"))
+    table.cell(table_id = chris_table, column = 2, row = 7, text = str.tostring(UPPER_7, "#.##"))
+    table.cell(table_id = chris_table, column = 2, row = 8, text = str.tostring(UPPER_8, "#.##"))
+    table.cell(table_id = chris_table, column = 2, row = 9, text = str.tostring(UPPER_9, "#.##"))
+    table.cell(table_id = chris_table, column = 2, row = 10, text = str.tostring(UPPER_10, "#.##"))
+
+    // Bottom Range
+    table.cell(table_id = chris_table, column = 3, row = 1, text = str.tostring(LOWER_1, "#.#####"))
+    table.cell(table_id = chris_table, column = 3, row = 2, text = str.tostring(LOWER_2, "#.##"))
+    table.cell(table_id = chris_table, column = 3, row = 3, text = str.tostring(LOWER_3, "#.##"))
+    table.cell(table_id = chris_table, column = 3, row = 4, text = str.tostring(LOWER_4, "#.##"))
+    table.cell(table_id = chris_table, column = 3, row = 5, text = str.tostring(LOWER_5, "#.##"))
+    table.cell(table_id = chris_table, column = 3, row = 6, text = str.tostring(LOWER_6, "#.##"))
+    table.cell(table_id = chris_table, column = 3, row = 7, text = str.tostring(LOWER_7, "#.##"))
+    table.cell(table_id = chris_table, column = 3, row = 8, text = str.tostring(LOWER_8, "#.##"))
+    table.cell(table_id = chris_table, column = 3, row = 9, text = str.tostring(LOWER_9, "#.##"))
+    table.cell(table_id = chris_table, column = 3, row = 10, text = str.tostring(LOWER_10, "#.##"))
+
+    // Z-Score
+    table.cell(table_id = chris_table, column = 4, row = 1, text = str.tostring(ZSCORE_1, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 2, text = str.tostring(ZSCORE_2, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 3, text = str.tostring(ZSCORE_3, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 4, text = str.tostring(ZSCORE_4, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 5, text = str.tostring(ZSCORE_5, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 6, text = str.tostring(ZSCORE_6, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 7, text = str.tostring(ZSCORE_7, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 8, text = str.tostring(ZSCORE_8, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 9, text = str.tostring(ZSCORE_9, "#.##"))
+    table.cell(table_id = chris_table, column = 4, row = 10, text = str.tostring(ZSCORE_10, "#.##"))
+
+
+var chris_table2 = table.new(
+ position       = table_chris2_position,
+ columns        = 8,
+ rows           = 3,
+ bgcolor        = table_bg_color,
+ frame_color    = table_frame_color,
+ frame_width    = table_frame_width,
+ border_color   = table_border_color,
+ border_width   = table_border_width 
+ )
+
+if barstate.islast
+
+    // Headers
+    table.cell(table_id = chris_table2, column = 0, row = 0, text = "")
+    table.cell(table_id = chris_table2, column = 1, row = 0, text = "1D Avg.")
+    table.cell(table_id = chris_table2, column = 2, row = 0, text = "1M Avg.")
+    table.cell(table_id = chris_table2, column = 3, row = 0, text = "3M Avg.")
+    table.cell(table_id = chris_table2, column = 4, row = 0, text = "6M Avg.")
+    table.cell(table_id = chris_table2, column = 5, row = 0, text = "DoD %")
+    table.cell(table_id = chris_table2, column = 6, row = 0, text = "WoW %")
+    table.cell(table_id = chris_table2, column = 7, row = 0, text = "MoM %")
+
+    // Rows Header
+    table.cell(table_id = chris_table2, column = 0, row = 1, text = "PRICE")
+    table.cell(table_id = chris_table2, column = 0, row = 2, text = "VOLUME")
+
+    // 1D Avg
+    table.cell(table_id = chris_table2, column = 1, row = 1, text = str.tostring(D_CLOSE_TABLE_2, "#.##"))
+    table.cell(table_id = chris_table2, column = 1, row = 2, text = str.tostring(D_VOLUME_TABLE_2, "#"))
+
+    // 1M Avg
+    table.cell(table_id = chris_table2, column = 2, row = 1, text = str.tostring(M_CLOSE_TABLE_2, "#.##"))
+    table.cell(table_id = chris_table2, column = 2, row = 2, text = str.tostring(M_VOLUME_TABLE_2, "#"))
+
+    // 3M Avg
+    table.cell(table_id = chris_table2, column = 3, row = 1, text = str.tostring(M3_CLOSE_TABLE_2, "#.##"))
+    table.cell(table_id = chris_table2, column = 3, row = 2, text = str.tostring(M3_VOLUME_TABLE_2, "#"))
+
+    // 6M Avg
+    table.cell(table_id = chris_table2, column = 4, row = 1, text = str.tostring(M6_CLOSE_TABLE_2, "#.##"))
+    table.cell(table_id = chris_table2, column = 4, row = 2, text = str.tostring(M6_VOLUME_TABLE_2, "#"))
+
+    // DoD %
+    table.cell(table_id = chris_table2, column = 5, row = 1, text = str.tostring(DoD_CLOSE_perc, "#.##") + "%")
+    table.cell(table_id = chris_table2, column = 5, row = 2, text = str.tostring(DoD_VOLUME_perc, "#.##") + "%")
+
+    // WoW %
+    table.cell(table_id = chris_table2, column = 6, row = 1, text = str.tostring(WoW_CLOSE_perc, "#.##") + "%")
+    table.cell(table_id = chris_table2, column = 6, row = 2, text = str.tostring(WoW_VOLUME_perc, "#.##") + "%")
+
+    // MoM %
+    table.cell(table_id = chris_table2, column = 7, row = 1, text = str.tostring(MoM_CLOSE_perc, "#.##") + "%")
+    table.cell(table_id = chris_table2, column = 7, row = 2, text = str.tostring(MoM_VOLUME_perc, "#.##") + "%")
+
+// # ========================================================================= #
+// #                   |   Display  |
+// # ========================================================================= #

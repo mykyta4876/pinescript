@@ -1,0 +1,369 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2759
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;\f1\fnil\fcharset0 Menlo-Bold;}
+{\colortbl;\red255\green255\blue255;\red101\green103\blue115;\red16\green18\blue26;\red255\green255\blue255;
+\red74\green135\blue243;\red46\green126\blue46;\red56\green178\blue151;\red199\green202\blue212;\red242\green100\blue109;
+\red240\green106\blue20;\red38\green95\blue242;}
+{\*\expandedcolortbl;;\cssrgb\c47059\c48235\c52549;\cssrgb\c7451\c9020\c13333;\cssrgb\c100000\c100000\c100000;
+\cssrgb\c35686\c61176\c96471;\cssrgb\c21961\c55686\c23529;\cssrgb\c25882\c74118\c65882;\cssrgb\c81961\c83137\c86275;\cssrgb\c96863\c48627\c50196;
+\cssrgb\c96078\c49804\c9020;\cssrgb\c19216\c47451\c96078;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs26 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 // This work is licensed under a Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) https://creativecommons.org/licenses/by-nc-sa/4.0/\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 // \'a9 StratifyTrade\cf4 \cb1 \strokec4 \
+\
+\cf2 \cb3 \strokec2 //
+\f1\b @version=
+\f0\b0 5\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb3 \strokec5 indicator\cf4 \strokec4 (\cf6 \strokec6 "Price Action Volumetric Order Blocks [StratifyTrade]"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "StratifyTrade - Price Action Volumetric Order Blocks [1.0]"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 overlay\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf9 \strokec9 true\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b \cf7 \cb3 \strokec7 const
+\f0\b0 \cf4 \strokec4  
+\f1\b \cf7 \strokec7 string
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 tm\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf6 \strokec6 "[Length] Use Length to adjust cordinate of the orderblocks\\n[Full] Use whole candle body"\cf4 \cb1 \strokec4 \
+
+\f1\b \cf7 \cb3 \strokec7 const
+\f0\b0 \cf4 \strokec4  
+\f1\b \cf7 \strokec7 string
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 tn\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf6 \strokec6 "Mitigation method for when to trigger order blocks"\cf4 \cb1 \strokec4 \
+
+\f1\b \cf7 \cb3 \strokec7 const
+\f0\b0 \cf4 \strokec4  
+\f1\b \cf7 \strokec7 string
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 ts\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf6 \strokec6 'Show Last number of orderblocks'\cf4 \cb1 \strokec4 \
+
+\f1\b \cf7 \cb3 \strokec7 const
+\f0\b0 \cf4 \strokec4  
+\f1\b \cf7 \strokec7 string
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 gv\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf6 \strokec6 "Volumetric Order Blocks"\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf8 \cb3 \strokec8 obshow\cf4 \strokec4          \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.bool\cf4 \strokec4   (\cf9 \strokec9 true\cf4 \strokec4                 \cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Show Last"\cf4 \strokec4                       \cf7 \strokec7 ,\cf4 \strokec4                                                \cf8 \strokec8 ts\cf7 \strokec7 ,\cf4 \strokec4           \cf6 \strokec6 '1'\cf7 \strokec7 ,\cf4 \strokec4          \cf8 \strokec8 gv\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 oblast\cf4 \strokec4          \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.int\cf4 \strokec4    (\cf10 \strokec10 5\cf4 \strokec4                    \cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 ""\cf4 \strokec4                                \cf7 \strokec7 ,\cf4 \strokec4   \cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4                    \cf10 \strokec10 50\cf7 \strokec7 ,\cf4 \strokec4                  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 ,\cf4 \strokec4      \cf8 \strokec8 inline\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf6 \strokec6 '1'\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 gv\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 obmode\cf4 \strokec4          \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.string\cf4 \strokec4 (\cf6 \strokec6 "Length"\cf4 \strokec4             \cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Construction "\cf4 \strokec4                   \cf7 \strokec7 ,\cf4 \strokec4  [\cf6 \strokec6 "Length"\cf7 \strokec7 ,\cf4 \strokec4                            \cf6 \strokec6 "Full"\cf4 \strokec4 ]\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tm\cf7 \strokec7 ,\cf4 \strokec4           \cf6 \strokec6 '3'\cf7 \strokec7 ,\cf4 \strokec4          \cf8 \strokec8 gv\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 len\cf4 \strokec4             \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.int\cf4 \strokec4    (\cf10 \strokec10 5\cf4 \strokec4                    \cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 ""\cf4 \strokec4                                \cf7 \strokec7 ,\cf4 \strokec4   \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4                   \cf10 \strokec10 20\cf7 \strokec7 ,\cf4 \strokec4                   \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 ,\cf4 \strokec4      \cf8 \strokec8 inline\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf6 \strokec6 '3'\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 gv\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 obmiti\cf4 \strokec4          \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.string\cf4 \strokec4 (\cf6 \strokec6 "Close"\cf4 \strokec4              \cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Mitigation Method"\cf4 \strokec4               \cf7 \strokec7 ,\cf4 \strokec4  [\cf6 \strokec6 "Close"\cf7 \strokec7 ,\cf4 \strokec4            \cf6 \strokec6 "Wick"\cf7 \strokec7 ,\cf4 \strokec4            \cf6 \strokec6 "Avg"\cf4 \strokec4 ]\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tn\cf7 \strokec7 ,\cf4 \strokec4                \cf8 \strokec8 group\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 gv\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 overlap\cf4 \strokec4         \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.bool\cf4 \strokec4   (\cf9 \strokec9 true\cf4 \strokec4                 \cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Hide Overlap"\cf4 \strokec4                    \cf7 \strokec7 ,\cf4 \strokec4                                                                  \cf8 \strokec8 group\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 gv\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tooltip\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf6 \strokec6 "Most recent order block will be preserved"\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 //\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf8 \cb3 \strokec8 tf1\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "1"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 1"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf2\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "3"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 2"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf3\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "5"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 3"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf4\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "10"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 4"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf5\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "15"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 5"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf6\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "30"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 6"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf7\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "45"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 7"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf8\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "60"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 8"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf9\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "120"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 9"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf10\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "180"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 10"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf11\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "240"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 11"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf12\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "D"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 12"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf13\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "W"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 13"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 tf14\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.timeframe\cf4 \strokec4 (\cf6 \strokec6 "M"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Timeframe 14"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.int\cf4 \strokec4 (\cf10 \strokec10 3\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Number of order blocks"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 minval\cf7 \strokec7 =\cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 maxval\cf7 \strokec7 =\cf10 \strokec10 5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 table_text_color\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.color\cf4 \strokec4 (\cf9 \strokec9 color.white\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Text color"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 table_text_size_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.string\cf4 \strokec4 (\cf6 \strokec6 "Normal"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Text size"\cf7 \strokec7 ,\cf4 \strokec4  [\cf6 \strokec6 "Tiny"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Small"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Normal"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Large"\cf4 \strokec4 ]\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 table_pos_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.string\cf4 \strokec4 (\cf6 \strokec6 "Bottom Right"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Table position"\cf7 \strokec7 ,\cf4 \strokec4  [\cf6 \strokec6 "Top Left"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Top Center"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Top Right"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Middle Left"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Middle Center"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Middle Right"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Bottom Left"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Bottom Center"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Bottom Right"\cf4 \strokec4 ]\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 input_limit\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.int\cf4 \strokec4 (\cf10 \strokec10 20\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Process only last N order blocks"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 minval\cf7 \strokec7 =\cf10 \strokec10 5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\cf8 \cb3 \strokec8 input_limit_calc_bars\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 input.int\cf4 \strokec4 (\cf10 \strokec10 3000\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Process only last N bars"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 minval\cf7 \strokec7 =\cf10 \strokec10 100\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 group\cf7 \strokec7 =\cf6 \strokec6 "Table"\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf11 \cb3 \strokec11 f_overlap\cf4 \strokec4 (\cf8 \strokec8 num_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bt_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tb_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 dir_\cf4 \strokec4 ) \cf7 \strokec7 =>\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3     \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 num_\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 () \cf7 \strokec7 >\cf4 \strokec4  \cf10 \strokec10 1\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 num_\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 () \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\cb3             \cf8 \strokec8 sbtm\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 dir_\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf8 \strokec8 bt_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 ) \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 tb_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 cbtm\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 dir_\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf8 \strokec8 bt_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 num_\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 () \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4 ) \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 tb_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 num_\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 () \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 stop\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 dir_\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf8 \strokec8 tb_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 ) \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 bt_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 ctop\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 dir_\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf8 \strokec8 tb_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 num_\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 () \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4 ) \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 bt_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 num_\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 () \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4 )\cb1 \
+\
+\cb3             \cf7 \strokec7 if\cf4 \strokec4  (\cf8 \strokec8 sbtm\cf4 \strokec4  \cf7 \strokec7 >\cf4 \strokec4  \cf8 \strokec8 cbtm\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf8 \strokec8 sbtm\cf4 \strokec4  \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 ctop\cf4 \strokec4 ) \cf7 \strokec7 or\cf4 \strokec4  (\cf8 \strokec8 stop\cf4 \strokec4  \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 ctop\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf8 \strokec8 sbtm\cf4 \strokec4  \cf7 \strokec7 >\cf4 \strokec4  \cf8 \strokec8 cbtm\cf4 \strokec4 ) \cf7 \strokec7 or\cf4 \strokec4  (\cf8 \strokec8 stop\cf4 \strokec4  \cf7 \strokec7 >\cf4 \strokec4  \cf8 \strokec8 ctop\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf8 \strokec8 sbtm\cf4 \strokec4  \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 cbtm\cf4 \strokec4 ) \cf7 \strokec7 or\cf4 \strokec4  (\cf8 \strokec8 stop\cf4 \strokec4  \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 ctop\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf8 \strokec8 stop\cf4 \strokec4  \cf7 \strokec7 >\cf4 \strokec4  \cf8 \strokec8 cbtm\cf4 \strokec4 )\cb1 \
+\cb3                 \cf8 \strokec8 num_\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\cb3                 \cf8 \strokec8 price_\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\cb3                 \cf8 \strokec8 bt_\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\cb3                 \cf8 \strokec8 tb_\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 // Same as the "fnOB" but uses less memory so it can be used in the request.security function\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf11 \cb3 \strokec11 fnOB_req\cf4 \strokec4 () \cf7 \strokec7 =>\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3     \cf7 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 num_buy\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 int
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 na\cf4 \strokec4 )\cb1 \
+\cb3     \cf7 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 num_sell\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 int
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 na\cf4 \strokec4 )\cb1 \
+\cb3     \cf7 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 price_buy\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 na\cf4 \strokec4 )\cb1 \
+\cb3     \cf7 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 price_sell\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 na\cf4 \strokec4 )\cb1 \
+\cb3     \cf7 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 bt_buy\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 na\cf4 \strokec4 )\cb1 \
+\cb3     \cf7 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 bt_sell\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 na\cf4 \strokec4 )\cb1 \
+\cb3     \cf7 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 tb_buy\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 na\cf4 \strokec4 )\cb1 \
+\cb3     \cf7 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 tb_sell\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 na\cf4 \strokec4 )\cb1 \
+\cb3     \cb1 \
+\cb3     \cf7 \strokec7 var\cf4 \strokec4  
+\f1\b \cf7 \strokec7 int
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 dir\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\
+\cb3     \cf8 \strokec8 up\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 ta.highest\cf4 \strokec4   (\cf8 \strokec8 len\cf4 \strokec4 )\cb1 \
+\cb3     \cf8 \strokec8 dn\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 ta.lowest\cf4 \strokec4    (\cf8 \strokec8 len\cf4 \strokec4 )\cb1 \
+\cb3     \cf8 \strokec8 pv\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 ta.pivothigh\cf4 \strokec4 (\cf9 \strokec9 volume\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 len\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 len\cf4 \strokec4 )\cb1 \
+\
+\cb3     \cf8 \strokec8 dir\cf4 \strokec4  \cf7 \strokec7 :=\cf4 \strokec4  \cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 >\cf4 \strokec4  \cf8 \strokec8 up\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf10 \strokec10 -1\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 dn\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 dir\cf4 \strokec4 [\cf10 \strokec10 1\cf4 \strokec4 ]\cb1 \
+\
+\cb3     \cf8 \strokec8 atr\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 ta.atr\cf4 \strokec4 (\cf8 \strokec8 len\cf4 \strokec4 )\cb1 \
+\
+\cb3     \cf8 \strokec8 btmP\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4   \cf8 \strokec8 obmode\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf6 \strokec6 "Length"\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  (\cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf8 \strokec8 atr\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]) \cf7 \strokec7 <\cf4 \strokec4  \cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 ?\cf4 \strokec4  \cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 :\cf4 \strokec4  (\cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf8 \strokec8 atr\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]) \cf7 \strokec7 :\cf4 \strokec4  \cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]\cb1 \
+\cb3     \cf8 \strokec8 topP\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4   \cf8 \strokec8 obmode\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf6 \strokec6 "Length"\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  (\cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 +\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf8 \strokec8 atr\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]) \cf7 \strokec7 >\cf4 \strokec4  \cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 ?\cf4 \strokec4  \cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 :\cf4 \strokec4  (\cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ] \cf7 \strokec7 +\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf8 \strokec8 atr\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]) \cf7 \strokec7 :\cf4 \strokec4  \cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]\cb1 \
+\
+\cb3     \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 pv\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 dir\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf10 \strokec10 1\cf4 \cb1 \strokec4 \
+\cb3             \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 num_buy\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 () \cf7 \strokec7 >=\cf4 \strokec4  \cf8 \strokec8 input_limit\cf4 \cb1 \strokec4 \
+\cb3                 \cf8 \strokec8 num_buy\cf4 \strokec4 .\cf11 \strokec11 shift\cf4 \strokec4 ()\cb1 \
+\cb3                 \cf8 \strokec8 price_buy\cf4 \strokec4 .\cf11 \strokec11 shift\cf4 \strokec4 ()\cb1 \
+\cb3                 \cf8 \strokec8 bt_buy\cf4 \strokec4 .\cf11 \strokec11 shift\cf4 \strokec4 ()\cb1 \
+\cb3                 \cf8 \strokec8 tb_buy\cf4 \strokec4 .\cf11 \strokec11 shift\cf4 \strokec4 ()\cb1 \
+\cb3             \cf8 \strokec8 num_buy\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf5 \strokec5 math.round\cf4 \strokec4 (\cf9 \strokec9 volume\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]))\cb1 \
+\cb3             \cf8 \strokec8 price_buy\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf5 \strokec5 math.avg\cf4 \strokec4 (\cf8 \strokec8 topP\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]))\cb1 \
+\cb3             \cf8 \strokec8 bt_buy\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ])\cb1 \
+\cb3             \cf8 \strokec8 tb_buy\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf8 \strokec8 topP\cf4 \strokec4 )\cb1 \
+\cb3         \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 dir\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf10 \strokec10 -1\cf4 \cb1 \strokec4 \
+\cb3             \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 num_sell\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 () \cf7 \strokec7 >=\cf4 \strokec4  \cf8 \strokec8 input_limit\cf4 \cb1 \strokec4 \
+\cb3                 \cf8 \strokec8 num_sell\cf4 \strokec4 .\cf11 \strokec11 shift\cf4 \strokec4 ()\cb1 \
+\cb3                 \cf8 \strokec8 price_sell\cf4 \strokec4 .\cf11 \strokec11 shift\cf4 \strokec4 ()\cb1 \
+\cb3                 \cf8 \strokec8 bt_sell\cf4 \strokec4 .\cf11 \strokec11 shift\cf4 \strokec4 ()\cb1 \
+\cb3                 \cf8 \strokec8 tb_sell\cf4 \strokec4 .\cf11 \strokec11 shift\cf4 \strokec4 ()\cb1 \
+\cb3             \cf8 \strokec8 num_sell\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf5 \strokec5 math.round\cf4 \strokec4 (\cf9 \strokec9 volume\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]))\cb1 \
+\cb3             \cf8 \strokec8 price_sell\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf5 \strokec5 math.avg\cf4 \strokec4 (\cf8 \strokec8 btmP\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ]))\cb1 \
+\cb3             \cf8 \strokec8 bt_sell\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 len\cf4 \strokec4 ])\cb1 \
+\cb3             \cf8 \strokec8 tb_sell\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf8 \strokec8 btmP\cf4 \strokec4 )\cb1 \
+\
+\cb3     \cf8 \strokec8 buy_size_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 num_buy\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 ()\cb1 \
+\cb3     \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 buy_size_\cf4 \strokec4  \cf7 \strokec7 >\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf9 \strokec9 barstate.isconfirmed\cf4 \cb1 \strokec4 \
+\cb3         
+\f1\b \cf7 \strokec7 int
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 id_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf9 \strokec9 na\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 buy_size_\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\cb3             
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 btm\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 bt_buy\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\cb3             
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 avg\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 price_buy\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\cb3             \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 j\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf8 \strokec8 len\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \cb1 \strokec4 \
+\cb3                 \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 obmiti\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf6 \strokec6 "Close"\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf5 \strokec5 math.min\cf4 \strokec4 (\cf9 \strokec9 close\cf4 \strokec4 [\cf8 \strokec8 j\cf4 \strokec4 ]\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 open\cf4 \strokec4 [\cf8 \strokec8 j\cf4 \strokec4 ]) \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 btm\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 obmiti\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf6 \strokec6 "Wick"\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 j\cf4 \strokec4 ] \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 btm\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 obmiti\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf6 \strokec6 "Avg"\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf9 \strokec9 low\cf4 \strokec4 [\cf8 \strokec8 j\cf4 \strokec4 ] \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 avg\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf9 \strokec9 na\cf4 \cb1 \strokec4 \
+\cb3                     \cf8 \strokec8 id_\cf4 \strokec4  \cf7 \strokec7 :=\cf4 \strokec4  \cf8 \strokec8 i\cf4 \cb1 \strokec4 \
+\cb3                     \cf7 \strokec7 break\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 if\cf4 \strokec4  \cf7 \strokec7 not\cf4 \strokec4  \cf5 \strokec5 na\cf4 \strokec4 (\cf8 \strokec8 id_\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 num_buy\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 id_\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 price_buy\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 id_\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 bt_buy\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 id_\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 tb_buy\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 id_\cf4 \strokec4 )\cb1 \
+\
+\cb3     \cf8 \strokec8 sell_size_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 num_sell\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 ()\cb1 \
+\cb3     \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 sell_size_\cf4 \strokec4  \cf7 \strokec7 >\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf9 \strokec9 barstate.isconfirmed\cf4 \cb1 \strokec4 \
+\cb3         
+\f1\b \cf7 \strokec7 int
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 id1_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf9 \strokec9 na\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 sell_size_\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\cb3             
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 top\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 bt_sell\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\cb3             
+\f1\b \cf7 \strokec7 float
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 avg\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 price_sell\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 ) \cb1 \
+\cb3             \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 j\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf8 \strokec8 len\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \cb1 \strokec4 \
+\cb3                 \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 obmiti\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf6 \strokec6 "Close"\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf5 \strokec5 math.max\cf4 \strokec4 (\cf9 \strokec9 close\cf4 \strokec4 [\cf8 \strokec8 j\cf4 \strokec4 ]\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 open\cf4 \strokec4 [\cf8 \strokec8 j\cf4 \strokec4 ]) \cf7 \strokec7 >\cf4 \strokec4  \cf8 \strokec8 top\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 obmiti\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf6 \strokec6 "Wick"\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 j\cf4 \strokec4 ] \cf7 \strokec7 >\cf4 \strokec4  \cf8 \strokec8 top\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf8 \strokec8 obmiti\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf6 \strokec6 "Avg"\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf9 \strokec9 high\cf4 \strokec4 [\cf8 \strokec8 j\cf4 \strokec4 ] \cf7 \strokec7 >\cf4 \strokec4  \cf8 \strokec8 avg\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf9 \strokec9 na\cf4 \cb1 \strokec4 \
+\cb3                     \cf8 \strokec8 id1_\cf4 \strokec4  \cf7 \strokec7 :=\cf4 \strokec4  \cf8 \strokec8 i\cf4 \cb1 \strokec4 \
+\cb3                     \cf7 \strokec7 break\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 if\cf4 \strokec4  \cf7 \strokec7 not\cf4 \strokec4  \cf5 \strokec5 na\cf4 \strokec4 (\cf8 \strokec8 id1_\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 num_sell\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 id1_\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 price_sell\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 id1_\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 bt_sell\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 id1_\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 tb_sell\cf4 \strokec4 .\cf11 \strokec11 remove\cf4 \strokec4 (\cf8 \strokec8 id1_\cf4 \strokec4 )\cb1 \
+\
+\cb3     \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 overlap\cf4 \cb1 \strokec4 \
+\cb3         \cf11 \strokec11 f_overlap\cf4 \strokec4 (\cf8 \strokec8 num_buy\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bt_buy\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tb_buy\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4 )\cb1 \
+\cb3         \cf11 \strokec11 f_overlap\cf4 \strokec4 (\cf8 \strokec8 num_sell\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bt_sell\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tb_sell\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 -1\cf4 \strokec4 )\cb1 \
+\
+\cb3     [\cf8 \strokec8 num_buy\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell\cf4 \strokec4 ]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 //\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf8 \cb3 \strokec8 ntfs\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 14\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb3 \strokec7 var\cf4 \strokec4  
+\f1\b \cf7 \strokec7 string
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 table_text_size\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf9 \strokec9 na\cf4 \cb1 \strokec4 \
+\cf7 \cb3 \strokec7 var\cf4 \strokec4  
+\f1\b \cf7 \strokec7 string
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 table_pos\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf9 \strokec9 na\cf4 \cb1 \strokec4 \
+\
+\cf7 \cb3 \strokec7 if\cf4 \strokec4  \cf9 \strokec9 barstate.islastconfirmedhistory\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3     \cf8 \strokec8 table_text_size\cf4 \strokec4  \cf7 \strokec7 :=\cf4 \strokec4  \cf7 \strokec7 switch\cf4 \strokec4  \cf8 \strokec8 table_text_size_\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Tiny"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 size.tiny\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Small"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 size.small\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Normal"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 size.normal\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Large"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 size.large\cf4 \cb1 \strokec4 \
+\cb3     \cf8 \strokec8 table_pos\cf4 \strokec4  \cf7 \strokec7 :=\cf4 \strokec4  \cf7 \strokec7 switch\cf4 \strokec4  \cf8 \strokec8 table_pos_\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Top Left"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.top_left\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Top Center"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.top_center\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Top Right"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.top_right\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Middle Left"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.middle_left\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Middle Center"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.middle_center\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Middle Right"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.middle_right\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Bottom Left"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.bottom_left\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Bottom Center"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.bottom_center\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Bottom Right"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf9 \strokec9 position.bottom_right\cf4 \cb1 \strokec4 \
+\
+\cb3 [\cf8 \strokec8 num_buy1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell1\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf1\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy2\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy2\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell2\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell2\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf2\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy3\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy3\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell3\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell3\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf3\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy4\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy4\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell4\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell4\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf4\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell5\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf5\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy6\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy6\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell6\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell6\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf6\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy7\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy7\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell7\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell7\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf7\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy8\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy8\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell8\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell8\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf8\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy9\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy9\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell9\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell9\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf9\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy10\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy10\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell10\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell10\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf10\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy11\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy11\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell11\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell11\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf11\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy12\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy12\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell12\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell12\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf12\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy13\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy13\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell13\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell13\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf13\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\cb3 [\cf8 \strokec8 num_buy14\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy14\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell14\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell14\cf4 \strokec4 ] \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 request.security\cf4 \strokec4 (\cf9 \strokec9 syminfo.tickerid\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 tf14\cf7 \strokec7 ,\cf4 \strokec4  \cf11 \strokec11 fnOB_req\cf4 \strokec4 ()\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 calc_bars_count\cf7 \strokec7 =\cf8 \strokec8 input_limit_calc_bars\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb3 \strokec7 var\cf4 \strokec4  \cf8 \strokec8 data\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 matrix.new\cf4 \strokec4 <
+\f1\b \cf7 \strokec7 string
+\f0\b0 \cf4 \strokec4 >(\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf8 \cb3 \strokec8 nrows_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 data\cf4 \strokec4 .\cf11 \strokec11 rows\cf4 \strokec4 ()\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb3 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 nrows_\cf4 \strokec4  \cf7 \strokec7 >=\cf4 \strokec4  \cf10 \strokec10 1\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3     \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 data\cf4 \strokec4 .\cf11 \strokec11 rows\cf4 \strokec4 () \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\cb3         \cf8 \strokec8 data\cf4 \strokec4 .\cf11 \strokec11 remove_row\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf11 \cb3 \strokec11 tfformat\cf4 \strokec4 (\cf8 \strokec8 tf\cf4 \strokec4 ) \cf7 \strokec7 =>\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3     \cf7 \strokec7 if\cf4 \strokec4  \cf5 \strokec5 str.length\cf4 \strokec4 (\cf8 \strokec8 tf\cf4 \strokec4 ) \cf7 \strokec7 >=\cf4 \strokec4  \cf10 \strokec10 1\cf4 \cb1 \strokec4 \
+\cb3         \cf8 \strokec8 sl\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 str.length\cf4 \strokec4 (\cf8 \strokec8 tf\cf4 \strokec4 )\cb1 \
+\cb3         \cf8 \strokec8 ew_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 str.substring\cf4 \strokec4 (\cf8 \strokec8 tf\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 sl\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 sl\cf4 \strokec4 )\cb1 \
+\cb3         \cf7 \strokec7 switch\cf4 \strokec4  \cf8 \strokec8 ew_\cf4 \cb1 \strokec4 \
+\cb3             \cf6 \strokec6 "M"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf5 \strokec5 str.replace\cf4 \strokec4 (\cf8 \strokec8 tf\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "M"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 " MONTH"\cf4 \strokec4 )\cb1 \
+\cb3             \cf6 \strokec6 "W"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf5 \strokec5 str.replace\cf4 \strokec4 (\cf8 \strokec8 tf\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "W"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 " WEEK"\cf4 \strokec4 )\cb1 \
+\cb3             \cf6 \strokec6 "D"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf5 \strokec5 str.replace\cf4 \strokec4 (\cf8 \strokec8 tf\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "D"\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 " DAY"\cf4 \strokec4 )\cb1 \
+\cb3             \cf6 \strokec6 "S"\cf4 \strokec4  \cf7 \strokec7 =>\cf4 \strokec4  \cf8 \strokec8 tf\cf4 \cb1 \strokec4 \
+\cb3             \cf7 \strokec7 =>\cf4 \strokec4  (\cf5 \strokec5 str.tonumber\cf4 \strokec4 (\cf8 \strokec8 tf\cf4 \strokec4 ) \cf7 \strokec7 /\cf4 \strokec4  \cf10 \strokec10 60\cf4 \strokec4  \cf7 \strokec7 >\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf7 \strokec7 not\cf4 \strokec4  \cf5 \strokec5 str.contains\cf4 \strokec4 (\cf5 \strokec5 str.tostring\cf4 \strokec4 (\cf5 \strokec5 str.tonumber\cf4 \strokec4 (\cf8 \strokec8 tf\cf4 \strokec4 ) \cf7 \strokec7 /\cf4 \strokec4  \cf10 \strokec10 60\cf4 \strokec4 )\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "."\cf4 \strokec4 )) \cf7 \strokec7 ?\cf4 \strokec4  (\cf5 \strokec5 str.tostring\cf4 \strokec4 (\cf5 \strokec5 int\cf4 \strokec4 (\cf5 \strokec5 str.tonumber\cf4 \strokec4 (\cf8 \strokec8 tf\cf4 \strokec4 ) \cf7 \strokec7 /\cf4 \strokec4  \cf10 \strokec10 60\cf4 \strokec4 )) \cf7 \strokec7 +\cf4 \strokec4  \cf6 \strokec6 " HR"\cf4 \strokec4 ) \cf7 \strokec7 :\cf4 \strokec4  (\cf8 \strokec8 tf\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf6 \strokec6 " MIN"\cf4 \strokec4 )\cb1 \
+\cb3     \cf7 \strokec7 else\cf4 \cb1 \strokec4 \
+\cb3         \cf6 \strokec6 "Chart"\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf11 \cb3 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell_\cf4 \strokec4 ) \cf7 \strokec7 =>\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3     \cf8 \strokec8 arr1\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf5 \strokec5 array.from\cf4 \strokec4 (\cf11 \strokec11 tfformat\cf4 \strokec4 (\cf8 \strokec8 tf_\cf4 \strokec4 ))\cb1 \
+\cb3     \cf8 \strokec8 sell_size_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 num_sell_\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 ()\cb1 \
+\cb3     \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \cb1 \strokec4 \
+\cb3         \cf8 \strokec8 index_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 sell_size_\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 i\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 index_\cf4 \strokec4  \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 sell_size_\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf8 \strokec8 index_\cf4 \strokec4  \cf7 \strokec7 >=\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\cb3             \cf8 \strokec8 arr1\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf5 \strokec5 str.tostring\cf4 \strokec4 (\cf8 \strokec8 num_sell_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 index_\cf4 \strokec4 )))\cb1 \
+\cb3             \cf8 \strokec8 arr1\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf5 \strokec5 str.tostring\cf4 \strokec4 (\cf5 \strokec5 math.round_to_mintick\cf4 \strokec4 (\cf8 \strokec8 price_sell_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 index_\cf4 \strokec4 ))))\cb1 \
+\cb3         \cf7 \strokec7 else\cf4 \cb1 \strokec4 \
+\cb3             \cf8 \strokec8 arr1\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf6 \strokec6 "-"\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 arr1\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf6 \strokec6 "-"\cf4 \strokec4 )\cb1 \
+\cb3     \cf8 \strokec8 buy_size_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 num_buy_\cf4 \strokec4 .\cf11 \strokec11 size\cf4 \strokec4 ()\cb1 \
+\cb3     \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \cb1 \strokec4 \
+\cb3         \cf8 \strokec8 index_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 buy_size_\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf8 \strokec8 i\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 index_\cf4 \strokec4  \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 buy_size_\cf4 \strokec4  \cf7 \strokec7 and\cf4 \strokec4  \cf8 \strokec8 index_\cf4 \strokec4  \cf7 \strokec7 >=\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\cb3             \cf8 \strokec8 arr1\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf5 \strokec5 str.tostring\cf4 \strokec4 (\cf8 \strokec8 num_buy_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 index_\cf4 \strokec4 )))\cb1 \
+\cb3             \cf8 \strokec8 arr1\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf5 \strokec5 str.tostring\cf4 \strokec4 (\cf5 \strokec5 math.round_to_mintick\cf4 \strokec4 (\cf8 \strokec8 price_buy_\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 index_\cf4 \strokec4 ))))\cb1 \
+\cb3         \cf7 \strokec7 else\cf4 \cb1 \strokec4 \
+\cb3             \cf8 \strokec8 arr1\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf6 \strokec6 "-"\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 arr1\cf4 \strokec4 .\cf11 \strokec11 push\cf4 \strokec4 (\cf6 \strokec6 "-"\cf4 \strokec4 )\cb1 \
+\cb3     \cf8 \strokec8 data\cf4 \strokec4 .\cf11 \strokec11 add_row\cf4 \strokec4 (\cf8 \strokec8 array_id\cf7 \strokec7 =\cf8 \strokec8 arr1\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb3 \strokec7 if\cf4 \strokec4  \cf9 \strokec9 barstate.islast\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell1\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf2\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy2\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy2\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell2\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell2\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf3\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy3\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy3\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell3\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell3\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf4\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy4\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy4\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell4\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell4\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell5\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell5\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf6\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy6\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy6\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell6\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell6\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf7\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy7\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy7\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell7\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell7\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf8\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy8\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy8\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell8\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell8\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf9\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy9\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy9\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell9\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell9\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf10\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy10\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy10\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell10\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell10\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf11\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy11\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy11\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell11\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell11\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf12\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy12\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy12\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell12\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell12\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf13\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy13\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy13\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell13\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell13\cf4 \strokec4 )\cb1 \
+\cb3     \cf11 \strokec11 f_add\cf4 \strokec4 (\cf8 \strokec8 tf14\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_buy14\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_buy14\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 num_sell14\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 price_sell14\cf4 \strokec4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 //\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb3 \strokec7 var\cf4 \strokec4  
+\f1\b \cf7 \strokec7 table
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 t\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf9 \strokec9 na\cf4 \cb1 \strokec4 \
+\
+\cf7 \cb3 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 obshow\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3     \cf7 \strokec7 if\cf4 \strokec4  \cf9 \strokec9 barstate.islastconfirmedhistory\cf4 \cb1 \strokec4 \
+\cb3         \cf8 \strokec8 t\cf4 \strokec4  \cf7 \strokec7 :=\cf4 \strokec4  \cf5 \strokec5 table.new\cf4 \strokec4 (\cf8 \strokec8 table_pos\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf10 \strokec10 2\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 ntfs\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 #020202\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 #757575\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf9 \strokec9 #757575\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4 )\cb1 \
+\
+\cb3         \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 merge_cells\cf4 \strokec4 (\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4 )\cb1 \
+\cb3         \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 cell\cf4 \strokec4 (\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Interval"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_color\cf7 \strokec7 =\cf8 \strokec8 table_text_color\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_size\cf7 \strokec7 =\cf8 \strokec8 table_text_size\cf4 \strokec4 )\cb1 \
+\
+\cb3     \cf7 \strokec7 if\cf4 \strokec4  \cf7 \strokec7 not\cf4 \strokec4  \cf5 \strokec5 na\cf4 \strokec4 (\cf8 \strokec8 t\cf4 \strokec4 )\cb1 \
+\cb3         \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 ntfs\cf4 \cb1 \strokec4 \
+\cb3             \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 j\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf10 \strokec10 2\cf4 \cb1 \strokec4 \
+\cb3                 \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 cell_set_text\cf4 \strokec4 (\cf8 \strokec8 j\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 i\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "+"\cf4 \strokec4 )\cb1 \
+\
+\cb3     \cf2 \strokec2 // Columns\cf4 \cb1 \strokec4 \
+\cb3     \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4    \cb1 \
+\cb3         
+\f1\b \cf7 \strokec7 int
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 scol\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 *\cf4 \strokec4  \cf10 \strokec10 2\cf4 \cb1 \strokec4 \
+\
+\cb3         \cf7 \strokec7 if\cf4 \strokec4  \cf9 \strokec9 barstate.islastconfirmedhistory\cf4 \cb1 \strokec4 \
+\cb3             \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 merge_cells\cf4 \strokec4 (\cf8 \strokec8 scol\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 scol\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 cell\cf4 \strokec4 (\cf8 \strokec8 scol\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  (\cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf6 \strokec6 "SELL"\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf6 \strokec6 "BUY"\cf4 \strokec4 ) \cf7 \strokec7 +\cf4 \strokec4  \cf6 \strokec6 " OB-"\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf5 \strokec5 str.tostring\cf4 \strokec4 (\cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 <\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  (\cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4 ) \cf7 \strokec7 :\cf4 \strokec4  (\cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf8 \strokec8 nobs\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4 ))\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bgcolor\cf7 \strokec7 =\cf9 \strokec9 #020202\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_color\cf7 \strokec7 =\cf8 \strokec8 table_text_color\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_size\cf7 \strokec7 =\cf8 \strokec8 table_text_size\cf4 \strokec4 )\cb1 \
+\
+\cb3             \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 cell\cf4 \strokec4 (\cf8 \strokec8 scol\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Number"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bgcolor\cf7 \strokec7 =\cf9 \strokec9 #020202\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_color\cf7 \strokec7 =\cf8 \strokec8 table_text_color\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_size\cf7 \strokec7 =\cf8 \strokec8 table_text_size\cf4 \strokec4 )\cb1 \
+\cb3             \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 cell\cf4 \strokec4 (\cf8 \strokec8 scol\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf6 \strokec6 "Price"\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bgcolor\cf7 \strokec7 =\cf9 \strokec9 #020202\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_color\cf7 \strokec7 =\cf8 \strokec8 table_text_color\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_size\cf7 \strokec7 =\cf8 \strokec8 table_text_size\cf4 \strokec4 )\cb1 \
+\
+\cb3         \cf2 \strokec2 // Rows\cf4 \cb1 \strokec4 \
+\cb3         \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 data\cf4 \strokec4 .\cf11 \strokec11 rows\cf4 \strokec4 () \cf7 \strokec7 >\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\cb3             \cf7 \strokec7 for\cf4 \strokec4  \cf8 \strokec8 j\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 to\cf4 \strokec4  \cf8 \strokec8 ntfs\cf4 \cb1 \strokec4 \
+\cb3                 
+\f1\b \cf7 \strokec7 color
+\f0\b0 \cf4 \strokec4  \cf8 \strokec8 col_\cf4 \strokec4  \cf7 \strokec7 =\cf4 \strokec4  \cf8 \strokec8 j\cf4 \strokec4  \cf7 \strokec7 %\cf4 \strokec4  \cf10 \strokec10 2\cf4 \strokec4  \cf7 \strokec7 !=\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4  \cf7 \strokec7 ?\cf4 \strokec4  \cf9 \strokec9 #454545\cf4 \strokec4  \cf7 \strokec7 :\cf4 \strokec4  \cf9 \strokec9 #020202\cf4 \cb1 \strokec4 \
+\cb3                 \cf7 \strokec7 if\cf4 \strokec4  \cf8 \strokec8 i\cf4 \strokec4  \cf7 \strokec7 ==\cf4 \strokec4  \cf10 \strokec10 0\cf4 \cb1 \strokec4 \
+\cb3                     \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 cell\cf4 \strokec4 (\cf10 \strokec10 0\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 j\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 data\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 j\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 0\cf4 \strokec4 )\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bgcolor\cf7 \strokec7 =\cf8 \strokec8 col_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_color\cf7 \strokec7 =\cf8 \strokec8 table_text_color\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_size\cf7 \strokec7 =\cf8 \strokec8 table_text_size\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_halign\cf7 \strokec7 =\cf9 \strokec9 text.align_left\cf4 \strokec4 )\cb1 \
+\cb3                 \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 cell\cf4 \strokec4 (\cf8 \strokec8 scol\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 j\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 data\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 j\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 scol\cf4 \strokec4 )\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bgcolor\cf7 \strokec7 =\cf8 \strokec8 col_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_color\cf7 \strokec7 =\cf8 \strokec8 table_text_color\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_size\cf7 \strokec7 =\cf8 \strokec8 table_text_size\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_halign\cf7 \strokec7 =\cf9 \strokec9 text.align_right\cf4 \strokec4 )\cb1 \
+\cb3                 \cf8 \strokec8 t\cf4 \strokec4 .\cf11 \strokec11 cell\cf4 \strokec4 (\cf8 \strokec8 scol\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf8 \strokec8 j\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 data\cf4 \strokec4 .\cf11 \strokec11 get\cf4 \strokec4 (\cf8 \strokec8 j\cf4 \strokec4  \cf7 \strokec7 -\cf4 \strokec4  \cf10 \strokec10 1\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 scol\cf4 \strokec4  \cf7 \strokec7 +\cf4 \strokec4  \cf10 \strokec10 1\cf4 \strokec4 )\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 bgcolor\cf7 \strokec7 =\cf8 \strokec8 col_\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_color\cf7 \strokec7 =\cf8 \strokec8 table_text_color\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_size\cf7 \strokec7 =\cf8 \strokec8 table_text_size\cf7 \strokec7 ,\cf4 \strokec4  \cf8 \strokec8 text_halign\cf7 \strokec7 =\cf9 \strokec9 text.align_right\cf4 \strokec4 )\cb1 \
+}

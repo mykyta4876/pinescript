@@ -1,0 +1,54 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+
+//@version=5
+indicator("EMA_Stoch_BBWP", overlay = true)
+ema1 = ta.ema(close, 21)
+ema2 = ta.ema(close, 55)
+
+i_basisType     = input.string  ( 'SMA',        'Basis Type',                       options=[ 'SMA', 'EMA', 'WMA', 'RMA', 'HMA', 'VWMA' ],                    group = 'BBWP Properties')
+i_bbwpLen       = input.int     ( 13,           'Length',                           minval=1,                                                                 group = 'BBWP Properties')
+i_bbwpLkbk      = input.int     ( 252,          'Lookback',                         minval=1,                                                                 group = 'BBWP Properties')
+
+periodK = input.int(title="K", minval=1, defval=9)
+
+k = ta.stoch(close, high, low, periodK)
+i_priceSrc      = close
+
+f_maType ( _price, _len, _type ) =>
+    switch _type
+        "SMA" => ta.sma ( _price, _len )
+        "EMA" => ta.ema ( _price, _len )
+        "WMA" => ta.wma ( _price, _len )
+        "RMA" => ta.rma ( _price, _len )
+        "HMA" => ta.hma ( _price, _len )
+        => ta.vwma ( _price, _len )
+
+     // Returns moving average determined by _type       
+
+f_bbwp ( _price, _bbwLen, _bbwpLen, _type ) =>
+    float _basis = f_maType ( _price, _bbwLen, _type )
+    float _dev = ta.stdev ( _price, _bbwLen )
+    _bbw = ( _basis + _dev - ( _basis - _dev )) / _basis
+    _bbwSum = 0.0
+    _len = bar_index < _bbwpLen ? bar_index : _bbwpLen
+    for _i = 1 to _len by 1
+        _bbwSum += ( _bbw[_i] > _bbw ? 0 : 1 )
+        _bbwSum
+    _return = bar_index >= _bbwLen ? ( _bbwSum / _len) * 100 : na
+    _return
+
+     // Returns Bollinger Band Width Percentile
+
+bbwp        = f_bbwp ( i_priceSrc, i_bbwpLen, i_bbwpLkbk, i_basisType )
+
+plot(ema1, color=color.green, style=plot.style_line, linewidth=2, title='ema1')
+plot(ema2, color=color.orange, style=plot.style_line, linewidth=2, title='ema2')
+
+longCondition = ta.crossover(ema1, ema2) and bbwp < 40 and k >= k[1]
+shortCondition = ta.crossunder(ema1, ema2) and bbwp < 40 and k <= k[1]
+
+alertcondition(longCondition, title="BBWP Long", message="BBWP Long") 
+alertcondition(shortCondition, title="BBWP Short", message="BBWP Short")
+
+plotshape(longCondition ? low : na, title="Buy", text="Buy", location=location.absolute, style=shape.labelup, size=size.tiny, color=color.green, textcolor=color.white, transp=0)
+plotshape(shortCondition ? high : na, title="Sell", text="Sell", location=location.absolute, style=shape.labeldown, size=size.tiny, color=color.red, textcolor=color.white, transp=0)

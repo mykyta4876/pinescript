@@ -1,0 +1,505 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © TheMacroStrategist
+
+//@version=5
+
+// # ========================================================================= #
+// #                   |   Indicator  |
+// # ========================================================================= #
+
+SCRIPT_NAME = "TradingRangeTable"
+
+indicator(
+ title                = SCRIPT_NAME,
+ shorttitle           = SCRIPT_NAME,
+ overlay              = true,
+ max_lines_count      = 500,
+ max_labels_count     = 500,
+ max_boxes_count      = 500 
+ )
+// # ========================================================================= #
+// #                   |   Indicator  |
+// # ========================================================================= #
+
+// # ========================================================================= #
+// #                   |   Inputs  |
+// # ========================================================================= #
+
+i_table_chris_position = input.string(defval = "Top Right", title = "Big Table Position", options=["Top Right", "Middle Right", "Bottom Right", "Top Left", "Middle Left", "Bottom Left", "Middle Center", "Top Center", "Bottom Center"], group = "Table Positions")
+i_table_chris2_position = input.string(defval = "Top Left", title = "Big Table Position", options=["Top Right", "Middle Right", "Bottom Right", "Top Left", "Middle Left", "Bottom Left", "Middle Center", "Top Center", "Bottom Center"], group = "Table Positions")
+table_bg_color = input.color(defval = color.white, title = "Table Background Color", group = "Table")
+table_border_color = input.color(defval = color.black, title = "Table Borders Color", group = "Table") 
+table_border_width = input.int(defval = 1, title = "Table Borders Width", group = "Table") 
+table_frame_color = input.color(defval = color.black, title = "Table Frame Color", group = "Table")
+table_frame_width = input.int(defval = 3, title = "Table Frame Width", group = "Table") 
+
+ticker_count = input.int(defval = 10, title = "Ticker Count", group = "Table") 
+
+sec1 = input.symbol(defval = "SPY", title = "Ticker 1", group = "Tickers")
+sec2 = input.symbol(defval = "QQQ", title = "Ticker 2", group = "Tickers")
+sec3 = input.symbol(defval = "IWM", title = "Ticker 3", group = "Tickers")
+sec4 = input.symbol(defval = "TLT", title = "Ticker 4", group = "Tickers")
+sec5 = input.symbol(defval = "SLV", title = "Ticker 5", group = "Tickers")
+sec6 = input.symbol(defval = "GLD", title = "Ticker 6", group = "Tickers")
+sec7 = input.symbol(defval = "USO", title = "Ticker 7", group = "Tickers")
+sec8 = input.symbol(defval = "VIX", title = "Ticker 8", group = "Tickers")
+sec9 = input.symbol(defval = "EURUSD", title = "Ticker 9", group = "Tickers")
+sec10 = input.symbol(defval = "USDJPY", title = "Ticker 10", group = "Tickers")
+sec11 = input.symbol(defval = "USDJPY", title = "Ticker 11", group = "Tickers")
+sec12 = input.symbol(defval = "USDJPY", title = "Ticker 12", group = "Tickers")
+sec13 = input.symbol(defval = "USDJPY", title = "Ticker 13", group = "Tickers")
+
+kc_length = input.int(20, minval=1, group = "KC")
+kc_mult = input.float(2.0, "Multiplier", group = "KC")
+kc_src = input.source(close, title="Source", group = "KC")
+kc_exp = input.bool(true, "Use Exponential MA", group = "KC")
+kc_BandsStyle = input.string("Average True Range", options = ["Average True Range", "True Range", "Range"], title="Bands Style", group = "KC")
+kc_atrlength = input.int(10, "ATR Length", group = "KC")
+
+zscore_period = input.int(20, minval=1, title = "ZScore Period", group = "ZScore")
+
+// # ========================================================================= #
+// #                   |   Inputs  |
+// # ========================================================================= #
+
+// # ========================================================================= #
+// #                   |   General  |
+// # ========================================================================= #
+
+// Define a function that returns the full name based on the symbol
+getFullName(symbol) =>
+    if symbol == "SPY"
+        "S&P 500"
+    else if symbol == "NDX"
+        "Nasdaq 100"
+    else if symbol == "DJI"
+        "Dow Jones Industrial Average"
+    else if symbol == "RUT"
+        "Russell 2000"
+    else
+        "Unknown Symbol"
+
+f_security(_sym, _res, _src) => 
+    request.security(_sym, _res, _src[1], barmerge.gaps_off, barmerge.lookahead_on)
+
+// # ========================================================================= #
+// #                   |   Calculations  |
+// # ========================================================================= #
+
+esma(source, length)=>
+    s = ta.sma(source, length)
+    e = ta.ema(source, length)
+    kc_exp ? e : s
+
+adx_len = input(14)
+adx_th = input(20)
+
+f_adx_dmi_p(_close, _high, _low, len, th) =>
+    TrueRange = math.max(math.max(_high-_low, math.abs(_high-nz(_close[1]))), math.abs(_low-nz(_close[1])))
+    DirectionalMovementPlus = _high-nz(_high[1]) > nz(_low[1])-_low ? math.max(_high-nz(_high[1]), 0): 0
+    DirectionalMovementMinus = nz(_low[1])-_low > _high-nz(_high[1]) ? math.max(nz(_low[1])-_low, 0): 0
+
+    SmoothedTrueRange = 0.0
+    SmoothedTrueRange := nz(SmoothedTrueRange[1]) - (nz(SmoothedTrueRange[1])/len) + TrueRange
+
+    SmoothedDirectionalMovementPlus = 0.0
+    SmoothedDirectionalMovementPlus := nz(SmoothedDirectionalMovementPlus[1]) - (nz(SmoothedDirectionalMovementPlus[1])/len) + DirectionalMovementPlus
+
+    SmoothedDirectionalMovementMinus = 0.0
+    SmoothedDirectionalMovementMinus := nz(SmoothedDirectionalMovementMinus[1]) - (nz(SmoothedDirectionalMovementMinus[1])/len) + DirectionalMovementMinus
+
+    DIPlus = SmoothedDirectionalMovementPlus / SmoothedTrueRange * 100
+    DIMinus = SmoothedDirectionalMovementMinus / SmoothedTrueRange * 100
+
+    color _color = color.gray
+    if DIPlus >= 20 and DIPlus < 25
+        _color := color.rgb(1, 255, 132)
+    else if DIPlus >= 25
+        _color := color.green
+    else if DIMinus >= 20 and DIMinus < 25
+        _color := color.rgb(255, 20, 20)
+    else if DIMinus >= 25
+        _color := color.rgb(150, 0, 0)
+
+    _color
+
+x = 0
+
+[CLOSE_1, HIGH_1, LOW_1, TR_1, ATR_1, RMA_1, STDEV1, SMA1, FNAME1, Color1]         = request.security(sec1, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_2, HIGH_2, LOW_2, TR_2, ATR_2, RMA_2, STDEV2, SMA2, FNAME2, Color2]         = request.security(sec2, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_3, HIGH_3, LOW_3, TR_3, ATR_3, RMA_3, STDEV3, SMA3, FNAME3, Color3]         = request.security(sec3 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_4, HIGH_4, LOW_4, TR_4, ATR_4, RMA_4, STDEV4, SMA4, FNAME4, Color4]         = request.security(sec4 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_5, HIGH_5, LOW_5, TR_5, ATR_5, RMA_5, STDEV5, SMA5, FNAME5, Color5]         = request.security(sec5 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_6, HIGH_6, LOW_6, TR_6, ATR_6, RMA_6, STDEV6, SMA6, FNAME6, Color6]         = request.security(sec6 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_7, HIGH_7, LOW_7, TR_7, ATR_7, RMA_7, STDEV7, SMA7, FNAME7, Color7]         = request.security(sec7 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_8, HIGH_8, LOW_8, TR_8, ATR_8, RMA_8, STDEV8, SMA8, FNAME8, Color8]         = request.security(sec8 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_9, HIGH_9, LOW_9, TR_9, ATR_9, RMA_9, STDEV9, SMA9, FNAME9, Color9]         = request.security(sec9 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_10, HIGH_10, LOW_10, TR_10, ATR_10, RMA_10, STDEV10, SMA10, FNAME10, Color10] = request.security(sec10, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_11, HIGH_11, LOW_11, TR_11, ATR_11, RMA_11, STDEV11, SMA11, FNAME11, Color11] = request.security(sec11, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_12, HIGH_12, LOW_12, TR_12, ATR_12, RMA_12, STDEV12, SMA12, FNAME12, Color12] = request.security(sec12, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE_13, HIGH_13, LOW_13, TR_13, ATR_13, RMA_13, STDEV13, SMA13, FNAME13, Color13] = request.security(sec13, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x], syminfo.description, f_adx_dmi_p(close, high, low, adx_len, adx_th)], barmerge.gaps_off, barmerge.lookahead_on)
+
+pip() => syminfo.mintick * (syminfo.type == "forex" ? 10 : 1)
+
+f_kc_symbol(_src, _high, _low, _tr, _atr, _rma) =>
+
+    kc_ma = esma(_src, kc_length)
+
+    kc_rangema = kc_BandsStyle == "True Range" ? _tr : kc_BandsStyle == "Average True Range" ? _atr : _rma
+    upper = kc_ma + (kc_rangema * kc_mult)// * pip())
+    lower = kc_ma - (kc_rangema * kc_mult)// * pip())
+
+    [upper, lower]
+
+[UPPER_1, LOWER_1] = f_kc_symbol(CLOSE_1, HIGH_1, LOW_1, TR_1, ATR_1, RMA_1)
+[UPPER_2, LOWER_2] = f_kc_symbol(CLOSE_2, HIGH_2, LOW_2, TR_2, ATR_2, RMA_2)
+[UPPER_3, LOWER_3] = f_kc_symbol(CLOSE_3, HIGH_3, LOW_3, TR_3, ATR_3, RMA_3)
+[UPPER_4, LOWER_4] = f_kc_symbol(CLOSE_4, HIGH_4, LOW_4, TR_4, ATR_4, RMA_4)
+[UPPER_5, LOWER_5] = f_kc_symbol(CLOSE_5, HIGH_5, LOW_5, TR_5, ATR_5, RMA_5)
+[UPPER_6, LOWER_6] = f_kc_symbol(CLOSE_6, HIGH_6, LOW_6, TR_6, ATR_6, RMA_6)
+[UPPER_7, LOWER_7] = f_kc_symbol(CLOSE_7, HIGH_7, LOW_7, TR_7, ATR_7, RMA_7)
+[UPPER_8, LOWER_8] = f_kc_symbol(CLOSE_8, HIGH_8, LOW_8, TR_8, ATR_8, RMA_8)
+[UPPER_9, LOWER_9] = f_kc_symbol(CLOSE_9, HIGH_9, LOW_9, TR_9, ATR_9, RMA_9)
+[UPPER_10, LOWER_10] = f_kc_symbol(CLOSE_10, HIGH_10, LOW_10, TR_10, ATR_10, RMA_10)
+[UPPER_11, LOWER_11] = f_kc_symbol(CLOSE_11, HIGH_11, LOW_11, TR_11, ATR_11, RMA_11)
+[UPPER_12, LOWER_12] = f_kc_symbol(CLOSE_12, HIGH_12, LOW_12, TR_12, ATR_12, RMA_12)
+[UPPER_13, LOWER_13] = f_kc_symbol(CLOSE_13, HIGH_13, LOW_13, TR_13, ATR_13, RMA_13)
+
+f_zscore_symbol(_close, _stdev, _sma) =>
+
+    nRes = (_close - _sma) / _stdev
+
+ZSCORE_1 = f_zscore_symbol(CLOSE_1, STDEV1, SMA1)
+ZSCORE_2 = f_zscore_symbol(CLOSE_2, STDEV2, SMA2)
+ZSCORE_3 = f_zscore_symbol(CLOSE_3, STDEV3, SMA3)
+ZSCORE_4 = f_zscore_symbol(CLOSE_4, STDEV4, SMA4)
+ZSCORE_5 = f_zscore_symbol(CLOSE_5, STDEV5, SMA5)
+ZSCORE_6 = f_zscore_symbol(CLOSE_6, STDEV6, SMA6)
+ZSCORE_7 = f_zscore_symbol(CLOSE_7, STDEV7, SMA7)
+ZSCORE_8 = f_zscore_symbol(CLOSE_8, STDEV8, SMA8)
+ZSCORE_9 = f_zscore_symbol(CLOSE_9, STDEV9, SMA9)
+ZSCORE_10 = f_zscore_symbol(CLOSE_10, STDEV10, SMA10)
+ZSCORE_11 = f_zscore_symbol(CLOSE_11, STDEV11, SMA11)
+ZSCORE_12 = f_zscore_symbol(CLOSE_12, STDEV12, SMA12)
+ZSCORE_13 = f_zscore_symbol(CLOSE_13, STDEV13, SMA13)
+
+
+[CLOSE4H_1, STDEV4H_1, SMA4H_1]         = request.security(sec1, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_2, STDEV4H_2, SMA4H_2]         = request.security(sec2, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_3, STDEV4H_3, SMA4H_3]         = request.security(sec3, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_4, STDEV4H_4, SMA4H_4]         = request.security(sec4, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_5, STDEV4H_5, SMA4H_5]         = request.security(sec5, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_6, STDEV4H_6, SMA4H_6]         = request.security(sec6, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_7, STDEV4H_7, SMA4H_7]         = request.security(sec7, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_8, STDEV4H_8, SMA4H_8]         = request.security(sec8, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_9, STDEV4H_9, SMA4H_9]         = request.security(sec9, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_10, STDEV4H_10, SMA4H_10]         = request.security(sec10, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_11, STDEV4H_11, SMA4H_11]         = request.security(sec11, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_12, STDEV4H_12, SMA4H_12]         = request.security(sec12, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE4H_13, STDEV4H_13, SMA4H_13]         = request.security(sec13, "240", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+
+[CLOSE1D_1, STDEV1D_1, SMA1D_1]         = request.security(sec1, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_2, STDEV1D_2, SMA1D_2]         = request.security(sec2, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_3, STDEV1D_3, SMA1D_3]         = request.security(sec3, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_4, STDEV1D_4, SMA1D_4]         = request.security(sec4, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_5, STDEV1D_5, SMA1D_5]         = request.security(sec5, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_6, STDEV1D_6, SMA1D_6]         = request.security(sec6, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_7, STDEV1D_7, SMA1D_7]         = request.security(sec7, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_8, STDEV1D_8, SMA1D_8]         = request.security(sec8, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_9, STDEV1D_9, SMA1D_9]         = request.security(sec9, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_10, STDEV1D_10, SMA1D_10]         = request.security(sec10, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_11, STDEV1D_11, SMA1D_11]         = request.security(sec11, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_12, STDEV1D_12, SMA1D_12]         = request.security(sec12, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+[CLOSE1D_13, STDEV1D_13, SMA1D_13]         = request.security(sec13, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+
+TACVOL4H_1 = f_zscore_symbol(CLOSE4H_1, STDEV4H_1, SMA4H_1)
+TACVOL4H_2 = f_zscore_symbol(CLOSE4H_2, STDEV4H_2, SMA4H_2)
+TACVOL4H_3 = f_zscore_symbol(CLOSE4H_3, STDEV4H_3, SMA4H_3)
+TACVOL4H_4 = f_zscore_symbol(CLOSE4H_4, STDEV4H_4, SMA4H_4)
+TACVOL4H_5 = f_zscore_symbol(CLOSE4H_5, STDEV4H_5, SMA4H_5)
+TACVOL4H_6 = f_zscore_symbol(CLOSE4H_6, STDEV4H_6, SMA4H_6)
+TACVOL4H_7 = f_zscore_symbol(CLOSE4H_7, STDEV4H_7, SMA4H_7)
+TACVOL4H_8 = f_zscore_symbol(CLOSE4H_8, STDEV4H_8, SMA4H_8)
+TACVOL4H_9 = f_zscore_symbol(CLOSE4H_9, STDEV4H_9, SMA4H_9)
+TACVOL4H_10 = f_zscore_symbol(CLOSE4H_10, STDEV4H_10, SMA4H_10)
+TACVOL4H_11 = f_zscore_symbol(CLOSE4H_11, STDEV4H_11, SMA4H_11)
+TACVOL4H_12 = f_zscore_symbol(CLOSE4H_12, STDEV4H_12, SMA4H_12)
+TACVOL4H_13 = f_zscore_symbol(CLOSE4H_13, STDEV4H_13, SMA4H_13)
+
+TACVOL1D_1 = f_zscore_symbol(CLOSE1D_1, STDEV1D_1, SMA1D_1)
+TACVOL1D_2 = f_zscore_symbol(CLOSE1D_2, STDEV1D_2, SMA1D_2)
+TACVOL1D_3 = f_zscore_symbol(CLOSE1D_3, STDEV1D_3, SMA1D_3)
+TACVOL1D_4 = f_zscore_symbol(CLOSE1D_4, STDEV1D_4, SMA1D_4)
+TACVOL1D_5 = f_zscore_symbol(CLOSE1D_5, STDEV1D_5, SMA1D_5)
+TACVOL1D_6 = f_zscore_symbol(CLOSE1D_6, STDEV1D_6, SMA1D_6)
+TACVOL1D_7 = f_zscore_symbol(CLOSE1D_7, STDEV1D_7, SMA1D_7)
+TACVOL1D_8 = f_zscore_symbol(CLOSE1D_8, STDEV1D_8, SMA1D_8)
+TACVOL1D_9 = f_zscore_symbol(CLOSE1D_9, STDEV1D_9, SMA1D_9)
+TACVOL1D_10 = f_zscore_symbol(CLOSE1D_10, STDEV1D_10, SMA1D_10)
+TACVOL1D_11 = f_zscore_symbol(CLOSE1D_11, STDEV1D_11, SMA1D_11)
+TACVOL1D_12 = f_zscore_symbol(CLOSE1D_12, STDEV1D_12, SMA1D_12)
+TACVOL1D_13 = f_zscore_symbol(CLOSE1D_13, STDEV1D_13, SMA1D_13)
+
+f_get_forecolor(bg_color) =>
+    color lightcolor = color.rgb(240, 240, 240, 0)
+    color darkcolor = color.rgb(0, 0, 0, 0)
+
+    color _color = darkcolor
+    if bg_color == color.gray
+        _color := darkcolor
+    else if bg_color == color.rgb(1, 255, 132)
+        _color := darkcolor
+    else if bg_color == color.green
+        _color := darkcolor
+    else if bg_color == color.rgb(255, 20, 20)
+        _color := lightcolor
+    else if bg_color == color.rgb(150, 0, 0)
+        _color := lightcolor
+
+    _color
+
+// # ========================================================================= #
+// #                   |   Display  |
+// # ========================================================================= #
+
+table_chris_position = switch i_table_chris_position
+    "Top Right" => position.top_right
+    "Middle Right" => position.middle_right
+    "Bottom Right" => position.bottom_right
+    "Top Left" => position.top_left
+    "Middle Left" => position.middle_left
+    "Bottom Left" => position.bottom_left
+    "Middle Center" => position.middle_center
+    "Top Center" => position.top_center
+    "Bottom Center" => position.bottom_center
+
+var chris_table = table.new(
+ position       = table_chris_position,
+ columns        = 9,
+ rows           = 15,
+ bgcolor        = table_bg_color,
+ frame_color    = table_frame_color,
+ frame_width    = table_frame_width,
+ border_color   = table_border_color,
+ border_width   = table_border_width 
+ )
+
+if barstate.islast
+
+    // Headers
+    table.cell(table_id = chris_table, column = 0, row = 0, text = "TICKER")
+    table.cell(table_id = chris_table, column = 1, row = 0, text = "NAME")
+    table.cell(table_id = chris_table, column = 2, row = 0, text = "Price")
+    table.cell(table_id = chris_table, column = 3, row = 0, text = "TOP RANGE")
+    table.cell(table_id = chris_table, column = 4, row = 0, text = "BOTTOM RANGE")
+    table.cell(table_id = chris_table, column = 5, row = 0, text = "Z-SCORE")
+    table.cell(table_id = chris_table, column = 6, row = 0, text = "TACVOL")
+    table.cell(table_id = chris_table, column = 7, row = 0, text = "up (%)")
+    table.cell(table_id = chris_table, column = 8, row = 0, text = "down (%)")
+
+    // Tickers
+    table.cell(table_id = chris_table, column = 0, row = 1, text = sec1, bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 0, row = 2, text = sec2, bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 0, row = 3, text = sec3, bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 0, row = 4, text = sec4, bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 0, row = 5, text = sec5, bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 0, row = 6, text = sec6, bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 0, row = 7, text = sec7, bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 0, row = 8, text = sec8, bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 0, row = 9, text = sec9, bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 0, row = 10, text = sec10, bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 0, row = 11, text = sec11, bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 0, row = 12, text = sec12, bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 0, row = 13, text = sec13, bgcolor = Color13, text_color = f_get_forecolor(Color13))
+
+    // Name
+    table.cell(table_id = chris_table, column = 1, row = 1, text = FNAME1, bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 1, row = 2, text = FNAME2, bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 1, row = 3, text = FNAME3, bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 1, row = 4, text = FNAME4, bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 1, row = 5, text = FNAME5, bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 1, row = 6, text = FNAME6, bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 1, row = 7, text = FNAME7, bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 1, row = 8, text = FNAME8, bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 1, row = 9, text = FNAME9, bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 1, row = 10, text = FNAME10, bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 1, row = 11, text = FNAME11, bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 1, row = 12, text = FNAME12, bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 1, row = 13, text = FNAME13, bgcolor = Color13, text_color = f_get_forecolor(Color13))
+
+    // Price
+    table.cell(table_id = chris_table, column = 2, row = 1, text = str.tostring(CLOSE_1, "#.##"), bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 2, row = 2, text = str.tostring(CLOSE_2, "#.##"), bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 2, row = 3, text = str.tostring(CLOSE_3, "#.##"), bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 2, row = 4, text = str.tostring(CLOSE_4, "#.##"), bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 2, row = 5, text = str.tostring(CLOSE_5, "#.##"), bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 2, row = 6, text = str.tostring(CLOSE_6, "#.##"), bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 2, row = 7, text = str.tostring(CLOSE_7, "#.##"), bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 2, row = 8, text = str.tostring(CLOSE_8, "#.##"), bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 2, row = 9, text = str.tostring(CLOSE_9, "#.##"), bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 2, row = 10, text = str.tostring(CLOSE_10, "#.##"), bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 2, row = 11, text = str.tostring(CLOSE_11, "#.##"), bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 2, row = 12, text = str.tostring(CLOSE_12, "#.##"), bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 2, row = 13, text = str.tostring(CLOSE_13, "#.##"), bgcolor = Color13, text_color = f_get_forecolor(Color13))
+
+    // Top Range
+    table.cell(table_id = chris_table, column = 3, row = 1, text = str.tostring(UPPER_1, "#.##"), bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 3, row = 2, text = str.tostring(UPPER_2, "#.##"), bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 3, row = 3, text = str.tostring(UPPER_3, "#.##"), bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 3, row = 4, text = str.tostring(UPPER_4, "#.##"), bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 3, row = 5, text = str.tostring(UPPER_5, "#.##"), bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 3, row = 6, text = str.tostring(UPPER_6, "#.##"), bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 3, row = 7, text = str.tostring(UPPER_7, "#.##"), bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 3, row = 8, text = str.tostring(UPPER_8, "#.##"), bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 3, row = 9, text = str.tostring(UPPER_9, "#.##"), bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 3, row = 10, text = str.tostring(UPPER_10, "#.##"), bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 3, row = 11, text = str.tostring(UPPER_11, "#.##"), bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 3, row = 12, text = str.tostring(UPPER_12, "#.##"), bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 3, row = 13, text = str.tostring(UPPER_13, "#.##"), bgcolor = Color13, text_color = f_get_forecolor(Color13))
+
+    // Bottom Range
+    table.cell(table_id = chris_table, column = 4, row = 1, text = str.tostring(LOWER_1, "#.##"), bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 4, row = 2, text = str.tostring(LOWER_2, "#.##"), bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 4, row = 3, text = str.tostring(LOWER_3, "#.##"), bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 4, row = 4, text = str.tostring(LOWER_4, "#.##"), bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 4, row = 5, text = str.tostring(LOWER_5, "#.##"), bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 4, row = 6, text = str.tostring(LOWER_6, "#.##"), bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 4, row = 7, text = str.tostring(LOWER_7, "#.##"), bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 4, row = 8, text = str.tostring(LOWER_8, "#.##"), bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 4, row = 9, text = str.tostring(LOWER_9, "#.##"), bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 4, row = 10, text = str.tostring(LOWER_10, "#.##"), bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 4, row = 11, text = str.tostring(LOWER_11, "#.##"), bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 4, row = 12, text = str.tostring(LOWER_12, "#.##"), bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 4, row = 13, text = str.tostring(LOWER_13, "#.##"), bgcolor = Color13, text_color = f_get_forecolor(Color13))
+
+    // Z-Score
+    table.cell(table_id = chris_table, column = 5, row = 1, text = str.tostring(ZSCORE_1, "#.##"), bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 5, row = 2, text = str.tostring(ZSCORE_2, "#.##"), bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 5, row = 3, text = str.tostring(ZSCORE_3, "#.##"), bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 5, row = 4, text = str.tostring(ZSCORE_4, "#.##"), bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 5, row = 5, text = str.tostring(ZSCORE_5, "#.##"), bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 5, row = 6, text = str.tostring(ZSCORE_6, "#.##"), bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 5, row = 7, text = str.tostring(ZSCORE_7, "#.##"), bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 5, row = 8, text = str.tostring(ZSCORE_8, "#.##"), bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 5, row = 9, text = str.tostring(ZSCORE_9, "#.##"), bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 5, row = 10, text = str.tostring(ZSCORE_10, "#.##"), bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 5, row = 11, text = str.tostring(ZSCORE_11, "#.##"), bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 5, row = 12, text = str.tostring(ZSCORE_12, "#.##"), bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 5, row = 13, text = str.tostring(ZSCORE_13, "#.##"), bgcolor = Color13, text_color = f_get_forecolor(Color13))
+
+    // TACVOL-Score
+    table.cell(table_id = chris_table, column = 6, row = 1, text = str.tostring((TACVOL4H_1 + TACVOL1D_1)/2, "#.##"), bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 6, row = 2, text = str.tostring((TACVOL4H_2 + TACVOL1D_2)/2, "#.##"), bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 6, row = 3, text = str.tostring((TACVOL4H_3 + TACVOL1D_3)/2, "#.##"), bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 6, row = 4, text = str.tostring((TACVOL4H_4 + TACVOL1D_4)/2, "#.##"), bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 6, row = 5, text = str.tostring((TACVOL4H_5 + TACVOL1D_5)/2, "#.##"), bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 6, row = 6, text = str.tostring((TACVOL4H_6 + TACVOL1D_6)/2, "#.##"), bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 6, row = 7, text = str.tostring((TACVOL4H_7 + TACVOL1D_7)/2, "#.##"), bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 6, row = 8, text = str.tostring((TACVOL4H_8 + TACVOL1D_8)/2, "#.##"), bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 6, row = 9, text = str.tostring((TACVOL4H_9 + TACVOL1D_9)/2, "#.##"), bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 6, row = 10, text = str.tostring((TACVOL4H_10 + TACVOL1D_10)/2, "#.##"), bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 6, row = 11, text = str.tostring((TACVOL4H_11 + TACVOL1D_11)/2, "#.##"), bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 6, row = 12, text = str.tostring((TACVOL4H_12 + TACVOL1D_12)/2, "#.##"), bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 6, row = 13, text = str.tostring((TACVOL4H_13 + TACVOL1D_13)/2, "#.##"), bgcolor = Color13, text_color = f_get_forecolor(Color13))
+
+    // up
+    table.cell(table_id = chris_table, column = 7, row = 1, text = str.tostring((UPPER_1 - CLOSE_1) * 100 / (CLOSE_1), "#.##"), bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 7, row = 2, text = str.tostring((UPPER_2 - CLOSE_2) * 100 / (CLOSE_2), "#.##"), bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 7, row = 3, text = str.tostring((UPPER_3 - CLOSE_3) * 100 / (CLOSE_3), "#.##"), bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 7, row = 4, text = str.tostring((UPPER_4 - CLOSE_4) * 100 / (CLOSE_4), "#.##"), bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 7, row = 5, text = str.tostring((UPPER_5 - CLOSE_5) * 100 / (CLOSE_5), "#.##"), bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 7, row = 6, text = str.tostring((UPPER_6 - CLOSE_6) * 100 / (CLOSE_6), "#.##"), bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 7, row = 7, text = str.tostring((UPPER_7 - CLOSE_7) * 100 / (CLOSE_7), "#.##"), bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 7, row = 8, text = str.tostring((UPPER_8 - CLOSE_8) * 100 / (CLOSE_8), "#.##"), bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 7, row = 9, text = str.tostring((UPPER_9 - CLOSE_9) * 100 / (CLOSE_9), "#.##"), bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 7, row = 10, text = str.tostring((UPPER_10 - CLOSE_10) * 100 / (CLOSE_10), "#.##"), bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 7, row = 11, text = str.tostring((UPPER_11 - CLOSE_11) * 100 / (CLOSE_11), "#.##"), bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 7, row = 12, text = str.tostring((UPPER_12 - CLOSE_12) * 100 / (CLOSE_12), "#.##"), bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 7, row = 13, text = str.tostring((UPPER_13 - CLOSE_13) * 100 / (CLOSE_13), "#.##"), bgcolor = Color13, text_color = f_get_forecolor(Color13))
+
+    // down
+    table.cell(table_id = chris_table, column = 8, row = 1, text = str.tostring((CLOSE_1 - LOWER_1) * 100 / (CLOSE_1), "#.##"), bgcolor = Color1, text_color = f_get_forecolor(Color1))
+    table.cell(table_id = chris_table, column = 8, row = 2, text = str.tostring((CLOSE_2 - LOWER_2) * 100 / (CLOSE_2), "#.##"), bgcolor = Color2, text_color = f_get_forecolor(Color2))
+    table.cell(table_id = chris_table, column = 8, row = 3, text = str.tostring((CLOSE_3 - LOWER_3) * 100 / (CLOSE_3), "#.##"), bgcolor = Color3, text_color = f_get_forecolor(Color3))
+    table.cell(table_id = chris_table, column = 8, row = 4, text = str.tostring((CLOSE_4 - LOWER_4) * 100 / (CLOSE_4), "#.##"), bgcolor = Color4, text_color = f_get_forecolor(Color4))
+    table.cell(table_id = chris_table, column = 8, row = 5, text = str.tostring((CLOSE_5 - LOWER_5) * 100 / (CLOSE_5), "#.##"), bgcolor = Color5, text_color = f_get_forecolor(Color5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 8, row = 6, text = str.tostring((CLOSE_6 - LOWER_6) * 100 / (CLOSE_6), "#.##"), bgcolor = Color6, text_color = f_get_forecolor(Color6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 8, row = 7, text = str.tostring((CLOSE_7 - LOWER_7) * 100 / (CLOSE_7), "#.##"), bgcolor = Color7, text_color = f_get_forecolor(Color7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 8, row = 8, text = str.tostring((CLOSE_8 - LOWER_8) * 100 / (CLOSE_8), "#.##"), bgcolor = Color8, text_color = f_get_forecolor(Color8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 8, row = 9, text = str.tostring((CLOSE_9 - LOWER_9) * 100 / (CLOSE_9), "#.##"), bgcolor = Color9, text_color = f_get_forecolor(Color9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 8, row = 10, text = str.tostring((CLOSE_10 - LOWER_10) * 100 / (CLOSE_10), "#.##"), bgcolor = Color10, text_color = f_get_forecolor(Color10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 8, row = 11, text = str.tostring((CLOSE_11 - LOWER_11) * 100 / (CLOSE_11), "#.##"), bgcolor = Color11, text_color = f_get_forecolor(Color11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 8, row = 12, text = str.tostring((CLOSE_12 - LOWER_12) * 100 / (CLOSE_12), "#.##"), bgcolor = Color12, text_color = f_get_forecolor(Color12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 8, row = 13, text = str.tostring((CLOSE_13 - LOWER_13) * 100 / (CLOSE_13), "#.##"), bgcolor = Color13, text_color = f_get_forecolor(Color13))

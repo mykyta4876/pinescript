@@ -1,0 +1,110 @@
+//@version=4
+study("ADX_Simple v2", shorttitle="ADX_Simple v2", overlay=false)
+
+adxperiod = input(17, title="ADX Period")
+deviation1 = 1.0//input(1.0, title="Deviation #1")
+deviation2 = 2.0//input(2.0, title="Deviation #2")
+
+small_adxlen = input(14, title="Small ADX Period")
+big_adxlen = input(24, title="Big ADX Period")
+
+//small_mult = input(0.5, title="Small Mult")
+//big_mult = input(0.5, title="Big Mult")
+
+
+
+dirmov(len) =>
+    up = change(high)
+    down = -change(low)
+    plusDM = na(up) ? na : up > down and up > 0 ? up : 0
+    minusDM = na(down) ? na : down > up and down > 0 ? down : 0
+    truerange = rma(tr, len)
+    plus = fixnan(100 * rma(plusDM, len) / truerange)
+    minus = fixnan(100 * rma(minusDM, len) / truerange)
+    [plus, minus]
+
+adx(dilen, adxlen) =>
+    [plus, minus] = dirmov(dilen)
+    sum = plus + minus
+    adx = 100 * rma(abs(plus - minus) / (sum == 0 ? 1 : sum), adxlen)
+    diff = plus - minus
+    [adx, diff]
+
+
+adx_v8(adxlen, dev1, dev2) =>
+    [sig, diff] = adx(adxlen, adxlen)
+    diffema = ema(diff, adxlen)
+    std = stdev(diff, adxlen)
+    bbup1 = diffema + dev1 * std
+    bblo1 = diffema - dev1 * std
+    bbup2 = diffema + dev2 * std
+    bblo2 = diffema - dev2 * std
+    [sig, diff, diffema, std, bbup1, bblo1, bbup2, bblo2]
+
+adx_v9(adxlen, dev1, dev2, small_adx, big_adx, mult1, mult2) =>
+    [small_sig, small_diff, small_diffema, small_std, small_bbup1, small_bblo1, small_bbup2, small_bblo2] = adx_v8(small_adx, dev1, dev2)
+    [big_sig, big_diff, big_diffema, big_std, big_bbup1, big_bblo1, big_bbup2, big_bblo2] = adx_v8(big_adx, dev1, dev2)
+    diff = mult1 * small_diff + mult2 * big_diff
+    diffema = ema(diff, adxlen)
+    std = stdev(diff, adxlen)
+    bbup1 = diffema + dev1 * std
+    bblo1 = diffema - dev1 * std
+    bbup2 = diffema + dev2 * std
+    bblo2 = diffema - dev2 * std
+    [diff, diffema, std, bbup1, bblo1, bbup2, bblo2]
+
+[diff, diffema, std, bbup1, bblo1, bbup2, bblo2] = adx_v9(adxperiod, deviation1, deviation2, small_adxlen, big_adxlen, 1, 1)
+
+positive = 0
+if diffema>0
+    positive := positive + 1
+if bbup1>0
+    positive := positive + 1
+if bblo1>0
+    positive := positive + 1
+if bbup2>0
+    positive := positive + 1
+if bblo2>0
+    positive := positive + 1
+
+negative = 0
+if diffema<0
+    negative := negative + 1
+if bbup1<0
+    negative := negative + 1
+if bblo1<0
+    negative := negative + 1
+if bbup2<0
+    negative := negative + 1
+if bblo2<0
+    negative := negative + 1
+
+
+positive2 = 0
+if diff>diffema
+    positive2 := positive2 + 1
+if diff>bbup1
+    positive2 := positive2 + 1
+if diff>bblo1
+    positive2 := positive2 + 1
+if diff>bbup2
+    positive2 := positive2 + 1
+if diff>bblo2
+    positive2 := positive2 + 1
+
+negative2 = 0
+if diff<diffema
+    negative2 := negative2 + 1
+if diff<bbup1
+    negative2 := negative2 + 1
+if diff<bblo1
+    negative2 := negative2 + 1
+if diff<bbup2
+    negative2 := negative2 + 1
+if diff<bblo2
+    negative2 := negative2 + 1
+
+count = positive + positive2 - negative - negative2
+
+plot(count, color=count >= 0 ? color.lime : color.red, style=plot.style_histogram, title="Count")
+plot(ema(count,adxperiod), color=color.yellow, title="Count EMA")

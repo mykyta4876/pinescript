@@ -1,0 +1,162 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © seriousquang
+
+//@version=5
+indicator("My Levels", overlay = true)
+showfibolabels = input.bool(defval = true, title = "Price Labels")
+
+var extendLeft = input(false, "Extend Left    |    Extend Right", inline = "Extend Lines")
+var extendRight = input(true, "", inline = "Extend Lines")
+var extending = extend.none
+if extendLeft and extendRight
+    extending := extend.both
+if extendLeft and not extendRight
+    extending := extend.left
+if not extendLeft and extendRight
+    extending := extend.right
+    
+enable0 = input.bool(defval = true, title = "Starting Price", inline = "0", group = "Levels")
+level0 = input.float(defval = 0, title = "", minval = 0, inline = "0", group = "Levels")
+color0 = input.color(defval = color.blue, title = "", inline = "0", group = "Levels")
+enable1 = input.bool(defval = true, title = "Level 1", inline = "1", group = "Levels")
+level1 = input.float(defval = 0.083, title = "", minval = 0, inline = "1", group = "Levels")
+color1 = input.color(defval = color.lime, title = "", inline = "1", group = "Levels")
+enable2 = input.bool(defval = true, title = "Level 2", inline = "2", group = "Levels")
+level2 = input.float(defval = 0.166, title = "", minval = 0, inline = "2", group = "Levels")
+color2 = input.color(defval = color.red, title = "", inline = "2", group = "Levels")
+enable3 = input.bool(defval = true, title = "Level 3", inline = "3", group = "Levels")
+level3 = input.float(defval = 0.25, title = "", minval = 0, inline = "3", group = "Levels")
+color3 = input.color(defval = color.orange, title = "", inline = "3", group = "Levels")
+enable4 = input.bool(defval = true, title = "Level 4", inline = "4", group = "Levels")
+level4 = input.float(defval = 0.333, title = "", minval = 0, inline = "4", group = "Levels")
+color4 = input.color(defval = color.teal, title = "", inline = "4", group = "Levels")
+enable5 = input.bool(defval = true, title = "Level 5", inline = "5", group = "Levels")
+level5 = input.float(defval = 0.5, title = "", minval = 0, inline = "5", group = "Levels")
+color5 = input.color(defval = color.navy, title = "", inline = "5", group = "Levels")
+enable6 = input.bool(defval = true, title = "Level 6", inline = "6", group = "Levels")
+level6 = input.float(defval = 0.666, title = "", minval = 0, inline = "6", group = "Levels")
+color6 = input.color(defval = color.blue, title = "", inline = "6", group = "Levels")
+enable7 = input.bool(defval = true, title = "Level 7", inline = "7", group = "Levels")
+level7 = input.float(defval = 0.749, title = "", minval = 0, inline = "7", group = "Levels")
+color7 = input.color(defval = color.purple, title = "", inline = "7", group = "Levels")
+enable8 = input.bool(defval = true, title = "Level 8", inline = "8", group = "Levels")
+level8 = input.float(defval = 0.8, title = "", minval = 0, inline = "8", group = "Levels")
+color8 = input.color(defval = color.navy, title = "", inline = "8", group = "Levels")
+enable9 = input.bool(defval = true, title = "Level 9", inline = "9", group = "Levels")
+level9 = input.float(defval = 1, title = "", minval = 0, inline = "9", group = "Levels")
+color9 = input.color(defval = color.silver, title = "", inline = "9", group = "Levels")
+enable10 = input.bool(defval = true, title = "Level 10", inline = "10", group = "Levels")
+level10 = input.float(defval = 1.333, title = "", minval = 0, inline = "10", group = "Levels")
+color10 = input.color(defval = color.lime, title = "", inline = "10", group = "Levels")
+enable11 = input.bool(defval = true, title = "Level 11", inline = "11", group = "Levels")
+level11 = input.float(defval = 1.749, title = "", minval = 0, inline = "11", group = "Levels")
+color11 = input.color(defval = color.teal, title = "", inline = "11", group = "Levels")
+enable12 = input.bool(defval = true, title = "Level 12", inline = "12", group = "Levels")
+level12 = input.float(defval = 2, title = "", minval = 0, inline = "12", group = "Levels")
+color12 = input.color(defval = color.gray, title = "", inline = "12", group = "Levels")
+enable13 = input.bool(defval = false, title = "Level 13", inline = "13", group = "Levels")
+level13 = input.float(defval = 2, title = "", minval = 0, inline = "13", group = "Levels")
+color13 = input.color(defval = color.gray, title = "", inline = "13", group = "Levels")
+enable14 = input.bool(defval = false, title = "Level 14", inline = "14", group = "Levels")
+level14 = input.float(defval = 2, title = "", minval = 0, inline = "14", group = "Levels")
+color14 = input.color(defval = color.gray, title = "", inline = "14", group = "Levels")
+enable15 = input.bool(defval = false, title = "Level 15", inline = "15", group = "Levels")
+level15 = input.float(defval = 2, title = "", minval = 0, inline = "15", group = "Levels")
+color15 = input.color(defval = color.gray, title = "", inline = "15", group = "Levels")
+enable16 = input.bool(defval = false, title = "Level 16", inline = "16", group = "Levels")
+level16 = input.float(defval = 2, title = "", minval = 0, inline = "16", group = "Levels")
+color16 = input.color(defval = color.gray, title = "", inline = "16", group = "Levels")
+enable17 = input.bool(defval = false, title = "Level 17", inline = "17", group = "Levels")
+level17 = input.float(defval = 2, title = "", minval = 0, inline = "17", group = "Levels")
+color17 = input.color(defval = color.gray, title = "", inline = "17", group = "Levels")
+enable18 = input.bool(defval = false, title = "Level 18", inline = "18", group = "Levels")
+level18 = input.float(defval = 2, title = "", minval = 0, inline = "18", group = "Levels")
+color18 = input.color(defval = color.gray, title = "", inline = "18", group = "Levels")
+enable19 = input.bool(defval = false, title = "Level 19", inline = "19", group = "Levels")
+level19 = input.float(defval = 2, title = "", minval = 0, inline = "19", group = "Levels")
+color19 = input.color(defval = color.gray, title = "", inline = "19", group = "Levels")
+enable20 = input.bool(defval = false, title = "Level 20", inline = "20", group = "Levels")
+level20 = input.float(defval = 2, title = "", minval = 0, inline = "20", group = "Levels")
+color20 = input.color(defval = color.gray, title = "", inline = "20", group = "Levels")
+
+pivot = level0
+
+var enabled = array.from(enable0, enable1, enable2, enable3, enable4, enable5, enable6, enable7, enable8, enable9, enable10, enable11, enable12, enable13, enable14, enable15, enable16, enable17, enable18, enable19, enable20)
+var levels = array.from(level0, level1, level2, level3, level4, level5, level6, level7, level8, level9, level10, level11, level12, level13, level14, level15, level16, level17, level18, level19, level20)
+var colors = array.from(color0, color1, color2, color3, color4, color5, color6, color7, color8, color9, color10, color11, color12, color13, color14, color15, color16, color17, color18, color19, color20)
+mlevels_up = array.new_float(21, na)
+mlevels_down = array.new_float(21, na)
+
+for x = 1 to array.size(levels) - 1
+    //t = math.pow((math.sqrt(level0) + array.get(levels, x) * 0.005533333333), 2)
+    y = array.get(levels, x)
+    t = level0 + 2 * math.sqrt(level0) * y + y * y
+    array.set(mlevels_up, x, array.get(enabled, x) ? t: na)
+    r = math.pow((math.sqrt(level0) - array.get(levels, x)), 2)
+    array.set(mlevels_down, x, array.get(enabled, x) ? r: na)
+
+// fibonacci levels
+//plot(pivot, color = array.get(colors, 0), style=plot.style_linebr)
+line.new(bar_index - 50, pivot, bar_index + 50, pivot, xloc.bar_index, color = array.get(colors, 0), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 1), bar_index + 50, array.get(mlevels_up, 1), xloc.bar_index, color = array.get(colors, 1), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 1), bar_index + 50, array.get(mlevels_down, 1), xloc.bar_index, color = array.get(colors, 1), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 2), bar_index + 50, array.get(mlevels_up, 2), xloc.bar_index, color = array.get(colors, 2), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 2), bar_index + 50, array.get(mlevels_down, 2), xloc.bar_index, color = array.get(colors, 2), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 3), bar_index + 50, array.get(mlevels_up, 3), xloc.bar_index, color = array.get(colors, 3), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 3), bar_index + 50, array.get(mlevels_down, 3), xloc.bar_index, color = array.get(colors, 3), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 4), bar_index + 50, array.get(mlevels_up, 4), xloc.bar_index, color = array.get(colors, 4), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 4), bar_index + 50, array.get(mlevels_down, 4), xloc.bar_index, color = array.get(colors, 4), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 5), bar_index + 50, array.get(mlevels_up, 5), xloc.bar_index, color = array.get(colors, 5), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 5), bar_index + 50, array.get(mlevels_down, 5), xloc.bar_index, color = array.get(colors, 5), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 6), bar_index + 50, array.get(mlevels_up, 6), xloc.bar_index, color = array.get(colors, 6), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 6), bar_index + 50, array.get(mlevels_down, 6), xloc.bar_index, color = array.get(colors, 6), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 7), bar_index + 50, array.get(mlevels_up, 7), xloc.bar_index, color = array.get(colors, 7), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 7), bar_index + 50, array.get(mlevels_down, 7), xloc.bar_index, color = array.get(colors, 7), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 8), bar_index + 50, array.get(mlevels_up, 8), xloc.bar_index, color = array.get(colors, 8), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 8), bar_index + 50, array.get(mlevels_down, 8), xloc.bar_index, color = array.get(colors, 8), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 9), bar_index + 50, array.get(mlevels_up, 9), xloc.bar_index, color = array.get(colors, 9), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 9), bar_index + 50, array.get(mlevels_down, 9), xloc.bar_index, color = array.get(colors, 9), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 10), bar_index + 50, array.get(mlevels_up, 10), xloc.bar_index, color = array.get(colors, 10), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 10), bar_index + 50, array.get(mlevels_down, 10), xloc.bar_index, color = array.get(colors, 10), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 11), bar_index + 50, array.get(mlevels_up, 11), xloc.bar_index, color = array.get(colors, 11), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 11), bar_index + 50, array.get(mlevels_down, 11), xloc.bar_index, color = array.get(colors, 11), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 12), bar_index + 50, array.get(mlevels_up, 12), xloc.bar_index, color = array.get(colors, 12), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 12), bar_index + 50, array.get(mlevels_down, 12), xloc.bar_index, color = array.get(colors, 12), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 13), bar_index + 50, array.get(mlevels_up, 13), xloc.bar_index, color = array.get(colors, 13), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 13), bar_index + 50, array.get(mlevels_down, 13), xloc.bar_index, color = array.get(colors, 13), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 14), bar_index + 50, array.get(mlevels_up, 14), xloc.bar_index, color = array.get(colors, 14), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 14), bar_index + 50, array.get(mlevels_down, 14), xloc.bar_index, color = array.get(colors, 14), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 15), bar_index + 50, array.get(mlevels_up, 15), xloc.bar_index, color = array.get(colors, 15), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 15), bar_index + 50, array.get(mlevels_down, 15), xloc.bar_index, color = array.get(colors, 15), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 16), bar_index + 50, array.get(mlevels_up, 16), xloc.bar_index, color = array.get(colors, 16), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 16), bar_index + 50, array.get(mlevels_down, 16), xloc.bar_index, color = array.get(colors, 16), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 17), bar_index + 50, array.get(mlevels_up, 17), xloc.bar_index, color = array.get(colors, 17), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 17), bar_index + 50, array.get(mlevels_down, 17), xloc.bar_index, color = array.get(colors, 17), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 18), bar_index + 50, array.get(mlevels_up, 18), xloc.bar_index, color = array.get(colors, 18), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 18), bar_index + 50, array.get(mlevels_down, 18), xloc.bar_index, color = array.get(colors, 18), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 19), bar_index + 50, array.get(mlevels_up, 19), xloc.bar_index, color = array.get(colors, 19), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 19), bar_index + 50, array.get(mlevels_down, 19), xloc.bar_index, color = array.get(colors, 19), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_up, 20), bar_index + 50, array.get(mlevels_up, 20), xloc.bar_index, color = array.get(colors, 20), extend=extending)
+line.new(bar_index - 50, array.get(mlevels_down, 20), bar_index + 50, array.get(mlevels_down, 20), xloc.bar_index, color = array.get(colors, 20), extend=extending)
+
+
+if barstate.islast and showfibolabels
+    var flabels = array.new_label(0)
+    for x = 0 to (array.size(flabels) > 0 ? array.size(flabels) - 1 : na)
+        label.delete(array.pop(flabels))
+    if array.get(enabled, 0)
+        array.push(flabels, label.new(bar_index + 10 + 50, pivot, text = "0 (" + str.tostring(pivot) + ")", color = na, textcolor = color.white, style = label.style_label_left))
+    for x = 1 to (array.size(enabled) > 0 ? array.size(enabled) - 1 : na)
+        if array.get(enabled, x)
+            level = array.get(mlevels_up, x)
+            array.push(flabels, label.new(bar_index + 50 + 50, level, 
+                                          text = str.tostring(array.get(levels, x)) + " (" + str.tostring(math.round(level, 4)) + ")", 
+                                          color = na, 
+                                          textcolor = color.white, 
+                                          style = label.style_label_lower_left))
+            level := array.get(mlevels_down, x)
+            array.push(flabels, label.new(bar_index + 50 + 50, level, 
+                                          text = "-" + str.tostring(array.get(levels, x)) + " (" + str.tostring(math.round(level, 4)) + ")", 
+                                          color = na, 
+                                          textcolor = color.white, 
+                                          style = label.style_label_upper_left))

@@ -1,0 +1,93 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © GoemonYae
+
+//@version=5
+indicator("Christiano-Fitzgerald & Baxter-King filters", 'CF|BK filters', overlay=false, max_bars_back=5000)
+
+// The Christiano-Fitzgerald random walk filter is a band pass filter that was built on the same principles as the Baxter and King (BK) filter.
+// These filters formulate the de-trending and smoothing problem in the frequency domain. Should we have continuous and/or infinitely long time series
+// the frequency filtering could be an exact procedure. However the granularity and finiteness of real life time series do not allow for perfect frequency filtering.
+// Both the BK and CF filters approximate the ideal infinite band pass filter. The Baxter and King version is a symmetric approximation,
+// with no phase shifts in the resulting filtered series. But symmetry and phase correctness comes at the expense of series trimming.
+// Depending on the trim factor a certain number of values at the end of the series cannot be calculated. There is a trade-off between the trimming factor and
+// the precision with which the optimal filter can be approximated. On the other hand the Christiano-Fitzgerald random walk filter uses the whole time series
+// for the calculation of each filtered data point. The advantage of the CF filter is that it is designed to work well on a larger class of time series than the BK filter,
+// converges in the long run to the optimal filter, and in real time applications outperforms the BK filter. For details see Christiano-Fitzgerald [1999].
+//
+// Conclusion of study:
+// The use of a Hodrick-Prescott (HP) filter is recommend if the early, clear and steady turning point signals are a priority.
+// The use of the CF filter is recommended when priority is given to minimizing cumulative revisions.
+// With the CF filter a noisy, oscillating signal arises in real time applications, but in return the initial estimates of a cyclical value are the closest to the final long term cycle value.
+//
+// source: "Cycle Extraction: A Comparison of the Phase- Average Trend Method, the Hodrick-Prescott and Christiano-Fitzgerald Filters" by Ronny Nilsson, Gyorgy Gyomai (2011)
+// https://dx.doi.org/10.1787/5kg9srt7f8g0-en
+
+
+// Function to compute Bj coefficients
+compute_Bj(int nobs, float a, float b) =>
+    var float[] Bj = array.new_float(nobs + 1)
+    array.set(Bj, 0, (b - a) / math.pi)  // B0
+    for i = 1 to nobs
+        array.set(Bj, i, (math.sin(b * i) - math.sin(a * i)) / (math.pi * i))
+    Bj
+
+// Function to adjust for drift // TODO this linear correction is too simplistic, let's skip it for now (always use drift=false)!!!
+drift_adjusted(series float x, int idx, int nobs, bool drift) =>
+    drift ? x - (x[0] - x[nobs - 1]) * idx / (nobs - 1) : x
+
+
+// @function                Calculates the Christiano-Fitzgerald asymmetric, random walk band-pass-like filter.
+//                          Adapted from https://github.com/statsmodels/statsmodels/blob/main/statsmodels/tsa/filters/cf_filter.py
+// @param x                 {float} Input series to be transformed by the filter
+// @param low_val           {float} Minimum period of oscillations. Features below low periodicity are filtered out. Default is 6 for quarterly data, giving a 1.5 year periodicity.
+// @param high_val          {float} Maximum period of oscillations. Features above high periodicity are filtered out. Default is 32 for quarterly data, giving an 8 year periodicity.
+// @param drift             {bool} Whether or not to remove a trend from the data. The trend is estimated as np.arange(nobs)*(x[-1] - x[0])/(len(x)-1).
+// @param num_observations  {int} How much of recent observations of `x` should be taken into account. Default is 100k, which is also the current maximum of a Pine Script array.
+// @returns [cycle, trend]  {float, float} cycle: The features of x between the periodicities low and high; trend: The trend in the data with the cycles removed.
+cf_filter(series float x, float low_val = 6, float high_val = 32, bool drift = false, int num_observations = 100000) =>
+    var float A = na
+    var float B = na
+    var float sum1 = na
+    var float sum2 = na
+
+    a = 2 * math.pi / high_val
+    b = 2 * math.pi / low_val
+    int nobs = math.min(num_observations, bar_index + 1)  // Include current bar
+
+    i = bar_index
+
+    // Compute Bj coefficients once
+    Bj = barstate.isfirst or (low_val != low_val[1]) or (high_val != high_val[1]) ? (b - a) / math.pi : (math.sin(b * i) - math.sin(a * i)) / (math.pi * i)
+
+    // Filter calculation
+    float y = 0.0
+    float adj_val = x
+    
+    B := barstate.isfirst ? -0.5 * Bj : B[1] - Bj
+    
+    A := barstate.isfirst ? Bj : A[1] - Bj
+    
+    A := A - B
+
+    sum1 := barstate.isfirst ? Bj * adj_val : sum1 + Bj * x
+    sum2 := barstate.isfirst ? B * x : sum2 + Bj * x
+    y := sum1 + sum2 + A * x
+
+    float cycle = y
+    float trend = x[1] - y
+    
+    [cycle, trend]
+
+// ========= Application ========= //
+source          = input.source(close, 'Source')
+min_period      = input.int(6, 'Minimum period oscillations', minval=2)
+max_period      = input.int(32, 'Maximum period oscillations', minval=3)
+correct_drift   = input.bool(false, 'Correct for drift')
+lookback_window = input.int(500, 'Lookback window for calculation', minval=100)
+
+[cycle, trend]  = cf_filter(source, min_period, max_period, correct_drift, lookback_window)
+
+plot(bar_index)
+// Plotting the results
+plot(cycle, 'Cycle', color.red,  2, force_overlay=false)
+plot(trend, 'Trend', color.blue, 2, force_overlay=false)

@@ -1,0 +1,23 @@
+//@version=5
+indicator("My Engulfing Candles", overlay = true)
+//strategy("Engulfing Candles") //keep this commented out unless backtesting
+percentageOfWick = input.int(100, "Percentage of wick", inline = "01", minval = 0, step = 100)
+
+openBarPrevious = open[1]
+closeBarPrevious = close[1]
+openBarCurrent = open
+closeBarCurrent = close
+wickUpPrevious = open[1] + (high[1] - open[1]) * percentageOfWick / 100
+wickDnPrevious = open[1] - (open[1] - low[1]) * percentageOfWick / 100
+
+//If current bar open is less than equal to the previous bar close AND current bar open is less than previous bar open AND current bar close is greater than previous wick up THEN True
+bullishEngulfing = (openBarCurrent <= closeBarPrevious) and (openBarCurrent < openBarPrevious) and (closeBarCurrent > wickUpPrevious)
+//If current bar open is greater than equal to previous bar close AND current bar open is greater than previous bar open AND current bar close is less than previous wick down THEN True
+bearishEngulfing = (openBarCurrent >= closeBarPrevious) and (openBarCurrent > openBarPrevious) and (closeBarCurrent < wickDnPrevious)
+
+//bullishEngulfing/bearishEngulfing return a value of 1 or 0; if 1 then plot on chart, if 0 then don't plot
+plotshape(bullishEngulfing, style = shape.triangleup, location = location.belowbar, color = color.green, size = size.tiny)
+plotshape(bearishEngulfing, style = shape.triangledown , location = location.abovebar, color = color.red, size = size.tiny)
+
+alertcondition(bullishEngulfing, title = "Bullish Engulfing", message = "[CurrencyPair] [TimeFrame], Bullish candle engulfing previous candle")
+alertcondition(bearishEngulfing, title = "Bearish Engulfing", message = "[CurrencyPair] [TimeFrame], Bearish candle engulfing previous candle")

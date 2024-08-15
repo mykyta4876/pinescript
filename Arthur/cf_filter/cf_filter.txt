@@ -1,0 +1,39 @@
+//@version=5
+indicator("Christiano-Fitzgerald Filter", overlay=true)
+
+// Input parameters
+length = input.int(20, minval=1, title="Filter Length")
+P_U = input.float(2.0, title="Upper Period")
+P_L = input.float(0.5, title="Lower Period")
+
+// Calculate a and b
+a = 2 * math.pi / P_U
+b = 2 * math.pi / P_L
+
+// Function to calculate B_j
+B_j(j) =>
+    if (j == 0)
+        (b - a) / math.pi
+    else
+        (math.sin(b * j) - math.sin(a * j)) / (math.pi * j)
+
+// Calculate the coefficients
+var B = array.new_float(length)
+for i = 0 to length - 1
+    array.set(B, i, B_j(i))
+
+// Function to calculate the filtered value y_t*
+calc_CF_filter(src, length) =>
+    var float y_star = na
+    if (bar_index > length)
+        float sum = 0.0
+        for j = 0 to length - 1
+            sum := sum + array.get(B, j) * nz(src[j], 0)
+        y_star := sum
+    y_star
+
+// Calculate the filtered series
+y_t_star = calc_CF_filter(close, length)
+
+// Plot the filtered series
+plot(y_t_star, color=color.blue, title="CF Filtered")

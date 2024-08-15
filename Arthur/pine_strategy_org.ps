@@ -1,0 +1,1214 @@
+// ©2024 GoemonYae
+
+//@version=5
+strategy(title='Martingale Strategy', overlay=true, format=format.price, pyramiding=99, backtest_fill_limits_assumption=0,
+  default_qty_type=strategy.percent_of_equity, default_qty_value=1, initial_capital=10000, slippage=0, commission_type=strategy.commission.percent,
+  commission_value=0, close_entries_rule='ANY', calc_on_order_fills=false,  calc_on_every_tick=true, max_lines_count=500, max_labels_count=500)
+
+
+// ----------------------------------------------------------------------------------------------------------------------------- //
+// ------[  GENERAL INITIALISATION  ]-----
+// ----------------------------------------------------------------------------------------------------------------------------- //
+
+import jdehorty/KernelFunctions/2 as kernels
+import GoemonYae/Utilities/1 as utilities
+
+const string group_viz          = '🎨🎨 ----------------- Visualisation ----------------- 🎨🎨'
+const string group_time         = '⏳⏳ ----------------- Time settings ----------------- ⏳⏳'
+const string group_entry        = '🚪🚪 --------------------- Entry --------------------- 🚪🚪'
+const string group_martingale   = '🎰🎰 ------------------- Martingale ------------------- 🎰🎰'
+const string group_sl           = '🛑🛑 -------------------- Stoploss -------------------- 🛑🛑'
+const string group_tp1          = '🎯1️⃣ ---------------- Take profit no.1 ---------------- 1️⃣🎯'
+const string group_tp2          = '🎯2️⃣ ---------------- Take profit no.2 ---------------- 2️⃣🎯'
+const string group_tp3          = '🎯3️⃣ ---------------- Take profit no.3 ---------------- 3️⃣🎯'
+const string group_tp4          = '🎯4️⃣ ---------------- Take profit no.4 ---------------- 4️⃣🎯'
+const string group_tp5          = '🎯5️⃣ ---------------- Take profit no.5 ---------------- 5️⃣🎯'
+const string group_wt_settings  = '🌊🛠️ ----------- WaveTrend 3D settings ------------ ️🛠🌊'
+const string group_wt_entry     = '🌊🚪 ----------- WaveTrend 3D entries ----------- 🚪🌊'
+const string group_wt_exit      = '🌊🔚 ------------- WaveTrend 3D exits ------------- 🔚🌊'
+const string group_st_entry     = '📈🚪 ---------- SuperTrend Entry Filter ----------- 🚪📈'
+const string group_st_exit      = '📉🔚 ---------- SuperTrend as Stoploss ------------ 🔚📉'
+const string group_consolidated = '🤝🤝 ------------ Consolidated signals ------------- 🤝🤝'
+
+
+// ------[  Visualisation settings  ]----- //
+
+show_signals            = input.bool(true, '🎨 Show signal shapes', group=group_viz)
+show_supertrend_entry   = input.bool(true, '🎨 Show SuperTrend entry', inline='st', group=group_viz)
+show_supertrend_exit    = input.bool(true, '🎨 Show SuperTrend exit', inline='st', group=group_viz)
+show_order_levels       = input.bool(true, '🎨 Show order levels', group=group_viz)
+show_signals_legend     = input.bool(true, '🎨 Show legend of signals', group=group_viz)
+show_trading_stats      = input.bool(true, '🎨 Show trading statistics', group=group_viz)
+table_color_light       = input.bool(false, '🎨 Light chart background', group=group_viz, tooltip='Whether you use a light background (usually white) for your chart, or dark (usually black) otherwise. This will adjust the colours of the tables for better visibility.')
+
+
+// ------[  Trade setup  ]----- //
+
+type Trade
+    string direction                = na  // 'bull' / 'bear'
+    string trade_id                 = na
+
+    float entry_size                = na
+    float calculated_order_size     = na
+    float tp1_size                  = na
+    float tp2_size                  = na
+    float tp3_size                  = na
+    float tp4_size                  = na
+    float tp5_size                  = na
+
+    float entry_price_signal        = na  // price when signal was given
+    float entry_price               = na  // actual price to start the trade (can be different when limit-order)
+    float sl_price                  = na
+    float tp1_price                 = na
+    float tp2_price                 = na
+    float tp3_price                 = na
+    float tp4_price                 = na
+    float tp5_price                 = na
+
+    bool entry_placed               = na  // only used for limit orders (market order are considered always filled)
+    bool entry_filled               = na  // only used for limit orders (market order are considered always filled)
+    bool supertrend_exit_activated  = na
+    int num_bars_entry_open         = 0
+    int num_bars_in_trade           = 0
+
+    bool tp1_fill_event             = false
+    bool tp2_fill_event             = false
+    bool tp3_fill_event             = false
+    bool tp4_fill_event             = false
+    bool tp5_fill_event             = false
+
+    bool sl_filled                  = na
+    bool tp1_filled                 = na
+    bool tp2_filled                 = na
+    bool tp3_filled                 = na
+    bool tp4_filled                 = na
+    bool tp5_filled                 = na
+
+    float sl_distance_perc          = na
+    float tp1_distance_perc         = na
+    float tp2_distance_perc         = na
+    float tp3_distance_perc         = na
+    float tp4_distance_perc         = na
+    float tp5_distance_perc         = na
+
+type TradeStats
+    // Parameters
+    int num_exits                               = 0
+
+    // Variables
+    int num_trades                              = 0
+    int num_current_consecutive_wins            = 0
+    int num_current_consecutive_losses          = 0
+
+    bool last_trade_was_win                     = false
+    bool last_trade_was_loss                    = false
+    float initial_entry_size                       = na
+
+    int num_wins                                = 0
+    int num_losses                              = 0
+    int num_breakeven                           = 0
+    float win_rate                              = na
+    float current_profit                        = na
+
+    float consecutive_wins_max                  = na
+    float consecutive_losses_max                = na
+    float drawdown_max                          = na
+    float runup_max                             = na
+
+    float consecutive_wins_percentile           = na
+    float consecutive_losses_percentile         = na
+    float drawdown_percentile                   = na
+    float runup_percentile                      = na
+
+
+
+// ----------------------------------------------------------------------------------------------------------------------------- //
+// ------[  STRATEGY SETTINGS  ]-----
+// ----------------------------------------------------------------------------------------------------------------------------- //
+
+const string tt_hhll_enable = "Highest-High, Lowest-Low (HHLL) are the most recent high/lows, also called 'swing high/low'. It's the same method that is used in Donchian Channels. The 'most recent' aspect is controlled by the lookback window."
+const string tt_hhll_extrema = 'Whether to use the extrema (high/low) of the recent HHLL. If disabled, the body of the bar will be used (open/close)'
+const string tt_tp_allocation = "How much of the entry you want to allocate to be closed to by this TP. If the TPs that are enabled do not sum to 100%, the remainder will be closed by an exit signal (if enabled) or SL.\nYou can also choose to allocate 0% but use this TP to move the SL (see last few parameters)."
+const string tt_rr_ratio = 'Note that a "1 risk to 2 reward" would mean a value of `2.0`'
+const string tt_tp_enable   = "When disabled, make sure an exit with another TP or exit is possible. When TP2 and exit on signal is disabled, TP1 gets 100% regardles of this setting.
+  If TP1 and TP2 are enabled but exit by signal is disabled, the allocation of the TPs are scaled to sum to 100%. Note that when using PineConnector, a limit-order take profit is only placed when 100% of the volume is allocated to TP1."
+const string tt_tp_sl_move = "When this take-profit (TP) level is hit, you can move the stoploss (SL) to the selected level. If the SuperTrend is also activated , the level that is closest to the TP's price is used."
+// add-on when offset: "An offset can be applied too. A positive offset moves the SL from the selected level towards your position's direction (more profit)."
+const string tt_tp_supertrend_active = "When activated, the SuperTrend (the one that is used for exits) will be activated. If the `Move SL` is also activated (previous parameter), the level that is closest to the TP's price is used. Will trigger if high/low or close (see setting in SuperTrend) will breach the SuperTrend level, SuperTrend will change direction too."
+
+type DistParameters
+    bool enabled            = false
+    float allocation        = 0.  // between 0. and 1.
+    string distance_type    = na  // 'entry', 'TP', 'SL'
+    
+    bool perc_enabled       = false  // static percentage
+    float perc_percent      = na
+    
+    bool atr_enabled        = false  // average true range
+    float atr               = na  // output of `ta.atr()`
+    float atr_multiplier    = na
+
+    bool hhll_enabled       = false  // highest-high / lowest-low
+    int hhll_lookback       = na
+    bool hhll_use_hl        = na  // whether to use high/low or close/open
+
+    bool rr_enabled         = false // risk-to-reward
+    float rr_ratio          = na
+
+    string sl_movement      = 'do not move'
+    float sl_offset         = 0.
+    bool sl_supertrend_active = false
+
+
+method validate(DistParameters self) =>
+    if (self.perc_enabled ? 1 : 0) + (self.atr_enabled ? 1 : 0) + (self.hhll_enabled ? 1 : 0) + (self .rr_enabled ? 1 : 0) != 1
+        runtime.error(str.format('Ensure a single {0}-method is selected', self.distance_type))
+
+    // self.enabled := self.allocation > 0. ? self.enabled : false  // not used as you might put 0% exit but use it as a method to move SL
+
+
+method adjust_price(DistParameters self, reference_price=close, string _direction, float _lowest, float _highest, float _perc_override=na) =>
+    lowest  = na(_lowest)   ? reference_price * 0.99 : _lowest
+    highest = na(_highest)  ? reference_price * 1.01 : _highest
+    out     = reference_price
+    if self.perc_enabled or not na(_perc_override)
+        _perc = na(_perc_override) ? self.perc_percent : _perc_override
+        out *= 1 + _perc * (_direction == 'bull' ? 1 : -1)
+    else if self.atr_enabled
+        out += self.atr * self.atr_multiplier * (_direction == 'bull' ? 1 : -1)  // TODO not simple int
+    else if self.hhll_enabled
+        out := _direction == 'bull' ? highest : lowest
+    out
+
+
+// ------[  Entry  ]----- //
+
+entry_ordertype = input.string('limit', '🚪 Order Type​', options=['market', 'limit'], group=group_entry, tooltip='Use market order to enter at the open of the next bar, or use limit order to enter at a "better" price defined by the distance from the close price')
+max_bar_entry_limit_order_active = input.int(4, '🚪 Cancel limit-order entries after num bars: ', tooltip='When `0` selected, the limit-order entries will never be cancelled', group=group_entry)
+
+entry_params = DistParameters.new(
+  distance_type     = 'entry',
+  perc_enabled      = input.bool(false, '🚪 Use %-based', inline='entry_perc', group=group_entry),
+  perc_percent      = input.float(0.5, '🚪 %', step=0.02, inline='entry_perc', group=group_entry) / 100,
+  atr_enabled       = input.bool(true, '🚪 Use ATR-based', group=group_entry),
+  atr               = ta.atr(input.int(20, '🚪 ATR lookback', minval=1, inline='entry_atr', group=group_entry)),
+  atr_multiplier    = input.float(0.3, '🚪 ATR multiplier', minval=0.1, step=0.05, inline='entry_atr', group=group_entry),
+  hhll_enabled      = input.bool(false, '🚪 Use HHLL-based', group=group_entry, tooltip=tt_hhll_enable),
+  hhll_lookback     = input.int(10, '🚪 HHLL lookback', minval=1, inline='entry_hhll', group=group_entry),
+  hhll_use_hl       = input.bool(true, '🚪 Use extrema', inline='entry_hhll', group=group_entry, tooltip=tt_hhll_extrema)
+  )
+entry_params.validate()
+
+
+// ------[  Martingale  ]----- //
+
+type OrderSize
+    // parameters
+    float multiplier        = 1.
+    int min_streak          = 1
+    int max_streak          = 5
+    
+    // calculations
+    float order_size_factor_ub     = na
+
+method process(OrderSize self) =>
+    self.order_size_factor_ub := math.pow(self.multiplier, self.max_streak)
+
+
+const string tt_win_multiplier   = 'Multiplier applied on default entry size when consecutive wins occur. Can be effective to exploit favourable market conditions. Multiplier is applied on each consecutive trade, i.e. with 4 consequtive wins and a multiplier of `2`, the trading sizes will for each be 1x - 2x - 4x - 8x compared to default size. Set to `1` for no scaling on consecutive wins/losses.'
+const string tt_loss_multiplier  = 'Multiplier applied on default entry size when consecutive wins occur, also known as "Martingale". Can be effective to minimise overall drawdowns when losses occur seldom. Multiplier is applied on each consecutive trade, i.e. with 4 consequtive losses and a multiplier of `2`, the trading sizes will for each be 1x - 2x - 4x - 8x compared to default size. Set to `1` for no scaling on consecutive wins/losses.'
+const string tt_min_max_streak   = "Min. streak: Minimum number of consecutive losses/wins before the multiplier kicks in. Max. streak: maximum number of consecutive times the multiplier will be applied.\n\n
+  For example, with `multiplier=2, min_streak=1, max_streak=4`, the effective entry size multiplier will be 1-2-4-8-16-16-16-... until a result in the other direction occurs. With `min_streak=2` it would be 1-1-2-4-16-16-16-... and with `min_streak=3, max_streak=5` it would be 1-1-1-2-4-8-16-32-32-32-..."
+
+order_size_loss = OrderSize.new(
+  multiplier        = input.float(2.0, '🎰 [losses] Entry size multiplier', minval=0.1, maxval=10., step=0.1, tooltip=tt_loss_multiplier, group=group_martingale),
+  min_streak        = input.int(1, '🎰 [losses] Min. streak', minval=1, inline='streak1', tooltip=tt_min_max_streak, group=group_martingale),
+  max_streak        = input.int(5, '🎰 [losses] Max.', minval=1, inline='streak1', tooltip=tt_min_max_streak, group=group_martingale)
+  )
+order_size_winn = OrderSize.new(
+  multiplier        = input.float(1.0, '🎰 [wins] Entry size multiplier',   minval=0.1, maxval=10., step=0.1, tooltip=tt_win_multiplier,  group=group_martingale),
+  min_streak        = input.int(1, '🎰 [wins] Min. streak', minval=1, inline='streak2', tooltip=tt_min_max_streak, group=group_martingale),
+  max_streak        = input.int(5, '🎰 [wins] Max.', minval=1, inline='streak2', tooltip=tt_min_max_streak, group=group_martingale)
+  )
+
+order_size_loss.process()
+order_size_winn.process()
+    
+    
+// ------[  Stoploss  ]----- //
+
+sl_params = DistParameters.new(
+  distance_type     = 'SL',
+  perc_enabled      = input.bool(false, '🛑 Use %-based', inline='sl_perc', group=group_sl),
+  perc_percent      = input.float(1.0, '🛑 %', minval=0., step=0.02, inline='sl_perc', group=group_sl) / 100,
+  atr_enabled       = input.bool(true, '🛑 Use ATR-based', group=group_sl),
+  atr               = ta.atr(input.int(20, '🛑 ATR lookback', minval=1, inline='sl_atr', group=group_sl)),
+  atr_multiplier    = input.float(2.0, '🛑 ATR multiplier', minval=0.1, step=0.05, inline='sl_atr', group=group_sl),
+  hhll_enabled      = input.bool(false, '🛑 Use HHLL-based', group=group_sl, tooltip=tt_hhll_enable),
+  hhll_lookback     = input.int(10, '🛑 HHLL lookback', minval=1, inline='sl_hhll', group=group_sl),
+  hhll_use_hl       = input.bool(true, '🛑 Use extrema', inline='sl_hhll', group=group_sl, tooltip=tt_hhll_extrema)
+  )
+sl_params.validate()
+tt_sl_move          = 'When a limit-order take-profit (TP) is used, the stoploss can be moved to the entry price (break-even). When a second TP is used as well, the stoploss can be moved to the first TP (after being moved to entry when the first TP was hit).'
+// sl_move             = input.string('move to entry and TP1', '🛑 Strategy of moving SL', ['use fixed SL (do not move)', 'move to entry', 'move to entry and TP1'], group=group_sl,
+//   tooltip='The stoploss can be moved when multiple take-profits are enabled. When partial TP1 is enabled (and an overall exit), the SL can be moved to entry ("breakeven"). When both TP1 and TP2 are enabled (and an overall exit), SL can be moved to entry when TP1 is hit, and moved to TP1 when TP2 is hit. The remainder will be closed when the overall signal executes.')
+
+
+// ------[  TP1  ]----- //
+
+_tp1_enabled = input.bool(true, '1️⃣ Enable TP1', inline='tp_enable', group=group_tp1, tooltip=tt_tp_enable)  // TODO separated from class because otherwise TV sees it as `series` and gives further problems
+tp1_params = DistParameters.new(
+  distance_type     = 'TP1',
+  enabled           = _tp1_enabled,
+  allocation        = input.int(50,         '1️⃣ Allocation (%)', minval=0, maxval=100, step=5, inline='tp_enable', group=group_tp1, tooltip=tt_tp_allocation) / 100,
+  perc_enabled      = input.bool(false,     '1️⃣ Use %-based', inline='tp_perc', group=group_tp1),
+  perc_percent      = input.float(1.0,      '1️⃣ %', minval=0., step=0.02, inline='tp_perc', group=group_tp1) / 100,
+  atr_enabled       = input.bool(false,     '1️⃣ Use ATR-based', group=group_tp1),
+  atr               = ta.atr(input.int(20,  '1️⃣ ATR lookback', minval=1, inline='tp_atr', group=group_tp1)),
+  atr_multiplier    = input.float(2.0,      '1️⃣ ATR multiplier', minval=0.1, step=0.05, inline='tp_atr', group=group_tp1),
+  hhll_enabled      = input.bool(false,     '1️⃣ Use HHLL-based', group=group_tp1, tooltip=tt_hhll_enable),
+  hhll_lookback     = input.int(10,         '1️⃣ HHLL lookback', minval=1, inline='tp_hhll', group=group_tp1),
+  hhll_use_hl       = input.bool(true,      '1️⃣ Use extrema', inline='tp_hhll', group=group_tp1, tooltip=tt_hhll_extrema),
+  rr_enabled        = input.bool(true,      '1️⃣ Use RR-based', inline='tp_rr', group=group_tp1),
+  rr_ratio          = input.float(1.0,      '1️⃣ Ratio', minval=0.05, step=0.05, inline='tp_rr', group=group_tp1, tooltip=tt_rr_ratio),
+  sl_movement       = input.string('do not move', '1️⃣ Move SL to', options=['do not move', 'breakeven (entry)'], group=group_tp1, tooltip=tt_tp_sl_move),
+//   sl_offset         = input.float(0.,       '1️⃣ SL offset %', step=0.1, inline='sl_method', group=group_tp1, tooltip=tt_tp_sl_move),
+  sl_supertrend_active  = input.bool(false, '1️⃣ Activate SuperTrend exit', group=group_tp1, tooltip=tt_tp_supertrend_active)
+  )
+if tp1_params.enabled
+    tp1_params.validate()
+
+// ------[  TP2  ]----- //
+
+_tp2_enabled = input.bool(true, '2️⃣ Enable TP2', inline='tp_enable', group=group_tp2, tooltip=tt_tp_enable)  // TODO separated from class because otherwise TV sees it as `series` and gives further problems
+tp2_params = DistParameters.new(
+  distance_type     = 'TP2',
+  enabled           = _tp2_enabled,
+  allocation        = input.int(20,         '2️⃣ Allocation (%)', minval=0, maxval=100, step=5, inline='tp_enable', group=group_tp2, tooltip=tt_tp_allocation) / 100,
+  perc_enabled      = input.bool(false,     '2️⃣ Use %-based', inline='tp_perc', group=group_tp2),
+  perc_percent      = input.float(2.0,      '2️⃣ %', minval=0., step=0.02, inline='tp_perc', group=group_tp2) / 100,
+  atr_enabled       = input.bool(false,     '2️⃣ Use ATR-based', group=group_tp2),
+  atr               = ta.atr(input.int(20,  '2️⃣ ATR lookback', minval=1, inline='tp_atr', group=group_tp2)),
+  atr_multiplier    = input.float(3.0,      '2️⃣ ATR multiplier', minval=0.1, step=0.05, inline='tp_atr', group=group_tp2),
+  hhll_enabled      = input.bool(false,     '2️⃣ Use HHLL-based', group=group_tp2, tooltip=tt_hhll_enable),
+  hhll_lookback     = input.int(10,         '2️⃣ HHLL lookback', minval=1, inline='tp_hhll', group=group_tp2),
+  hhll_use_hl       = input.bool(true,      '2️⃣ Use extrema', inline='tp_hhll', group=group_tp2, tooltip=tt_hhll_extrema),
+  rr_enabled        = input.bool(true,      '2️⃣ Use RR-based', inline='tp_rr', group=group_tp2),
+  rr_ratio          = input.float(2.0,      '2️⃣ Ratio', minval=0.05, step=0.05, inline='tp_rr', group=group_tp2, tooltip=tt_rr_ratio),
+  sl_movement       = input.string('breakeven (entry)', '2️⃣ Move SL to', options=['do not move', 'breakeven (entry)', 'TP1'], group=group_tp2, tooltip=tt_tp_sl_move),
+//   sl_offset         = input.float(0.,       '2️⃣ SL offset %', step=0.1, inline='sl_method', group=group_tp2, tooltip=tt_tp_sl_move),
+  sl_supertrend_active  = input.bool(false, '2️⃣ Activate SuperTrend exit', group=group_tp2, tooltip=tt_tp_supertrend_active)
+  )
+if tp2_params.enabled
+    tp2_params.validate()
+
+// ------[  TP3  ]----- //
+
+_tp3_enabled = input.bool(true, '3️⃣ Enable TP3', inline='tp_enable', group=group_tp3, tooltip=tt_tp_enable)  // TODO separated from class because otherwise TV sees it as `series` and gives further problems
+tp3_params = DistParameters.new(
+  distance_type     = 'TP3',
+  enabled           = _tp3_enabled,
+  allocation        = input.int(10,         '3️⃣ Allocation (%)', minval=0, maxval=100, step=5, inline='tp_enable', group=group_tp3, tooltip=tt_tp_allocation) / 100,
+  perc_enabled      = input.bool(false,     '3️⃣ Use %-based', inline='tp_perc', group=group_tp3),
+  perc_percent      = input.float(3.0,      '3️⃣ %', minval=0., step=0.02, inline='tp_perc', group=group_tp3) / 100,
+  atr_enabled       = input.bool(false,     '3️⃣ Use ATR-based', group=group_tp3),
+  atr               = ta.atr(input.int(20,  '3️⃣ ATR lookback', minval=1, inline='tp_atr', group=group_tp3)),
+  atr_multiplier    = input.float(4.0,      '3️⃣ ATR multiplier', minval=0.1, step=0.05, inline='tp_atr', group=group_tp3),
+  hhll_enabled      = input.bool(false,     '3️⃣ Use HHLL-based', group=group_tp3, tooltip=tt_hhll_enable),
+  hhll_lookback     = input.int(10,         '3️⃣ HHLL lookback', minval=1, inline='tp_hhll', group=group_tp3),
+  hhll_use_hl       = input.bool(true,      '3️⃣ Use extrema', inline='tp_hhll', group=group_tp3, tooltip=tt_hhll_extrema),
+  rr_enabled        = input.bool(true,      '3️⃣ Use RR-based', inline='tp_rr', group=group_tp3),
+  rr_ratio          = input.float(3.0,      '3️⃣ Ratio', minval=0.05, step=0.05, inline='tp_rr', group=group_tp3, tooltip=tt_rr_ratio),
+  sl_movement       = input.string('TP1', '3️⃣ Move SL to', options=['do not move', 'breakeven (entry)', 'TP1', 'TP2'], group=group_tp3, tooltip=tt_tp_sl_move),
+//   sl_offset         = input.float(0.,       '3️⃣ SL offset %', step=0.1, inline='sl_method', group=group_tp3, tooltip=tt_tp_sl_move),
+  sl_supertrend_active  = input.bool(false, '3️⃣ Activate SuperTrend exit', group=group_tp3, tooltip=tt_tp_supertrend_active)
+  )
+if tp3_params.enabled
+    tp3_params.validate()
+
+
+// ------[  TP4  ]----- //
+
+_tp4_enabled = input.bool(true, '4️⃣ Enable TP4', inline='tp_enable', group=group_tp4, tooltip=tt_tp_enable)  // TODO separated from class because otherwise TV sees it as `series` and gives further problems
+tp4_params = DistParameters.new(
+  distance_type     = 'TP4',
+  enabled           = _tp4_enabled,
+  allocation        = input.int(10,         '4️⃣ Allocation (%)', minval=0, maxval=100, step=5, inline='tp_enable', group=group_tp4, tooltip=tt_tp_allocation) / 100,
+  perc_enabled      = input.bool(false,     '4️⃣ Use %-based', inline='tp_perc', group=group_tp4),
+  perc_percent      = input.float(4.0,      '4️⃣ %', minval=0., step=0.02, inline='tp_perc', group=group_tp4) / 100,
+  atr_enabled       = input.bool(false,     '4️⃣ Use ATR-based', group=group_tp4),
+  atr               = ta.atr(input.int(20,  '4️⃣ ATR lookback', minval=1, inline='tp_atr', group=group_tp4)),
+  atr_multiplier    = input.float(5.0,      '4️⃣ ATR multiplier', minval=0.1, step=0.05, inline='tp_atr', group=group_tp4),
+  hhll_enabled      = input.bool(false,     '4️⃣ Use HHLL-based', group=group_tp4, tooltip=tt_hhll_enable),
+  hhll_lookback     = input.int(10,         '4️⃣ HHLL lookback', minval=1, inline='tp_hhll', group=group_tp4),
+  hhll_use_hl       = input.bool(true,      '4️⃣ Use extrema', inline='tp_hhll', group=group_tp4, tooltip=tt_hhll_extrema),
+  rr_enabled        = input.bool(true,      '4️⃣ Use RR-based', inline='tp_rr', group=group_tp4),
+  rr_ratio          = input.float(4.0,      '4️⃣ Ratio', minval=0.05, step=0.05, inline='tp_rr', group=group_tp4, tooltip=tt_rr_ratio),
+  sl_movement       = input.string('TP2', '4️⃣ Move SL to', options=['do not move', 'breakeven (entry)', 'TP1', 'TP2', 'TP3'], group=group_tp4, tooltip=tt_tp_sl_move),
+//   sl_offset         = input.float(0.,       '4️⃣ SL offset %', step=0.1, inline='sl_method', group=group_tp4, tooltip=tt_tp_sl_move),
+  sl_supertrend_active  = input.bool(false, '4️⃣ Activate SuperTrend exit', group=group_tp4, tooltip=tt_tp_supertrend_active)
+  )
+if tp4_params.enabled
+    tp4_params.validate()
+
+
+// ------[  TP5  ]----- //
+
+_tp5_enabled = input.bool(true, '5️⃣ Enable TP5', inline='tp_enable', group=group_tp5, tooltip=tt_tp_enable)  // TODO separated from class because otherwise TV sees it as `series` and gives further problems
+tp5_params = DistParameters.new(
+  distance_type     = 'TP5',
+  enabled           = _tp5_enabled,
+  allocation        = input.int(0,         '5️⃣ Allocation (%)', minval=0, maxval=100, step=5, inline='tp_enable', group=group_tp5, tooltip=tt_tp_allocation) / 100,
+  perc_enabled      = input.bool(false,     '5️⃣ Use %-based', inline='tp_perc', group=group_tp5),
+  perc_percent      = input.float(3.0,      '5️⃣ %', minval=0., step=0.02, inline='tp_perc', group=group_tp5) / 100,
+  atr_enabled       = input.bool(false,     '5️⃣ Use ATR-based', group=group_tp5),
+  atr               = ta.atr(input.int(20,  '5️⃣ ATR lookback', minval=1, inline='tp_atr', group=group_tp5)),
+  atr_multiplier    = input.float(4.0,      '5️⃣ ATR multiplier', minval=0.1, step=0.05, inline='tp_atr', group=group_tp5),
+  hhll_enabled      = input.bool(false,     '5️⃣ Use HHLL-based', group=group_tp5, tooltip=tt_hhll_enable),
+  hhll_lookback     = input.int(10,         '5️⃣ HHLL lookback', minval=1, inline='tp_hhll', group=group_tp5),
+  hhll_use_hl       = input.bool(true,      '5️⃣ Use extrema', inline='tp_hhll', group=group_tp5, tooltip=tt_hhll_extrema),
+  rr_enabled        = input.bool(true,      '5️⃣ Use RR-based', inline='tp_rr', group=group_tp5),
+  rr_ratio          = input.float(5.0,      '5️⃣ Ratio', minval=0.05, step=0.05, inline='tp_rr', group=group_tp5, tooltip=tt_rr_ratio),
+  sl_movement       = input.string('do not move', '5️⃣ Move SL to', options=['do not move', 'breakeven (entry)', 'TP1', 'TP2', 'TP3', 'TP4'], group=group_tp5, tooltip=tt_tp_sl_move),
+//   sl_offset         = input.float(0.,       '5️⃣ SL offset %', step=0.1, inline='sl_method', group=group_tp5, tooltip=tt_tp_sl_move),
+  sl_supertrend_active  = input.bool(true, '5️⃣ Activate SuperTrend exit', group=group_tp5, tooltip=tt_tp_supertrend_active)
+  )
+if tp5_params.enabled
+    tp5_params.validate()
+
+
+
+// ----------------------------------------------------------------------------------------------------------------------------- //
+// ------[  SUPERTREND as entry filter & trailing stoploss  ]-----
+// ----------------------------------------------------------------------------------------------------------------------------- //
+
+// ------[  Input  ]----- //
+
+const string tt_st1_enable          = "Enable SuperTrend as a filter for entries: only signals in the direction of this SuperTrend (circles) will be allowed"
+const string tt_st_factor           = "Sets the initial wideness of the SuperTrend"
+
+enable_supertrend_entry_filter      = input.bool(true,              '📈 Use entry SuperTrend as filter', group=group_st_entry, tooltip=tt_st1_enable)
+st1_volatility_factor               = input.float(9.0,              '📈 Volatility factor', step=0.1, minval=0.1, group=group_st_entry, tooltip=tt_st_factor)
+
+// enable_supertrend_exit_filter       = input.bool(true,              '📉 Use SuperTrend as exit signal', group=group_st_exit, tooltip=tt_st2_enable)
+st2_volatility_factor               = input.float(3.0,              '📉 Volatility factor', step=0.1, minval=0.1, group=group_st_exit, tooltip=tt_st_factor)
+
+
+// ------[  Calculations   ]----- //
+
+enable_supertrend_exit_filter       = (tp1_params.enabled and tp1_params.sl_supertrend_active) or (tp2_params.enabled and tp2_params.sl_supertrend_active) or (tp3_params.enabled and tp3_params.sl_supertrend_active) or (tp4_params.enabled and tp4_params.sl_supertrend_active) or (tp5_params.enabled and tp5_params.sl_supertrend_active)
+
+show_supertrend_entry               := enable_supertrend_entry_filter ? show_supertrend_entry : false
+show_supertrend_exit                := enable_supertrend_exit_filter ? show_supertrend_exit : false
+
+[supertrend1, st1_direction] = ta.supertrend(st1_volatility_factor, 20)  // as entry filter
+st1_bullish = st1_direction == -1
+st1_bearish = st1_direction ==  1
+
+[supertrend2, st2_direction] = ta.supertrend(st2_volatility_factor, 20)  // as stoploss
+st2_bullish = st2_direction == -1
+st2_bearish = st2_direction ==  1
+
+
+// ------[  Plots   ]----- //
+
+const color c_st1_bullish  = color.rgb(78, 190, 37, 80)
+const color c_st1_bearish  = color.rgb(165, 45, 99, 80)
+const color c_st2_bullish  = color.rgb(42, 181, 153, 40)
+const color c_st2_bearish  = color.rgb(155, 45, 165, 40)
+
+p_st1_bull      = plot(st1_bullish ? supertrend1 : na, title="SuperTrend entry filter (bullish)", color=c_st1_bullish, linewidth=3, style=plot.style_linebr)
+p_st1_bear      = plot(st1_bearish ? supertrend1 : na, title="SuperTrend entry filter (bearish)", color=c_st1_bearish, linewidth=3, style=plot.style_linebr)
+
+st_centre       = st1_bullish ? math.min(open, close) : math.max(open, close)
+p_st_centre     = plot(st_centre, 'Candle\'s body', editable=false, display=display.none)
+fill(p_st_centre, p_st1_bull, st_centre, supertrend1, color.new(c_st1_bullish, 96), color.new(c_st1_bullish, 82), 'SuperTrend bullish fill', fillgaps=false)
+fill(p_st_centre, p_st1_bear, supertrend1, st_centre, color.new(c_st1_bearish, 82), color.new(c_st1_bearish, 96), 'SuperTrend bearish fill', fillgaps=false)
+
+p_st2_bull      = plot(st2_bullish ? supertrend2 : na, title="SuperTrend exit filter (bullish)",  color=c_st2_bullish, linewidth=2, style=plot.style_circles)
+p_st2_bear      = plot(st2_bearish ? supertrend2 : na, title="SuperTrend exit filter (bearish)",  color=c_st2_bearish, linewidth=2, style=plot.style_circles)
+
+
+// ----------------------------------------------------------------------------------------------------------------------------- //
+// ------[  SIGNAL GENERATION  ]-----
+// ----------------------------------------------------------------------------------------------------------------------------- //
+
+// ------[  Input  ]----- //
+
+enable_wt_entry_signals         = true
+enable_wt_exit_signals          = input.bool(true, '🤝 Exit: Use WaveTrend 3D signals', 'Whether to use the signals generated from the WaveTrend 3D section for an exit order', group=group_consolidated)
+exit_signal_strategy            = input.string('market close', '🤝 Exit signal strategy', ['market close', 'move SL to entry', 'start reverse trade'], group=group_consolidated,
+  tooltip='What to when an opposite signal ("exit") is given: (1) directly close the trade with a market order, (2) move the stoploss to entry ("breakeven"), (3) reverse trade into opposite direction. Not that the first two options will also affect the handling of SuperTrend exits (when enabled).')
+
+
+// ------[  Elegant Oscillator functions  ]----- //
+
+normalizeDeriv(_src, _quadraticMeanLength) =>
+    float derivative = _src - _src[2]
+    quadraticMean = math.sqrt(nz(math.sum(math.pow(derivative, 2), _quadraticMeanLength) / _quadraticMeanLength))
+    derivative/quadraticMean
+
+tanh(series float _src) =>
+    -1 + 2/(1 + math.exp(-2*_src))
+
+dualPoleFilter(float _src, float _lookback) =>
+    float _omega = -99 * math.pi / (70 * _lookback)
+    float _alpha = math.exp(_omega)
+    float _beta = -math.pow(_alpha, 2)
+    float _gamma = math.cos(_omega) * 2 * _alpha
+    float _delta = 1 - _gamma - _beta
+    float _slidingAvg = 0.5 * (_src + nz(_src[1], _src))
+    float _filter = na
+    _filter := (_delta*_slidingAvg) + _gamma*nz(_filter[1]) + _beta*nz(_filter[2])
+    _filter
+
+getOscillator(float src, float smoothingFrequency, int quadraticMeanLength) =>   
+    nDeriv = normalizeDeriv(src, quadraticMeanLength)
+    hyperbolicTangent = tanh(nDeriv)
+    result = dualPoleFilter(hyperbolicTangent, smoothingFrequency)
+
+
+// ------[  Input  ]----- //
+
+wt_src              = close
+oscillatorLookback  = 20
+quadraticMeanLength = 50
+f_length            = 0.75
+f_smoothing         = 0.45
+n_length            = 1.0
+n_smoothing         = 1.0
+s_length            = 1.75
+s_smoothing         = 2.5
+divThreshold        = 40.0
+sizePercent         = 40.0
+
+
+// ------[  Calculations & Signals  ]----- //
+
+f_lookback = f_smoothing * oscillatorLookback
+seriesFast = f_length * getOscillator(wt_src, f_lookback, quadraticMeanLength)
+
+n_lookback = n_smoothing * oscillatorLookback
+seriesNorm = n_length * getOscillator(wt_src, n_lookback, quadraticMeanLength)
+
+s_lookback = s_smoothing * oscillatorLookback
+seriesSlow = s_length * getOscillator(wt_src, s_lookback, quadraticMeanLength)
+
+bearishCross              = ta.crossunder(seriesFast, seriesNorm) and seriesNorm > 0 
+bullishCross              = ta.crossover(seriesFast, seriesNorm) and seriesNorm < 0
+
+lastBearishCrossValue     = ta.valuewhen(condition=bearishCross, source=seriesNorm, occurrence=1)
+lastBullishCrossValue     = ta.valuewhen(condition=bullishCross, source=seriesNorm, occurrence=1)
+triggerWaveFactor         = sizePercent / 100
+isSmallerBearishCross     = bearishCross and seriesNorm < lastBearishCrossValue * triggerWaveFactor
+isSmallerBullishCross     = bullishCross and seriesNorm > lastBullishCrossValue * triggerWaveFactor
+
+yhat0 = kernels.gaussian(seriesSlow, 6, 6) 
+isBearishKernelTrend = yhat0 < seriesSlow
+isBullishKernelTrend = not isBearishKernelTrend
+
+isBearishDivZone    = ta.barssince(bearishCross[1]) < divThreshold
+isBullishDivZone    = ta.barssince(bullishCross[1]) < divThreshold
+BearishTriggerWave  = isSmallerBearishCross and isBearishDivZone and isBearishKernelTrend
+BullishTriggerWave  = isSmallerBullishCross and isBullishDivZone and isBullishKernelTrend
+
+wtEntrySignal_shrt_TriggerWave = BearishTriggerWave
+wtEntrySignal_long_TriggerWave = BullishTriggerWave
+wtExitSignal_shrt_TriggerWave  = BullishTriggerWave
+wtExitSignal_long_TriggerWave  = BearishTriggerWave
+
+
+// ------[  Consolidated signals  ]----- //
+
+enable_exit_by_signal = enable_wt_exit_signals or enable_supertrend_exit_filter
+
+signal_entry_shrt = enable_wt_entry_signals and wtEntrySignal_shrt_TriggerWave
+signal_entry_long = enable_wt_entry_signals and wtEntrySignal_long_TriggerWave
+signal_exit_shrt  = enable_wt_exit_signals and wtExitSignal_shrt_TriggerWave
+signal_exit_long  = enable_wt_exit_signals and wtExitSignal_long_TriggerWave
+
+// Update entry signals based on SuperTrend
+if enable_supertrend_entry_filter
+    signal_entry_shrt := st1_bearish ? signal_entry_shrt : false
+    signal_entry_long := st1_bullish ? signal_entry_long : false
+
+get_binary_color(string _direction, float _transparency=0, bool _entry, bool _exit) =>
+    c_entry_shrt          = color.rgb(180, 36, 92, _transparency)
+    c_entry_long          = color.rgb(39, 168, 27, _transparency)
+    c_exit_shrt           = color.rgb(171, 161, 27, _transparency)
+    c_exit_long           = color.rgb(144, 36, 191, _transparency)
+    c_entry_and_exit_shrt = color.rgb(20, 161, 174, _transparency)
+    c_entry_and_exit_long = color.rgb(41, 86, 222, _transparency)
+    
+    switch _direction
+        'bear' => _entry ? (_exit ? c_entry_and_exit_shrt : c_entry_shrt) : (_exit ? c_exit_shrt : na)
+        'bull' => _entry ? (_exit ? c_entry_and_exit_long : c_entry_long) : (_exit ? c_exit_long : na)
+
+
+// ------[  Plotting  ]----- //
+plotshape(show_signals and (signal_entry_shrt or signal_exit_long), 'Final short entry (or long exit) signal', shape.triangledown, location.abovebar, get_binary_color('bear', 60, signal_entry_shrt, signal_exit_long), size=size.small)
+plotshape(show_signals and (signal_entry_long or signal_exit_shrt), 'Final long entry (or short exit) signal', shape.triangleup,   location.belowbar, get_binary_color('bull', 60, signal_entry_long, signal_exit_shrt), size=size.small)
+
+
+// ----------------------------------------------------------------------------------------------------------------------------- //
+// ------[  3RD PARTY AUTOMATION  ]-----
+// ----------------------------------------------------------------------------------------------------------------------------- //
+
+
+// ------[  PineConnector  ]----- //
+
+const string group_alert_pineconnector = '🔔🌲 ------- Alert Messages: PineConnector ------- 🌲🔔'
+
+pineconnector_enable        = input.bool(false, '🌲 Enable PineConnector alert messages', group=group_alert_pineconnector, tooltip='When enabled, make sure to deselect other alert messages. On MetaTrader, ensure it is setup correctly with PineConnector: https://docs.pineconnector.com/metatrader-4. When creating TradingView alerts, don\'t forget to enable the Webhook request using this URL "https://pineconnector.net/webhook/" (or check documentation).')
+pineconnector_show_msg      = input.bool(true, '🌲 Show alert message in label', 'Show the message that would be used in an alert as a label on the chart. Handy for understanding how the MetaTrader trades will be handled.', group=group_alert_pineconnector)
+
+pineconnector_licence_id    = input.string('60123456789', '🌲 Licence ID', group=group_alert_pineconnector, tooltip='Input your License ID found in the Licensing Dashboard to connect to the PineConnector server. It is a long value, usually starting with a 6')
+pineconnector_risk          = input.float(0.5, '🌲 Risk (order size %)', minval=0.1, step=0.1, group=group_alert_pineconnector, tooltip='The "risk" that PineConnector should use. Specifically, this refers to the PineConnector setting "Volume Type (risk=)", which should be set to "% of Balance, Margin" (or possibly "% of balance, Loss (sl= required)", but this is not how the TV strategy behaves.). Naturally, to align with the behaviour of TV, set the same value in the "Properties" tab at "Order Size" ("% of equity").')
+pineconnector_symbol_suffix = input.string('', '🌲 TradingView symbol suffix', group=group_alert_pineconnector, tooltip='The alert messages will automatically use the current symbol from TradingView. However, to match it with MetaTrader, sometimes a suffix needs to be added, for example "AUDUSD-f" where "-f" would be the suffix. If the parameter "Full MT4/MT5 symbol (override)" is not empty, this suffix will have no function.')
+pineconnector_symbol        = input.string('', '🌲 Full MT4/MT5 symbol (override)', group=group_alert_pineconnector, tooltip='To have full control over the symbol that will be send to MetaTrader, this field can be used. Note that this will override the automatic symbol usage and suffix.')
+pineconnector_pip_factor    = input.int(0, '🌲 Pip correction factor', minval=-6, step=1, maxval=6, group=group_alert_pineconnector, tooltip='Use a number other than 0 to add/remove decimal points that define a pip to align with your broker. This factor is used as `10^x`, meaning that with a value of 3, the output of pips will be `10^3=1000` times as large. And a value of -3 would divide by 1000. This parameter has no function if the next parameter ("use price i/o pips") is enabled.')
+pineconnector_use_price     = input.bool(false, '🌲 Use price i/o pips', tooltip='If enabled, the price data (absolute values) will be used to be send to PineConnector instead of pips (relative values). Make sure to test thoroughly as precision and different data feeds and lags can affect the order behaviour.')
+
+pineconnector_symbol        := pineconnector_symbol != '' ? pineconnector_symbol : syminfo.ticker + pineconnector_symbol_suffix
+
+
+// ------[  Custom API  ]----- //
+
+const string group_alert_custom = '🔔🔌 ------- Alert Messages: Custom API ------- 🔌🔔'
+
+custom_api_enable       = input.bool(false, '🔌 Enable custom alert messages', group=group_alert_custom, tooltip='When enabled, will trigger custom messages that can communicate with the API of a third-party automation platform (e.g. 3Commas, Wickhunter, Cornix, CryptoHopper, WunderTrader, Alertatron, etc.). Also enable the correct webhook address when creating alerts. IMPORTANT: check your risk management for all scenarios. For example, this script works with limit-order TPs and SLs, which are triggered once per bar as a market order (on close) alert for the API.')
+custom_api_show_msg     = input.bool(true,  '🔌 Show alert message in label', group=group_alert_custom, tooltip='Show the message that would be used in an alert as a label on the chart. Handy for understanding how the alerts would behave on historical data.')
+
+if custom_api_enable and pineconnector_enable
+    runtime.error('Only one of the alert messages services are possible. Therefore, ensure only one of "PineConnector" and "Custom API" are selected.')
+if custom_api_enable and ((tp1_params.enabled and tp1_params.allocation < 1.) or _tp2_enabled)
+    runtime.error('The entire position is closed when using the custom API alerts. Therefore, make sure that TP2 is not enabled, and when enabling TP1, it is set to 100% allocation. Using an exit method (LC/WT3D/SuperTrend) with or without TP1 at 100% is also possible.')
+
+custom_api_entry_long   = input.text_area('For example:\n{  "message_type": "bot",  "bot_id": 12300000,  "email_token": "abcdefgh-klmnopqr-ijst-uvwxy-c7d0856ebd1f",  "delay_seconds": 0}',                                     '🔌 Message for "entry long"',  group=group_alert_custom, tooltip='Only "market" order type is supported for entries')
+custom_api_exit_long    = input.text_area('For example:\n{  "action": "close_at_market_price",  "message_type": "bot",  "bot_id": 12300000,  "email_token": "abcdefgh-klmnopqr-ijst-uvwxy-c7d0856ebd1f",  "delay_seconds": 0}', '🔌 Message for "exit long"',   group=group_alert_custom, tooltip='Exits are computed as market orders')
+custom_api_entry_shrt   = input.text_area('For example:\n{  "message_type": "bot",  "bot_id": 12300000,  "email_token": "abcdefgh-klmnopqr-ijst-uvwxy-c7d0856ebd1f",  "delay_seconds": 0}',                                     '🔌 Message for "entry short"', group=group_alert_custom, tooltip='Only "market" order type is supported for entries')
+custom_api_exit_shrt    = input.text_area('For example:\n{  "action": "close_at_market_price",  "message_type": "bot",  "bot_id": 12300000,  "email_token": "abcdefgh-klmnopqr-ijst-uvwxy-c7d0856ebd1f",  "delay_seconds": 0}', '🔌 Message for "exit short"',  group=group_alert_custom, tooltip='Exits are computed as market orders')
+
+
+// ------[  Alert Functions  ]----- //
+
+atr100 = ta.atr(100)
+
+// Function to convert price difference to pips with decimal correction when `pineconnector_use_price` is disabled. Returns an integer as string
+// If only `price_1` is passed, it is considered to be a difference of price. Otherwise the absolute difference between `price_1` and `price_2` will be computed.
+// Extra division by 10 to account for discrepancy between pips and points
+// For the `pineconnector_use_price` behaviour, price_2 will have no function.
+get_pineconnector_price(float price_1, float price_2=na) =>
+    out = str.tostring(price_1)
+    if not pineconnector_use_price
+        _diff = na(price_2) ? price_1 : math.abs(price_1 - price_2)
+        out := str.tostring(math.round(_diff * math.pow(10, pineconnector_pip_factor) / syminfo.mintick) / 10)
+    out
+
+v_offset = ta.highest(math.max(open, close), 5) + 0.2 * ta.atr(10)
+_print_label_martingale(string direction, int streak_no, float order_size_factor, OrderSize order_size, num_loss, num_win, last_profit)=>
+    _col = direction == 'bull' ? color.rgb(47, 182, 74, 30) : direction == 'bear' ? color.rgb(174, 37, 108, 30) : color.rgb(120, 120, 120, 30)
+    _str = "--- ({0}) factor: {1} ---\n
+      [param] multiplier: {2}\n
+      [param] min streak: {3} | max: {4}\n
+      max factor: {5}\n
+      num loss|win: {6} | {7}
+      last profit: {8}
+      "
+    label.new(bar_index + 4, v_offset, str.format(_str, streak_no, order_size_factor, order_size.multiplier, order_size.min_streak, order_size.max_streak, order_size.order_size_factor_ub, num_loss, num_win, last_profit), color=_col, size=size.small)
+
+compute_order_size(TradeStats _trade_stats, Trade _t) =>
+    // Compute entry size multiplier
+    order_size_factor = 1.
+
+    if (order_size_loss.multiplier != 1.) and (_trade_stats.num_current_consecutive_wins < _trade_stats.num_current_consecutive_losses) and (_trade_stats.num_current_consecutive_losses >= order_size_loss.min_streak)
+        order_size_factor := math.min(math.pow(order_size_loss.multiplier, _trade_stats.num_current_consecutive_losses - order_size_loss.min_streak + 1), order_size_loss.order_size_factor_ub)
+    else if (order_size_winn.multiplier != 1.) and (_trade_stats.num_current_consecutive_wins > _trade_stats.num_current_consecutive_losses) and (_trade_stats.num_current_consecutive_wins >= order_size_winn.min_streak)
+        order_size_factor := math.min(math.pow(order_size_winn.multiplier, _trade_stats.num_current_consecutive_wins - order_size_winn.min_streak + 1), order_size_winn.order_size_factor_ub)
+
+    calculated_order_size = strategy.default_entry_qty(entry_ordertype == 'market' ? close : _t.entry_price)
+    _t.calculated_order_size := calculated_order_size
+    _t.entry_size := calculated_order_size  // will be updated below
+
+    // Streak has ended, store the last order size and compute the one with multiplier
+    if (_trade_stats.num_current_consecutive_wins <= 1) and (_trade_stats.num_current_consecutive_losses <= 1)
+        _trade_stats.initial_entry_size := calculated_order_size[1]
+    if order_size_factor != 1
+        _t.entry_size                   := _trade_stats.initial_entry_size * order_size_factor
+    
+splitString(string input_string, int line_length_threshold=20) =>
+    string result = ""
+    string current_line = ""
+
+    // Split the string into words based on commas
+    string[] words = str.split(input_string, ",")
+    for int i = 0 to array.size(words) - 1
+        string word = array.get(words, i)
+        // Check if adding the next word exceeds the line length threshold
+        if str.length(current_line + word) > line_length_threshold and str.length(current_line) > 0
+            result := result + current_line + "\n"
+            current_line := word + (i == array.size(words) - 1 ? "" : ",")  // no trailing comma if it's the very last word
+        else
+            current_line := current_line + word + (i < array.size(words) - 1 ? "," : "")
+    
+    // Add the last line and return
+    result + current_line
+
+
+trigger_pineconnector_alert(string command=na, float risk_multiplier=na, string kwargs=na, float offset=1.) =>
+    // General syntax is `LicenseID,Command,Symbol,Others`
+    if pineconnector_enable
+        _others  = na(risk_multiplier) ? kwargs : 'risk=' + str.tostring(pineconnector_risk * risk_multiplier, '0.000') + kwargs
+        _msg     = str.format('{0},{1},{2}{3}', pineconnector_licence_id, command, pineconnector_symbol, na(_others) ? '' : ',' + _others)
+        alert(_msg, alert.freq_once_per_bar)
+        if pineconnector_show_msg
+            _msg := splitString(_msg, 25)
+            label.new(bar_index, high + offset*0.3*atr100, _msg, style=offset > 0 ? label.style_label_lower_right : label.style_label_upper_right, textcolor=color.white, color=color.rgb(28, 105, 247, 50), size=size.small)
+        0
+    else
+        0
+
+trigger_custom_api_alert(string kind, offset=1) =>
+    if custom_api_enable
+        _alert_msg = switch kind
+            'entry_long' => custom_api_entry_long
+            'entry_short' => custom_api_entry_shrt
+            'exit_long' => custom_api_exit_long
+            'exit_short' => custom_api_exit_shrt
+        alert(_alert_msg, alert.freq_once_per_bar)
+        if custom_api_show_msg
+            label.new(bar_index, close, kind, style=offset > 0 ? label.style_label_lower_right : label.style_label_upper_right, textcolor=color.white, color=color.rgb(95, 5, 131, 50), size=size.small)
+
+
+// ----------------------------------------------------------------------------------------------------------------------------- //
+// ------[  TRADE EXECUTTION  ]-----
+// ----------------------------------------------------------------------------------------------------------------------------- //
+
+// ------[  Initialise arrays  ]----- //
+
+var tp_enabled_array        = array.new<bool>(5)
+var tp_enabled_array_int    = array.new<int>(5)  // same as tp_enabled_array but int so we can sum it etc.
+var tp_allocation_array     = array.new<float>(5)
+var tp_percentages_array    = array.new<float>(5)
+var tp_atr_multiplier_array = array.new<float>(5)
+var tp_rr_ratio_array       = array.new<float>(5)
+tp_enabled_array.set(0, tp1_params.enabled)
+tp_enabled_array.set(1, tp2_params.enabled)
+tp_enabled_array.set(2, tp3_params.enabled)
+tp_enabled_array.set(3, tp4_params.enabled)
+tp_enabled_array.set(4, tp5_params.enabled)
+tp_enabled_array_int.set(0, tp1_params.enabled ? 1 : 0)
+tp_enabled_array_int.set(1, tp2_params.enabled ? 1 : 0)
+tp_enabled_array_int.set(2, tp3_params.enabled ? 1 : 0)
+tp_enabled_array_int.set(3, tp4_params.enabled ? 1 : 0)
+tp_enabled_array_int.set(4, tp5_params.enabled ? 1 : 0)
+tp_allocation_array.set(0, tp1_params.enabled ? tp1_params.allocation : 0.)
+tp_allocation_array.set(1, tp2_params.enabled ? tp2_params.allocation : 0.)
+tp_allocation_array.set(2, tp3_params.enabled ? tp3_params.allocation : 0.)
+tp_allocation_array.set(3, tp4_params.enabled ? tp4_params.allocation : 0.)
+tp_allocation_array.set(4, tp5_params.enabled ? tp5_params.allocation : 0.)
+tp_percentages_array.set(0, tp1_params.enabled and tp1_params.perc_enabled ? tp1_params.perc_percent : na)
+tp_percentages_array.set(1, tp2_params.enabled and tp2_params.perc_enabled ? tp2_params.perc_percent : na)
+tp_percentages_array.set(2, tp3_params.enabled and tp3_params.perc_enabled ? tp3_params.perc_percent : na)
+tp_percentages_array.set(3, tp4_params.enabled and tp4_params.perc_enabled ? tp4_params.perc_percent : na)
+tp_percentages_array.set(4, tp5_params.enabled and tp5_params.perc_enabled ? tp5_params.perc_percent : na)
+tp_atr_multiplier_array.set(0, tp1_params.enabled and tp1_params.atr_enabled ? tp1_params.atr_multiplier : na)
+tp_atr_multiplier_array.set(1, tp2_params.enabled and tp2_params.atr_enabled ? tp2_params.atr_multiplier : na)
+tp_atr_multiplier_array.set(2, tp3_params.enabled and tp3_params.atr_enabled ? tp3_params.atr_multiplier : na)
+tp_atr_multiplier_array.set(3, tp4_params.enabled and tp4_params.atr_enabled ? tp4_params.atr_multiplier : na)
+tp_atr_multiplier_array.set(4, tp5_params.enabled and tp5_params.atr_enabled ? tp5_params.atr_multiplier : na)
+tp_rr_ratio_array.set(0, tp1_params.enabled and tp1_params.rr_enabled ? tp1_params.rr_ratio : na)
+tp_rr_ratio_array.set(1, tp2_params.enabled and tp2_params.rr_enabled ? tp2_params.rr_ratio : na)
+tp_rr_ratio_array.set(2, tp3_params.enabled and tp3_params.rr_enabled ? tp3_params.rr_ratio : na)
+tp_rr_ratio_array.set(3, tp4_params.enabled and tp4_params.rr_enabled ? tp4_params.rr_ratio : na)
+tp_rr_ratio_array.set(4, tp5_params.enabled and tp5_params.rr_enabled ? tp5_params.rr_ratio : na)
+
+
+// ------[  Validation  ]----- //
+
+var n = tp_enabled_array.size()
+for i = 1 to n - 1
+    last = n - i
+    prev = last - 1
+    if tp_enabled_array.get(last) and not tp_enabled_array.get(prev)
+        runtime.error(str.format('TP{0} cannot be enabled without enabling TP{1} too', last+1, prev+1))
+    
+    // percentage  validation
+    perc_last = tp_percentages_array.get(last)
+    perc_prev = tp_percentages_array.get(prev)
+    if na(perc_prev) and not na(perc_last)
+        runtime.error(str.format('Ensure that all enabled TPs use the same distance metric. TP{0} used a percentage as a distance while TP{1} does not.', last+1, prev+1))
+    if perc_last < perc_prev
+        runtime.error(str.format('The distance of TP{0} ({1}%) cannot be less than that of TP{2} ({3}%)', last+1, perc_last, prev+1, perc_prev))
+
+    // ATR validation
+    atr_last = tp_atr_multiplier_array.get(last)
+    atr_prev = tp_atr_multiplier_array.get(prev)
+    if na(atr_prev) and not na(atr_last)
+        runtime.error(str.format('Ensure that all enabled TPs use the same distance metric. TP{0} used an ATR as a distance while TP{1} does not.', last+1, prev+1))
+    if atr_last < atr_prev
+        runtime.error(str.format('The distance of TP{0} (ATR multiplier of {1}) cannot be less than that of TP{2} (ATR multiplier of {3})', last+1, atr_last, prev+1, atr_prev))
+
+    // Risk-to-Reward valdation
+    rr_last = tp_rr_ratio_array.get(last)
+    rr_prev = tp_rr_ratio_array.get(prev)
+    if na(rr_prev) and not na(rr_last)
+        runtime.error(str.format('Ensure that all enabled TPs use the same distance metric. TP{0} used Risk-to-Reward as a distance while TP{1} does not.', last, prev))
+    if rr_last < rr_prev
+        runtime.error(str.format('The distance of TP{0} (RR-ratio of {1}) cannot be less than that of TP{2} (RR-ratio of {3})', last+1, rr_last, prev+1, rr_prev))
+
+var tp_total_allocation = tp_allocation_array.sum()
+if tp_total_allocation > 1
+    runtime.error(str.format('The allocation for all enabled TP levels cannot exceed 100%; received {0}%', tp_total_allocation * 100))
+if not (tp1_params.enabled or enable_exit_by_signal)
+    runtime.error('Choose at least one method to exit: either TP1 (and potentially other TPs) or exit by signal')
+
+if (tp_total_allocation < 1) and not enable_exit_by_signal
+    runtime.error(str.format('The total allocation of all TPs is {0}%, while it should be 100% if no other exit signals are enabled.', tp_total_allocation * 100))
+
+if tp1_params.enabled and not tp2_params.enabled and not enable_exit_by_signal  // change TP1 allocation to 100%
+    tp1_params.allocation := 1    
+if tp1_params.enabled and tp2_params.enabled and not enable_exit_by_signal // scale TP1 + TP2 to 100%
+    tp1_params.allocation := nz(tp1_params.allocation / (tp1_params.allocation + tp2_params.allocation), tp1_params.allocation)  // for some reason getting "division by zero" thus added `nz()`
+    tp2_params.allocation := nz(tp2_params.allocation / (tp1_params.allocation + tp2_params.allocation), tp2_params.allocation)
+
+var int num_take_profits = (_tp1_enabled ? 1 : 0)  + (_tp2_enabled ? 1 : 0) + (_tp3_enabled ? 1 : 0) + (_tp4_enabled ? 1 : 0) + (_tp5_enabled ? 1 : 0)  // `tp_enabled_array_int.sum()` doesn't work as TV sees it as a series
+var int num_exits        = num_take_profits + (enable_exit_by_signal ? 1 : 0)
+
+
+
+// ------[  Strategy logic  ]----- //
+
+// Initialize trade with order levels
+var trade_stats                 = TradeStats.new(num_exits = num_exits)
+var trade                       = Trade.new()
+
+var consecutive_wins_array      = array.new<int>(0)
+var consecutive_losses_array    = array.new<int>(0)
+var drawdown_array              = array.new<float>(0)
+var runup_array                 = array.new<float>(0)
+
+
+// Unfortunately, need to do this outside a function/loop otherwise TradingView gives a warning.
+_entry_lowest           = ta.lowest( entry_params.hhll_use_hl   ?  low : math.min(open, close), entry_params.hhll_lookback)
+_entry_highest          = ta.highest(entry_params.hhll_use_hl   ? high : math.max(open, close), entry_params.hhll_lookback)
+_sl_lowest              = ta.lowest( sl_params.hhll_use_hl      ?  low : math.min(open, close), sl_params.hhll_lookback)
+_sl_highest             = ta.highest(sl_params.hhll_use_hl      ? high : math.max(open, close), sl_params.hhll_lookback)
+_tp1_lowest             = ta.lowest( tp1_params.hhll_use_hl     ?  low : math.min(open, close), tp1_params.hhll_lookback)
+_tp1_highest            = ta.highest(tp1_params.hhll_use_hl     ? high : math.max(open, close), tp1_params.hhll_lookback)
+_tp2_lowest             = ta.lowest( tp2_params.hhll_use_hl     ?  low : math.min(open, close), tp2_params.hhll_lookback)
+_tp2_highest            = ta.highest(tp2_params.hhll_use_hl     ? high : math.max(open, close), tp2_params.hhll_lookback)
+_tp3_lowest             = ta.lowest( tp3_params.hhll_use_hl     ?  low : math.min(open, close), tp3_params.hhll_lookback)
+_tp3_highest            = ta.highest(tp3_params.hhll_use_hl     ? high : math.max(open, close), tp3_params.hhll_lookback)
+_tp4_lowest             = ta.lowest( tp4_params.hhll_use_hl     ?  low : math.min(open, close), tp4_params.hhll_lookback)
+_tp4_highest            = ta.highest(tp4_params.hhll_use_hl     ? high : math.max(open, close), tp4_params.hhll_lookback)
+_tp5_lowest             = ta.lowest( tp5_params.hhll_use_hl     ?  low : math.min(open, close), tp5_params.hhll_lookback)
+_tp5_highest            = ta.highest(tp5_params.hhll_use_hl     ? high : math.max(open, close), tp5_params.hhll_lookback)
+
+// Determine whether a trade is closed
+_previous_bar_in_trade_but_now_no_position  = (strategy.opentrades[1] > 0) and (strategy.opentrades == 0)
+_filled_and_exited_in_single_bar            = (strategy.opentrades[1] == 0) and (strategy.opentrades == 0) and (strategy.closedtrades[1] != strategy.closedtrades)  // TODO not sure if needed to check previous position size
+_new_trade_without_gap                      = (strategy.opentrades[1] > 0) and (strategy.opentrades > 0) and (trade_stats.num_trades > trade_stats.num_trades[1])
+trade_closed = _previous_bar_in_trade_but_now_no_position or _filled_and_exited_in_single_bar or _new_trade_without_gap
+
+// Determine whether a new trade is started
+_start_new_trade = (strategy.opentrades == 0) and na(trade.entry_placed) and (signal_entry_long or signal_entry_shrt)
+_start_reverse_trade = (exit_signal_strategy == 'start reverse trade') and (((trade.direction == 'bull') and signal_entry_shrt) or ((trade.direction == 'bear') and signal_entry_long))
+start_trade = (_start_new_trade or _start_reverse_trade) and barstate.isconfirmed
+
+if (exit_signal_strategy == 'start reverse trade') and (custom_api_enable or pineconnector_enable)
+    runtime.error('Trade reversal is currently not supported with PineConnector or custom API as an alert is triggered only once per bar. Disable the alert message or use another "Exit signal strategy". A direct "reverse trade" command for PineConnector/API could solve thise in the future.')
+
+if trade_closed
+    trade := Trade.new()
+
+if start_trade
+    if _start_reverse_trade and (custom_api_enable or pineconnector_enable)
+        0  // not implemented, see runtime.error message
+        // trigger_pineconnector_alert(command=signal_entry_shrt ? 'closelong' : 'closeshort', offset=1)
+        // trigger_custom_api_alert(signal_entry_shrt ? 'exit_long' : 'exit_short', offset=1)
+
+    trade := Trade.new()
+    entry_ordertype := _start_reverse_trade ? 'market' : entry_ordertype  // trade reversal is a market order in any case
+
+    // Determining prices
+    trade.direction          := signal_entry_long ? 'bull' : 'bear'
+    trade.entry_price_signal := close
+    trade.entry_price        := switch entry_ordertype
+        'market' => close
+        'limit'  => entry_params.adjust_price(close, trade.direction == 'bull' ? 'bear' : 'bull', _entry_lowest, _entry_highest) // reverse direction for entry
+    trade.sl_price          := sl_params.adjust_price(trade.entry_price, trade.direction == 'bull' ? 'bear' : 'bull', _sl_lowest, _sl_highest)  // reverse direction for SL
+    trade.sl_distance_perc  := math.abs(trade.entry_price - trade.sl_price) / trade.entry_price
+
+    // If Risk-to-Reward method is chosen, pre-compute the associated percentage and use that as an input
+    if tp1_params.enabled
+        trade.tp1_price         := tp1_params.adjust_price(trade.entry_price, trade.direction, _tp1_lowest, _tp1_highest, tp1_params.rr_enabled ? (trade.sl_distance_perc * tp1_params.rr_ratio) : na)
+        trade.tp1_distance_perc := math.abs(trade.entry_price - trade.tp1_price) / trade.entry_price
+    if tp2_params.enabled
+        trade.tp2_price         := tp2_params.adjust_price(trade.entry_price, trade.direction, _tp2_lowest, _tp2_highest, tp2_params.rr_enabled ? (trade.sl_distance_perc * tp2_params.rr_ratio) : na)
+        trade.tp2_distance_perc := math.abs(trade.entry_price - trade.tp2_price) / trade.entry_price
+    if tp3_params.enabled
+        trade.tp3_price         := tp3_params.adjust_price(trade.entry_price, trade.direction, _tp3_lowest, _tp3_highest, tp3_params.rr_enabled ? (trade.sl_distance_perc * tp3_params.rr_ratio) : na)
+        trade.tp3_distance_perc := math.abs(trade.entry_price - trade.tp3_price) / trade.entry_price
+    if tp4_params.enabled
+        trade.tp4_price         := tp4_params.adjust_price(trade.entry_price, trade.direction, _tp4_lowest, _tp4_highest, tp4_params.rr_enabled ? (trade.sl_distance_perc * tp4_params.rr_ratio) : na)
+        trade.tp4_distance_perc := math.abs(trade.entry_price - trade.tp4_price) / trade.entry_price
+    if tp5_params.enabled
+        trade.tp5_price         := tp5_params.adjust_price(trade.entry_price, trade.direction, _tp5_lowest, _tp5_highest, tp5_params.rr_enabled ? (trade.sl_distance_perc * tp5_params.rr_ratio) : na)
+        trade.tp5_distance_perc := math.abs(trade.entry_price - trade.tp5_price) / trade.entry_price
+
+    // Strategy application
+    trade_stats.num_trades    += 1
+    compute_order_size(trade_stats, trade)
+    // trade.entry_size := 100  // TODO temp for testing
+    trade.trade_id := str.format('no.{0,number,000}', trade_stats.num_trades)
+    string _pc_command = na
+    string _pc_kwargs  = ',sl=' + get_pineconnector_price(trade.sl_price, trade.entry_price)
+
+    // Entries
+    if entry_ordertype == 'market'
+        strategy.entry(trade.trade_id, trade.direction == 'bear' ? strategy.short : strategy.long, qty=trade.entry_size, comment=str.tostring(trade.trade_id))
+        _pc_command := trade.direction == 'bear' ? 'sell' : 'buy'
+        trade.entry_placed  := true
+        trade.entry_filled  := true
+        trigger_custom_api_alert(trade.direction == 'bear' ? 'entry_short' : 'entry_long')
+    else if entry_ordertype == 'limit'
+        strategy.entry(trade.trade_id, trade.direction == 'bear' ? strategy.short : strategy.long, qty=trade.entry_size, comment=str.tostring(trade.trade_id), limit=trade.entry_price)
+        _pc_command := trade.direction == 'bear' ? 'selllimit' : 'buylimit'
+        _pc_kwargs  += ',price=' + get_pineconnector_price(trade.entry_price, close)
+        trade.entry_placed  := true
+        trade.num_bars_entry_open := 0
+    
+    // Take Profits
+    if tp1_params.enabled
+        trade.tp1_size := trade.entry_size * tp1_params.allocation
+        trade.tp1_filled := false
+        if num_take_profits == 1 and tp_total_allocation == 1
+            strategy.exit('TP1 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp1_price, comment_loss='SL (TP1)', comment_profit='TP1')
+        else    
+            strategy.exit('TP1 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp1_price, qty=trade.tp1_size, comment_loss='SL (TP1)', comment_profit='TP1')
+        if tp1_params.allocation == 1.  // when no partial take profit, we don't need to use market order exits with PineConnector
+            _pc_kwargs += ',tp=' + get_pineconnector_price(trade.tp1_price, trade.entry_price)
+    if tp2_params.enabled
+        trade.tp2_size := trade.entry_size * tp2_params.allocation
+        trade.tp2_filled := false
+        if num_take_profits == 2 and tp_total_allocation == 1
+            strategy.exit('TP2 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp2_price, comment_loss='SL (TP2)', comment_profit='TP2')
+        else
+            strategy.exit('TP2 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp2_price, qty=trade.tp2_size, comment_loss='SL (TP2)', comment_profit='TP2')
+    if tp3_params.enabled
+        trade.tp3_size := trade.entry_size * tp3_params.allocation
+        trade.tp3_filled := false
+        if num_take_profits == 3 and tp_total_allocation == 1
+            strategy.exit('TP3 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp3_price, comment_loss='SL (TP3)', comment_profit='TP3')
+        else
+            strategy.exit('TP3 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp3_price, qty=trade.tp3_size, comment_loss='SL (TP3)', comment_profit='TP3')
+    if tp4_params.enabled
+        trade.tp4_size := trade.entry_size * tp4_params.allocation
+        trade.tp4_filled := false
+        if num_take_profits == 4 and tp_total_allocation == 1
+            strategy.exit('TP4 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp4_price, comment_loss='SL (TP4)', comment_profit='TP4')
+        else
+            strategy.exit('TP4 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp4_price, qty=trade.tp4_size, comment_loss='SL (TP4)', comment_profit='TP4')
+    if tp5_params.enabled
+        trade.tp5_size := trade.entry_size * tp5_params.allocation
+        trade.tp5_filled := false
+        if num_take_profits == 5 and tp_total_allocation == 1
+            strategy.exit('TP5 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp5_price, comment_loss='SL (TP5)', comment_profit='TP5')
+        else
+            strategy.exit('TP5 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp5_price, qty=trade.tp5_size, comment_loss='SL (TP5)', comment_profit='TP5')
+
+    // single alert: market/limit entry, SL and (only if TP1 = 100% allocation) TP. In other cases, TP will be triggered on candle close (market order)
+    trigger_pineconnector_alert(_pc_command, risk_multiplier=trade.entry_size / trade.calculated_order_size, kwargs=_pc_kwargs)
+    
+    // Exit for remaining volume
+    strategy.exit('SL', trade.trade_id, stop=trade.sl_price, limit=na, comment='SL (overall)')
+
+// Check if limit order is not filled within X bars and cancel it
+if trade.entry_placed and (not trade.entry_filled) and barstate.isconfirmed
+    if (strategy.position_size[1] == 0) and (strategy.position_size != 0) and (strategy.position_size < 0 ? high >= trade.entry_price : low <= trade.entry_price)
+        trade.entry_filled := true
+        trigger_custom_api_alert(trade.direction == 'bear' ? 'entry_short' : 'entry_long')
+    else
+        trade.num_bars_entry_open += 1
+        if (max_bar_entry_limit_order_active > 0) and (trade.num_bars_entry_open > max_bar_entry_limit_order_active)
+            strategy.cancel(trade.trade_id)
+            trigger_pineconnector_alert(command=trade.direction == 'bull' ? 'cancellong' : 'cancelshort')
+            // trigger_custom_api_alert(trade.direction == 'bull' ? 'exit_long' : 'exit_short')
+            trade := Trade.new()  // Reset trade information
+            trade_stats.num_trades -= 1
+
+
+// Update whether TP was filled. Current or previous bar in trade, and position has not flipped direction
+if trade.entry_filled and (strategy.position_size != 0) and not _start_reverse_trade
+    trade.num_bars_in_trade += 1
+    
+    trade.tp1_fill_event := not trade.tp1_filled and ((strategy.position_size > 0) ? (high >= trade.tp1_price) : (low <= trade.tp1_price))
+    trade.tp2_fill_event := not trade.tp2_filled and ((strategy.position_size > 0) ? (high >= trade.tp2_price) : (low <= trade.tp2_price))
+    trade.tp3_fill_event := not trade.tp3_filled and ((strategy.position_size > 0) ? (high >= trade.tp3_price) : (low <= trade.tp3_price))
+    trade.tp4_fill_event := not trade.tp4_filled and ((strategy.position_size > 0) ? (high >= trade.tp4_price) : (low <= trade.tp4_price))
+    trade.tp5_fill_event := not trade.tp5_filled and ((strategy.position_size > 0) ? (high >= trade.tp5_price) : (low <= trade.tp5_price))
+
+    trade.tp1_filled := trade.tp1_fill_event ? true : trade.tp1_filled
+    trade.tp2_filled := trade.tp2_fill_event ? true : trade.tp2_filled
+    trade.tp3_filled := trade.tp3_fill_event ? true : trade.tp3_filled
+    trade.tp4_filled := trade.tp4_fill_event ? true : trade.tp4_filled
+    trade.tp5_filled := trade.tp5_fill_event ? true : trade.tp5_filled
+
+
+update_sl(string _move) =>
+    sl_old = trade.sl_price
+    trade.sl_price := switch _move
+        'breakeven (entry)' => trade.entry_price
+        'TP1'               => trade.tp1_price
+        'TP2'               => trade.tp2_price
+        'TP3'               => trade.tp3_price
+        'TP4'               => trade.tp4_price
+        => trade.sl_price
+
+    _pine_alert = false
+    if not trade.tp1_filled   
+        strategy.exit('TP1 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp1_price, qty=trade.tp1_size, comment_loss='SL (TP1)', comment_profit='TP1')
+        _pine_alert := true
+    if not trade.tp2_filled
+        strategy.exit('TP2 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp2_price, qty=trade.tp2_size, comment_loss='SL (TP2)', comment_profit='TP2')
+        _pine_alert := true
+    if not trade.tp3_filled
+        strategy.exit('TP3 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp3_price, qty=trade.tp3_size, comment_loss='SL (TP3)', comment_profit='TP3')
+        _pine_alert := true
+    if not trade.tp4_filled
+        strategy.exit('TP4 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp4_price, qty=trade.tp4_size, comment_loss='SL (TP2)', comment_profit='TP4')
+        _pine_alert := true
+    if not trade.tp5_filled
+        strategy.exit('TP5 exit' , trade.trade_id, stop=trade.sl_price,  limit=trade.tp5_price, qty=trade.tp5_size, comment_loss='SL (TP5)', comment_profit='TP5')
+        _pine_alert := true
+    if enable_exit_by_signal
+        strategy.exit('SL', trade.trade_id, stop=trade.sl_price, limit=na, comment='SL (moved)')
+        _pine_alert := true
+    if _pine_alert  // to trigger only once
+        trigger_pineconnector_alert(command=trade.direction == 'bull'? 'newsltpbuylimit' : 'newsltpselllimit', kwargs='sl=' + get_pineconnector_price(trade.sl_price, close), offset=4)
+
+    
+if trade.tp1_fill_event or trade.tp2_fill_event or trade.tp3_fill_event or trade.tp4_fill_event or trade.tp5_fill_event
+    // PineConnector partial market order after hitting TPs
+    if trade.tp1_fill_event
+        trade.supertrend_exit_activated := tp1_params.sl_supertrend_active 
+        update_sl(tp1_params.sl_movement)
+        trigger_pineconnector_alert(command=trade.direction == 'bull' ? 'closelongvol' : 'closeshortvol', risk_multiplier=tp1_params.allocation * trade.entry_size / trade.calculated_order_size, offset=-4)
+    if trade.tp2_fill_event
+        trade.supertrend_exit_activated := tp2_params.sl_supertrend_active ? true : trade.supertrend_exit_activated
+        update_sl(tp2_params.sl_movement)
+        trigger_pineconnector_alert(command=trade.direction == 'bull' ? 'closelongvol' : 'closeshortvol', risk_multiplier=tp2_params.allocation * trade.entry_size / trade.calculated_order_size, offset=-8)
+    if trade.tp3_fill_event
+        trade.supertrend_exit_activated := tp3_params.sl_supertrend_active ? true : trade.supertrend_exit_activated
+        update_sl(tp3_params.sl_movement)
+        trigger_pineconnector_alert(command=trade.direction == 'bull' ? 'closelongvol' : 'closeshortvol', risk_multiplier=tp3_params.allocation * trade.entry_size / trade.calculated_order_size, offset=-12)
+    if trade.tp4_fill_event
+        trade.supertrend_exit_activated := tp4_params.sl_supertrend_active ? true : trade.supertrend_exit_activated
+        update_sl(tp4_params.sl_movement)
+        trigger_pineconnector_alert(command=trade.direction == 'bull' ? 'closelongvol' : 'closeshortvol', risk_multiplier=tp4_params.allocation * trade.entry_size / trade.calculated_order_size, offset=-16)
+    if trade.tp5_fill_event
+        trade.supertrend_exit_activated := tp5_params.sl_supertrend_active ? true : trade.supertrend_exit_activated
+        update_sl(tp5_params.sl_movement)
+        trigger_pineconnector_alert(command=trade.direction == 'bull' ? 'closelongvol' : 'closeshortvol', risk_multiplier=tp5_params.allocation * trade.entry_size / trade.calculated_order_size, offset=-20)
+
+
+st2_switch_direction_method = 'on high/low'  // TEMP
+if (strategy.position_size != 0) and barstate.isconfirmed
+    
+    // Check exits
+    exit_type = 'signal'
+    close_trade = switch trade.direction
+        'bull' => signal_exit_long
+        'bear' => signal_exit_shrt
+    if not close_trade and trade.supertrend_exit_activated
+        exit_type := 'SuperTrend'
+        close_trade := switch trade.direction
+            'bull' => st2_bullish ? (st2_switch_direction_method == 'on high/low' ? low  : close) < supertrend2 : false
+            'bear' => st2_bearish ? (st2_switch_direction_method == 'on high/low' ? high : close) > supertrend2 : false
+            // 'bull' => st2_bearish and st2_bullish[1]
+            // 'bear' => st2_bullish and st2_bearish[1]
+
+    if close_trade
+        if exit_signal_strategy == 'market close'
+            strategy.close(trade.trade_id, comment=str.format('Exit ({0})', exit_type))
+            trigger_pineconnector_alert(trade.direction == 'bull' ? 'closelong' : 'closeshort')
+            trigger_custom_api_alert(   trade.direction == 'bull' ? 'exit_long' : 'exit_short')
+        else if exit_signal_strategy ==  'move SL to entry'
+            update_sl('move to entry')
+        else if exit_signal_strategy ==  'start reverse trade'
+            runtime.error('Exit with reverse trade. Logically, this should not happen as a reverse trade should happen instanteneously.')
+
+
+// Check SL and TP for market order with custom API
+if custom_api_enable and _previous_bar_in_trade_but_now_no_position
+    if trade.direction[1] == 'bull'
+        trade.sl_filled  := low <= trade.sl_price[1]
+        trade.tp1_filled := high >= trade.tp1_price[1]
+    else if trade.direction[1] == 'bear'
+        trade.sl_filled  := high >= trade.sl_price[1]
+        trade.tp1_filled := low <= trade.tp1_price[1]
+    if trade.sl_filled or trade.tp1_filled
+        trigger_custom_api_alert(trade.direction[1] == 'bull' ? 'exit_long' : 'exit_short')
+
+
+// ----------------------------------------------------------------------------------------------------------------------------- //
+// ------[  POST-TRADE HANDLING  ]-----
+// ----------------------------------------------------------------------------------------------------------------------------- //
+
+// ------[  Calculate statistics  ]----- //
+
+if trade_closed  // trade is closed. TODO multiple entries will count as separate trades
+    // Calculate stats over all partial exits
+    _partial_profit_array    = array.new<float>(trade_stats.num_exits, 0)
+    _partial_drawdown_array  = array.new<float>(trade_stats.num_exits, 0)
+    _partial_runup_array     = array.new<float>(trade_stats.num_exits, 0)
+    num = 0
+    for i = (strategy.closedtrades - trade_stats.num_exits)  to (strategy.closedtrades - 1)
+        _partial_profit_array.set(num, strategy.closedtrades.profit_percent(i) * math.abs(strategy.closedtrades.size(i))/trade.entry_size[1])
+        _partial_drawdown_array.set(num, strategy.closedtrades.max_drawdown_percent(i))
+        _partial_runup_array.set(num, strategy.closedtrades.max_runup_percent(i))
+        num += 1
+        // log.info('\n{0} no.{1}) profit: {2,number,0.00}% (size={3}/{4})\nrunup/drawdown: {5}/{6}', strategy.closedtrades.entry_id(i), num, strategy.closedtrades.profit_percent(i), strategy.closedtrades.size(i), trade.entry_size[1], strategy.closedtrades.max_runup_percent(i), strategy.closedtrades.max_drawdown_percent(i))
+
+    trade_stats.current_profit  := _partial_profit_array.sum()
+    drawdown                    = _partial_drawdown_array.max()
+    runup                       = _partial_runup_array.max()
+    drawdown_array.push(drawdown)
+    runup_array.push(runup)
+
+    // Calculate consecutive wins/losses; not that we deliberately not include profit == 0
+    if trade_stats.last_trade_was_win
+        if trade_stats.current_profit > 0  // again a win
+            trade_stats.num_current_consecutive_wins   := nz(trade_stats.num_current_consecutive_wins) + 1
+        else if trade_stats.current_profit < 0  // win streak over
+            consecutive_wins_array.push(trade_stats.num_current_consecutive_wins)
+            trade_stats.last_trade_was_win              := false
+            trade_stats.last_trade_was_loss             := true
+            trade_stats.num_current_consecutive_wins    := 0
+            trade_stats.num_current_consecutive_losses  := 1
+    else if trade_stats.last_trade_was_loss
+        if trade_stats.current_profit < 0  // again a loss
+            trade_stats.num_current_consecutive_losses := nz(trade_stats.num_current_consecutive_losses) + 1
+        else if trade_stats.current_profit > 0 // loss streak over
+            consecutive_losses_array.push(trade_stats.num_current_consecutive_losses)
+            trade_stats.last_trade_was_win              := true
+            trade_stats.last_trade_was_loss             := false
+            trade_stats.num_current_consecutive_wins    := 1
+            trade_stats.num_current_consecutive_losses  := 0
+    else
+        if trade_stats.current_profit > 0
+            // consecutive_wins_array.push(trade_stats.num_current_consecutive_wins)
+            trade_stats.last_trade_was_win              := true
+            trade_stats.num_current_consecutive_wins    := 1
+        if trade_stats.current_profit < 0
+            // consecutive_losses_array.push(trade_stats.num_current_consecutive_losses)
+            trade_stats.last_trade_was_loss             := true
+            trade_stats.num_current_consecutive_losses  := 1
+
+
+// ------[  Table  ]----- //
+c_transparent = color.new(color.black, 100)
+c_table_header = table_color_light ? color.rgb(0, 0, 0, 0)         : color.rgb(220, 220, 220, 0)
+c_table_body   = table_color_light ? color.rgb(0, 0, 0, 20)        : color.rgb(220, 220, 220, 20)
+c_table_bg     = table_color_light ? color.rgb(255, 255, 255, 40)  : color.rgb(255, 255, 255, 90)
+if show_trading_stats and (barstate.islast or barstate.islastconfirmedhistory)
+    stats_percentile = 50
+
+    trade_stats.num_wins                        := consecutive_wins_array.sum()
+    trade_stats.num_losses                      := consecutive_losses_array.sum()
+    trade_stats.num_breakeven                   := trade_stats.num_trades - trade_stats.num_wins - trade_stats.num_losses
+    trade_stats.win_rate                        := trade_stats.num_wins / (trade_stats.num_trades - trade_stats.num_breakeven)
+    
+    trade_stats.consecutive_wins_max            := consecutive_wins_array.max()
+    trade_stats.consecutive_losses_max          := consecutive_losses_array.max()
+    trade_stats.drawdown_max                    := drawdown_array.max() / 100
+    trade_stats.runup_max                       := runup_array.max() / 100
+
+    trade_stats.consecutive_wins_percentile     := consecutive_wins_array.percentile_linear_interpolation(stats_percentile)
+    trade_stats.consecutive_losses_percentile   := consecutive_losses_array.percentile_linear_interpolation(stats_percentile)
+    trade_stats.drawdown_percentile             := drawdown_array.percentile_linear_interpolation(stats_percentile) / 100
+    trade_stats.runup_percentile                := runup_array.percentile_linear_interpolation(stats_percentile) / 100
+
+    var tbl_stats = table.new(position.bottom_center, columns=3, rows=12, bgcolor=c_table_bg, frame_width=1, border_width=1, border_color=c_transparent)
+    row = 0
+    table.cell(tbl_stats, 0, row, text_size=size.tiny, text_color=c_table_header, text_halign=text.align_right,     text='Trading')
+    table.cell(tbl_stats, 1, row, text_size=size.tiny, text_color=c_table_header, text_halign=text.align_left,      text=str.format('stats (n={0})', trade_stats.num_trades))
+    // row += 1
+    // table.cell(tbl_stats, 0, row, text_size=size.tiny,  text_color=c_transparent, text='row_separator')tiny
+    row += 1
+    table.cell(tbl_stats, 1, row, text_size=size.tiny,  text_color=c_table_header, text_halign=text.align_right,     text='maximum')
+    table.cell(tbl_stats, 2, row, text_size=size.tiny,  text_color=c_table_header, text_halign=text.align_right,     text='median')
+    row += 1
+    table.cell(tbl_stats, 0, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text='win streak')
+    table.cell(tbl_stats, 1, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text=str.tostring(trade_stats.consecutive_wins_max, '0'))
+    table.cell(tbl_stats, 2, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text=str.tostring(trade_stats.consecutive_wins_percentile, '0.0'))
+    row += 1
+    table.cell(tbl_stats, 0, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text='loss streak')
+    table.cell(tbl_stats, 1, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text=str.tostring(trade_stats.consecutive_losses_max, '0'))
+    table.cell(tbl_stats, 2, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text=str.tostring(trade_stats.consecutive_losses_percentile, '0.0'))
+    row += 1
+    // table.cell(tbl_stats, 0, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text='Max drawdown')
+    // table.cell(tbl_stats, 1, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text=str.tostring(trade_stats.drawdown_max, '0.00%'))
+    // table.cell(tbl_stats, 2, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text=str.tostring(trade_stats.drawdown_percentile, '0.00%'))
+    // row += 1
+    // table.cell(tbl_stats, 0, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text='Max runup')
+    // table.cell(tbl_stats, 1, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text=str.tostring(trade_stats.runup_max, '0.00%'))
+    // table.cell(tbl_stats, 2, row, text_size=size.tiny,  text_color=c_table_body,   text_halign=text.align_right,     text=str.tostring(trade_stats.runup_percentile, '0.00%'))
+
+
+// ------[  Plot trades  ]----- //
+
+c_line_gray         = color.rgb(151, 151, 151, 20)
+c_fill_gray         = color.rgb(151, 151, 151, 90)  
+c_line_blue         = color.rgb(33, 149, 243, 20)
+c_fill_blue         = color.rgb(33, 152, 243, 90)  
+c_line_yellow       = color.rgb(180, 134, 73, 20)
+c_fill_yellow       = color.rgb(180, 134, 73, 90)
+
+disp_all              = display.all - display.status_line
+disp_trades_fill      = show_order_levels ? display.all : display.none
+show_in_trade         = show_order_levels and (trade.entry_filled or trade.entry_filled[1])
+
+show_tp1_level     = show_in_trade and (not nz(trade.tp1_filled, true) or not nz(trade.tp1_filled[1], true))
+show_tp2_level     = show_in_trade and (not nz(trade.tp2_filled, true) or not nz(trade.tp2_filled[1], true))
+show_tp3_level     = show_in_trade and (not nz(trade.tp3_filled, true) or not nz(trade.tp3_filled[1], true))
+show_tp4_level     = show_in_trade and (not nz(trade.tp4_filled, true) or not nz(trade.tp4_filled[1], true))
+show_tp5_level     = show_in_trade and (not nz(trade.tp5_filled, true) or not nz(trade.tp5_filled[1], true))
+show_signal_level  = show_in_trade and (_tp1_enabled ? nz(trade.tp1_filled, true) : true) and (_tp2_enabled ? nz(trade.tp2_filled, true) : true) and (_tp3_enabled ? nz(trade.tp3_filled, true) : true) and (_tp4_enabled ? nz(trade.tp4_filled, true) : true) and (_tp5_enabled ? nz(trade.tp5_filled, true) : true)
+
+p_series_entry_price    = show_order_levels and trade.entry_placed and not trade.entry_filled and strategy.position_size[1] == 0 ? trade.entry_price_signal : na
+p_series_entry_pending  = show_order_levels and trade.entry_placed and not trade.entry_filled and strategy.position_size[1] == 0 ? trade.entry_price : na
+p_series_entry          = show_order_levels ? (strategy.position_avg_price != 0 ? strategy.position_avg_price : strategy.position_avg_price[1]) : na
+p_series_tp1            = show_tp1_level    ? nz(trade.tp1_price, trade.tp1_price[1]) : na
+p_series_tp2            = show_tp2_level    ? nz(trade.tp2_price, trade.tp2_price[1]) : na
+p_series_tp3            = show_tp3_level    ? nz(trade.tp3_price, trade.tp3_price[1]) : na
+p_series_tp4            = show_tp4_level    ? nz(trade.tp4_price, trade.tp4_price[1]) : na
+p_series_tp5            = show_tp5_level    ? nz(trade.tp5_price, trade.tp5_price[1]) : na  
+p_series_sl             = show_in_trade     ? nz(trade.sl_price,   trade.sl_price[1]) : na
+p_series_signal         = show_signal_level ? close : na
+
+p_entry_price  =  plot(nz(p_series_entry_price, p_series_entry_price[1]),  color=c_line_gray,    linewidth=2, style=plot.style_circles, title="Signal entry price (entry pending)", editable=false, display=disp_all)
+p_entry_pending = plot(nz(p_series_entry_pending, p_series_entry_pending[1]), color=c_line_gray, linewidth=1, style=plot.style_linebr,  title="Entry price (pending)",              editable=false, display=disp_all)
+p_entry_avg     = plot(p_series_entry, color=c_line_gray,  linewidth=3,                              style=plot.style_linebr, title="Entry price", editable=false, display=disp_all)
+p_tp1           = plot(p_series_tp1, color=c_line_blue,    linewidth=num_take_profits == 1 ? 3 : 1,  style=plot.style_linebr, title="TP1 price",   editable=false, display=disp_all)
+p_tp2           = plot(p_series_tp2, color=c_line_blue,    linewidth=num_take_profits == 2 ? 3 : 1,  style=plot.style_linebr, title="TP2 price",   editable=false, display=disp_all)
+p_tp3           = plot(p_series_tp3, color=c_line_blue,    linewidth=num_take_profits == 3 ? 3 : 1,  style=plot.style_linebr, title="TP3 price",   editable=false, display=disp_all)
+p_tp4           = plot(p_series_tp4, color=c_line_blue,    linewidth=num_take_profits == 4 ? 3 : 1,  style=plot.style_linebr, title="TP4 price",   editable=false, display=disp_all)
+p_tp5           = plot(p_series_tp5, color=c_line_blue,    linewidth=num_take_profits == 5 ? 3 : 1,  style=plot.style_linebr, title="TP5 price",   editable=false, display=disp_all)
+p_signal        = plot(p_series_signal, color=c_line_blue, linewidth=3,                              style=plot.style_linebr, title="Exit price",  editable=false, display=disp_all)
+p_sl            = plot(p_series_sl,  color=c_line_yellow,  linewidth=3,                              style=plot.style_linebr, title="SL price",    editable=false, display=disp_all)
+
+
+bool sl_in_profit = switch trade.direction
+    'bull' => nz(trade.entry_filled, trade.entry_filled[1]) ? trade.sl_price[1] >= trade.entry_price[1] : na
+    'bear' => nz(trade.entry_filled, trade.entry_filled[1]) ? trade.sl_price[1] <= trade.entry_price[1] : na
+
+// A dynamic plot for the fills
+p_tp_fill    = plot(nz(p_series_signal, nz(p_series_tp5, nz(p_series_tp4, nz(p_series_tp3, nz(p_series_tp2, p_series_tp1))))), editable=false, display=display.none)
+p_entry_fill = plot(nz(sl_in_profit, sl_in_profit[1]) ? na : p_series_entry,                 editable=false, display=display.none)
+p_sl_fill    = plot(nz(sl_in_profit, sl_in_profit[1]) ? na : p_series_sl,                    editable=false, display=display.none)
+
+fill(p_entry_price, p_entry_pending,    color=c_fill_gray,       title="Pending entry fill",  editable=false, display=disp_trades_fill)
+fill(p_entry_avg,    p_tp_fill,         color=c_fill_blue,      title="TP fill",              editable=false, display=disp_trades_fill)
+fill(p_entry_fill,   p_sl_fill,         color=c_fill_yellow,    title="SL fill",              editable=false, display=disp_trades_fill)

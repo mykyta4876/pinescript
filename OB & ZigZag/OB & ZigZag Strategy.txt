@@ -1,0 +1,304 @@
+//@version=5
+strategy("OB & ZigZag Strategy", overlay = true
+  , max_lines_count  = 500
+  , max_labels_count = 500
+  , max_boxes_count  = 500
+  , max_bars_back    = 500)
+
+//------------------------------------------------------------------------------
+//Settings
+//-----------------------------------------------------------------------------{
+//ZigZag Settings
+prd1     = input.int(2, 'ZigZag Period', minval = 2, maxval = 100, group = 'ZigZag Settings')
+showzz   = input.bool(true, 'Show ZigZag Line', group = 'ZigZag Settings')
+showhhll = input.bool(true, 'Show HHLL Label', group = 'ZigZag Settings')
+upcol   = input(color.lime, 'Up', inline = 'zz1', group = 'ZigZag Settings')
+dncol   = input(color.red,  'Down', inline = 'zz1', group = 'ZigZag Settings')
+txtcol   = input(color.black, 'Text', inline = 'zz1', group = 'ZigZag Settings')
+zzwidth = input.int(2, 'Line Width', minval = 1, maxval = 4, group = 'ZigZag Settings')
+
+//OrderBlock Settings
+length       = input.int(10, 'Swing Lookback'     , minval = 3, group = 'Order Block Settings')
+useBody      = input(false, 'Use Candle Body', group = 'Order Block Settings')
+showBull     = input.int(3, 'Show Last Bullish OB', minval = 0, group = 'Order Block Settings')
+showBear     = input.int(3, 'Show Last Bearish OB', minval = 0, group = 'Order Block Settings')
+bullCss      = input(color.new(#2157f3, 80), 'Bullish OB'   , inline = 'bullcss', group = 'Order Block Settings')
+bullBreakCss = input(color.new(#ff1100, 80), 'Bullish Break', inline = 'bullcss', group = 'Order Block Settings')
+bearCss      = input(color.new(#ff5d00, 80), 'Bearish OB'   , inline = 'bearcss', group = 'Order Block Settings')
+bearBreakCss = input(color.new(#0cb51a, 80), 'Bearish Break', inline = 'bearcss', group = 'Order Block Settings')
+showLabels   = input(false, 'Show Historical Polarity Changes', group = 'Order Block Settings')
+
+//-----------------------------------------------------------------------------}
+//ZigZag with HHLL
+//-----------------------------------------------------------------------------{
+float ph1 = ta.highestbars(high, prd1) == 0 ? high : na
+float pl1 = ta.lowestbars(low, prd1) == 0 ? low : na
+
+var dir1 = 0
+iff_1 = not na(pl1) and na(ph1) ? -1 : dir1
+dir1 := not na(ph1) and na(pl1) ? 1 : iff_1
+
+var int trade_signal = na
+var int trade_signal_ob = na
+
+var max_array_size = 10  // [5, 2] matrix
+var zigzag1 = array.new_float(0)
+oldzigzag1 = array.copy(zigzag1)
+
+add_to_zigzag(pointer, value, bindex) =>
+    array.unshift(pointer, bindex)
+    array.unshift(pointer, value)
+    if array.size(pointer) > max_array_size
+        array.pop(pointer)
+        array.pop(pointer)
+
+update_zigzag(pointer, value, bindex, dir) =>
+    if array.size(pointer) == 0
+        add_to_zigzag(pointer, value, bindex)
+    else
+        if dir == 1 and value > array.get(pointer, 0) or dir == -1 and value < array.get(pointer, 0)
+            array.set(pointer, 0, value)
+            array.set(pointer, 1, bindex)
+        0.
+
+dir1changed = ta.change(dir1) != 0
+if not na(ph1) or not na(pl1)
+    if dir1changed
+        add_to_zigzag(zigzag1, dir1 == 1 ? ph1 : pl1, bar_index)
+    else
+        update_zigzag(zigzag1, dir1 == 1 ? ph1 : pl1, bar_index, dir1)
+
+if array.size(zigzag1) >= 6
+    var line zzline = na
+    var label zzlabel = na
+    if array.get(zigzag1, 0) != array.get(oldzigzag1, 0) or array.get(zigzag1, 1) != array.get(oldzigzag1, 1)
+        if array.get(zigzag1, 2) == array.get(oldzigzag1, 2) and array.get(zigzag1, 3) == array.get(oldzigzag1, 3)
+            line.delete(zzline)
+            label.delete(zzlabel)
+        if showzz
+            zzline := line.new(x1=math.round(array.get(zigzag1, 1)), y1=array.get(zigzag1, 0), x2=math.round(array.get(zigzag1, 3)), y2=array.get(zigzag1, 2), color=dir1 == 1 ? upcol : dncol, width=zzwidth)
+            zzline
+        if showhhll
+            hhlltxt = dir1 == 1 ? array.get(zigzag1, 0) > array.get(zigzag1, 4) ? 'HH' : 'LH' : array.get(zigzag1, 0) < array.get(zigzag1, 4) ? 'LL' : 'HL'
+            labelcol = dir1 == 1 ? array.get(zigzag1, 0) > array.get(zigzag1, 4) ? upcol : dncol : array.get(zigzag1, 0) < array.get(zigzag1, 4) ? dncol : upcol
+            zzlabel := label.new(x=math.round(array.get(zigzag1, 1)), y=array.get(zigzag1, 0), text=hhlltxt, color=labelcol, textcolor=txtcol, style=dir1 == 1 ? label.style_label_down : label.style_label_up)
+            zzlabel
+// Trading logic based on ZigZag
+    
+    if showhhll
+        if zzlabel.get_text() == "LL" 
+            trade_signal := 1  // Buy signal
+        else if zzlabel.get_text() == "HH"
+            trade_signal := -1  // Sell signal
+        else
+            trade_signal := 0
+    else
+        trade_signal := na
+
+
+// Additional code for entering a buy trade on LL with green or blue ZigZag line of Bullish OB
+//-----------------------------------------------------------------------------{
+//-----------------------------------------------------------------------------}
+//UDT's
+//-----------------------------------------------------------------------------{
+type ob
+    float top = na
+    float btm = na
+    int   loc = bar_index
+    bool  breaker = false
+    int   break_loc = na
+
+type swing
+    float y = na
+    int   x = na
+    bool  crossed = false
+
+//-----------------------------------------------------------------------------}
+//Functions
+//-----------------------------------------------------------------------------{
+swings(len)=>
+    var os = 0
+    var swing top = swing.new(na, na)
+    var swing btm = swing.new(na, na)
+    
+    upper = ta.highest(len)
+    lower = ta.lowest(len)
+
+    os := high[len] > upper ? 0 
+      : low[len] < lower ? 1 : os
+
+    if os == 0 and os[1] != 0
+        top := swing.new(high[length], bar_index[length])
+
+    
+    if os == 1 and os[1] != 1
+        btm := swing.new(low[length], bar_index[length])
+
+    [top, btm]
+
+method notransp(color css) => color.rgb(color.r(css), color.g(css), color.b(css))
+
+method display(ob id, css, break_css)=>
+    if id.breaker
+        box.new(id.loc, id.top, id.break_loc, id.btm, css.notransp()
+          , bgcolor = css
+          , xloc = xloc.bar_time)
+        box.new(id.break_loc, id.top, time+1, id.btm, na
+          , bgcolor = break_css
+          , extend = extend.right
+          , xloc = xloc.bar_time)
+        line.new(id.loc, id.top, id.break_loc, id.top, xloc.bar_time, color = css.notransp())
+        line.new(id.loc, id.btm, id.break_loc, id.btm, xloc.bar_time, color = css.notransp())
+        line.new(id.break_loc, id.top, time+1, id.top, xloc.bar_time, extend.right, break_css.notransp(), line.style_dashed)
+        line.new(id.break_loc, id.btm, time+1, id.btm, xloc.bar_time, extend.right, break_css.notransp(), line.style_dashed)
+    else
+        box.new(id.loc, id.top, time, id.btm, na
+          , bgcolor = css
+          , extend = extend.right
+          , xloc = xloc.bar_time)
+        
+        line.new(id.loc, id.top, time, id.top, xloc.bar_time, extend.right, css.notransp())
+        line.new(id.loc, id.btm, time, id.btm, xloc.bar_time, extend.right, css.notransp())
+
+//-----------------------------------------------------------------------------}
+//Detect Swings
+//-----------------------------------------------------------------------------{
+n = bar_index
+
+[top, btm] = swings(length)
+max = useBody ? math.max(close, open) : high
+min = useBody ? math.min(close, open) : low
+
+//-----------------------------------------------------------------------------}
+//Bullish OB
+//-----------------------------------------------------------------------------{
+var bullish_ob = array.new<ob>(0)
+bull_break_conf = 0
+
+if close > top.y and not top.crossed
+    top.crossed := true
+
+    minima = max[1]
+    maxima = min[1]
+    loc = time[1]
+
+    for i = 1 to (n - top.x)-1
+        minima := math.min(min[i], minima)
+        maxima := minima == min[i] ? max[i] : maxima
+        loc := minima == min[i] ? time[i] : loc
+
+    bullish_ob.unshift(ob.new(maxima, minima, loc))
+
+if bullish_ob.size() > 0
+    for i = bullish_ob.size()-1 to 0
+        element = bullish_ob.get(i)
+    
+        if not element.breaker 
+            if math.min(close, open) < element.btm
+                element.breaker := true
+                element.break_loc := time
+        else
+            if close > element.top
+                bullish_ob.remove(i)
+            else if i < showBull and top.y < element.top and top.y > element.btm 
+                bull_break_conf := 1
+
+//Set label
+if bull_break_conf > bull_break_conf[1] and showLabels
+    label.new(top.x, top.y, '▼', color = na
+      , textcolor = bearCss.notransp()
+      , style = label.style_label_down
+      , size = size.tiny)
+    // trade_signal_ob := -1
+
+//-----------------------------------------------------------------------------}
+//Bearish OB
+//-----------------------------------------------------------------------------{
+var bearish_ob = array.new<ob>(0)
+bear_break_conf = 0
+
+if close < btm.y and not btm.crossed
+    btm.crossed := true
+
+    minima = min[1]
+    maxima = max[1]
+    loc = time[1]
+
+    for i = 1 to (n - btm.x)-1
+        maxima := math.max(max[i], maxima)
+        minima := maxima == max[i] ? min[i] : minima
+        loc := maxima == max[i] ? time[i] : loc
+
+    bearish_ob.unshift(ob.new(maxima, minima, loc))
+
+if bearish_ob.size() > 0
+    for i = bearish_ob.size()-1 to 0
+        element = bearish_ob.get(i)
+
+        if not element.breaker 
+            if math.max(close, open) > element.top
+                element.breaker := true
+                element.break_loc := time
+        else
+            if close < element.btm
+                bearish_ob.remove(i)
+            else if i < showBear and btm.y > element.btm and btm.y < element.top 
+                bear_break_conf := 1
+
+//Set label
+if bear_break_conf > bear_break_conf[1] and showLabels
+    label.new(btm.x, btm.y, '▲', color = na
+      , textcolor = bullCss.notransp()
+      , style = label.style_label_up
+      , size = size.tiny)
+
+//-----------------------------------------------------------------------------}
+//Set Order Blocks
+//-----------------------------------------------------------------------------{
+if barstate.islast
+    //Bullish
+    if showBull > 0
+        for i = 0 to math.min(showBull-1, bullish_ob.size())
+            get_ob = bullish_ob.get(i)
+            get_ob.display(bullCss, bullBreakCss)
+
+    //Bearish
+    if showBear > 0
+        for i = 0 to math.min(showBear-1, bearish_ob.size())
+            get_ob = bearish_ob.get(i)
+            get_ob.display(bearCss, bearBreakCss)
+
+
+
+var bullish_ob_color = dir1 == 1 ? bullCss : bearCss
+var bullish_ob_break_color = dir1 == 1 ? bullBreakCss : bearBreakCss
+
+
+risk_per_trade = close * 0.01 // example for 1% of the closing price
+
+if trade_signal == -1 and strategy.position_size >= 0
+    entry_price = close
+    stop_loss = entry_price + risk_per_trade
+    take_profit = entry_price - 2 * risk_per_trade
+    strategy.entry("Sell", strategy.short)
+    strategy.exit("exit", "Sell", stop = stop_loss, limit = take_profit)
+
+if trade_signal == 1 and strategy.position_size <= 0
+    entry_price = close
+    stop_loss = entry_price - risk_per_trade
+    take_profit = entry_price + 2 * risk_per_trade
+    strategy.entry("Buy", strategy.long)
+    strategy.exit("exit", "Buy", stop = stop_loss, limit = take_profit)
+
+
+// Assume 'lastHH' stores the last detected Higher High (HH) from the ZigZag
+// var float lastHH = na
+// if dir1 == 1 and not na(ph1)
+//     if na(lastHH) or ph1 > lastHH
+//         lastHH := ph1
+
+// // Detecting trade opportunities based on OB and ZigZag HH
+// for ob in bullish_ob
+//     if ob.top <= lastHH and ob.top != na and ob.breaker
+//         // Detected a bearish order block (with a red line) in a bullish context that is equal or below the ZigZag HH
+//         strategy.entry("Sell OB and ZigZag", strategy.short)

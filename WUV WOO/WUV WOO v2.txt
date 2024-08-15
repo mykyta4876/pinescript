@@ -1,0 +1,252 @@
+//@version=5
+strategy("WUV WOO v2", overlay=true, initial_capital=2500, currency="USD", default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0, pyramiding=30, slippage=0, calc_on_every_tick=true, margin_long=0, margin_short=0)
+//strategy("WUV WOO v2", overlay=true)
+
+//===================================
+bVolume = input.bool(false,"",inline = "5")
+volume_delta = input.int(100, title="Volume Delta",inline = "5")
+
+lowerTimeframeTooltip = "The indicator scans lower timeframe data to approximate up and down volume used in the delta calculation. By default, the timeframe is chosen automatically. These inputs override this with a custom timeframe.
+ \n\nHigher timeframes provide more historical data, but the data will be less precise."
+useCustomTimeframeInput = input.bool(false, "Use custom timeframe", tooltip = lowerTimeframeTooltip)
+lowerTimeframeInput = input.timeframe("1", "Timeframe")
+
+upAndDownVolume() =>
+    posVol = 0.0
+    negVol = 0.0
+    
+    var isBuyVolume = true    
+
+    switch
+        close > open     => isBuyVolume := true
+        close < open     => isBuyVolume := false
+        close > close[1] => isBuyVolume := true
+        close < close[1] => isBuyVolume := false
+
+    if isBuyVolume
+        posVol += volume
+    else
+        negVol -= volume
+
+    posVol + negVol
+
+var lowerTimeframe = switch
+    useCustomTimeframeInput => lowerTimeframeInput
+    timeframe.isseconds     => "1S"
+    timeframe.isintraday    => "1"
+    timeframe.isdaily       => "5"
+    => "60"
+
+diffVolArray = request.security_lower_tf(syminfo.tickerid, lowerTimeframe, upAndDownVolume())
+
+getHighLow(arr) =>
+    float cumVolume = na
+    float maxVolume = na
+    float minVolume = na
+
+    for item in arr
+        cumVolume := nz(cumVolume) + item
+        maxVolume := math.max(nz(maxVolume), cumVolume)
+        minVolume := math.min(nz(minVolume), cumVolume)
+
+    [maxVolume, minVolume, cumVolume]
+
+[maxVolume, minVolume, lastVolume] = getHighLow(diffVolArray)
+openVolume = not na(lastVolume) ? 0.0 : na
+
+//=========================================
+
+fContinuation = input.bool(true,"Mode Continuation")
+fPremium = input.bool(false,"Mode Premium Discount")
+
+bLong = input.bool(false,"",inline = "3")
+bShort = input.bool(false,"",inline = "4")
+tLong = input.timeframe('15',"Long timeframe",inline = "3")
+tShort = input.timeframe('5',"Short timeframe",inline = "4")
+
+tZone = input.string("UTC+3","Timezone",options = ["UTC-12", "UTC-11", "UTC-10", "UTC-9", "UTC-8", "UTC-7", "UTC-6", "UTC-5", "UTC-4", "UTC-3", "UTC-2", "UTC-1", "UTC+0", "UTC+1", "UTC+2", "UTC+3", "UTC+3:30", "UTC+4", "UTC+4:30", "UTC+5", "UTC+5:30", "UTC+5:45", "UTC+6", "UTC+6:30", "UTC+7", "UTC+8", "UTC+9", "UTC+9:30", "UTC+10", "UTC+10:30", "UTC+11", "UTC+11:30", "UTC+12", "UTC+12:45", "UTC+13", "UTC+14"])
+
+DAT_1 = input.bool(true,"",inline = "1")
+DAT_2 = input.bool(true,"",inline = "2")
+i_sess_1 = input.session("1000-1200", "Trading Session",inline = "1")
+i_sess_2 = input.session("1500-1700", "Trading Session",inline = "2")
+
+
+hideonDWM = input(false, title="Hide VWAP on 1D or Above", group="VWAP Settings", display = display.data_window)
+var anchor = input.string(defval = "Session", title="Anchor Period",
+ options=["Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "Earnings", "Dividends", "Splits"], group="VWAP Settings")
+src = input(title = "Source", defval = hlc3, group="VWAP Settings", display = display.data_window)
+offset = input.int(0, title="Offset", group="VWAP Settings", minval=0, display = display.data_window)
+
+BANDS_GROUP = "Bands Settings"
+CALC_MODE_TOOLTIP = "Determines the units used to calculate the distance of the bands. When 'Percentage' is selected, a multiplier of 1 means 1%."
+calcModeInput = input.string("Standard Deviation", "Bands Calculation Mode", options = ["Standard Deviation", "Percentage"], group = BANDS_GROUP, tooltip = CALC_MODE_TOOLTIP, display = display.data_window)
+showBand_1 = input(true, title = "", group = BANDS_GROUP, inline = "band_1", display = display.data_window)
+bandMult_1 = input.float(1.0, title = "Bands Multiplier #1", group = BANDS_GROUP, inline = "band_1", step = 0.5, minval=0, display = display.data_window)
+showBand_2 = input(false, title = "", group = BANDS_GROUP, inline = "band_2", display = display.data_window)
+bandMult_2 = input.float(2.0, title = "Bands Multiplier #2", group = BANDS_GROUP, inline = "band_2", step = 0.5, minval=0, display = display.data_window)
+showBand_3 = input(false, title = "", group = BANDS_GROUP, inline = "band_3", display = display.data_window)
+bandMult_3 = input.float(3.0, title = "Bands Multiplier #3", group = BANDS_GROUP, inline = "band_3", step = 0.5, minval=0, display = display.data_window)
+
+if barstate.islast and ta.cum(volume) == 0
+    runtime.error("No volume is provided by the data vendor.")
+
+new_earnings = request.earnings(syminfo.tickerid, earnings.actual, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+new_dividends = request.dividends(syminfo.tickerid, dividends.gross, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+new_split = request.splits(syminfo.tickerid, splits.denominator, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+
+isNewPeriod = switch anchor
+	"Earnings"  => not na(new_earnings)
+	"Dividends" => not na(new_dividends)
+	"Splits"    => not na(new_split)
+	"Session"   => timeframe.change("D")
+	"Week"      => timeframe.change("W")
+	"Month"     => timeframe.change("M")
+	"Quarter"   => timeframe.change("3M")
+	"Year"      => timeframe.change("12M")
+	"Decade"    => timeframe.change("12M") and year % 10 == 0
+	"Century"   => timeframe.change("12M") and year % 100 == 0
+	=> false
+
+isEsdAnchor = anchor == "Earnings" or anchor == "Dividends" or anchor == "Splits"
+if na(src[1]) and not isEsdAnchor
+	isNewPeriod := true
+
+float vwapValue = na
+float upperBandValue1 = na
+float lowerBandValue1 = na
+float upperBandValue2 = na
+float lowerBandValue2 = na
+float upperBandValue3 = na
+float lowerBandValue3 = na
+
+if not (hideonDWM and timeframe.isdwm)
+    [_vwap, _stdevUpper, _] = ta.vwap(src, isNewPeriod, 1)
+	vwapValue := _vwap
+    stdevAbs = _stdevUpper - _vwap
+	bandBasis = calcModeInput == "Standard Deviation" ? stdevAbs : _vwap * 0.01
+	upperBandValue1 := _vwap + bandBasis * bandMult_1
+	lowerBandValue1 := _vwap - bandBasis * bandMult_1
+	upperBandValue2 := _vwap + bandBasis * bandMult_2
+	lowerBandValue2 := _vwap - bandBasis * bandMult_2
+	upperBandValue3 := _vwap + bandBasis * bandMult_3
+	lowerBandValue3 := _vwap - bandBasis * bandMult_3
+
+plot(vwapValue, title="VWAP", color=#2962FF, offset=offset)
+
+upperBand_1 = plot(upperBandValue1, title="Upper Band #1", color=color.green, offset=offset, display = showBand_1 ? display.all : display.none)
+lowerBand_1 = plot(lowerBandValue1, title="Lower Band #1", color=color.green, offset=offset, display = showBand_1 ? display.all : display.none)
+fill(upperBand_1, lowerBand_1, title="Bands Fill #1", color= color.new(color.green, 95)    , display = showBand_1 ? display.all : display.none)
+
+upperBand_2 = plot(upperBandValue2, title="Upper Band #2", color=color.olive, offset=offset, display = showBand_2 ? display.all : display.none)
+lowerBand_2 = plot(lowerBandValue2, title="Lower Band #2", color=color.olive, offset=offset, display = showBand_2 ? display.all : display.none)
+fill(upperBand_2, lowerBand_2, title="Bands Fill #2", color= color.new(color.olive, 95)    , display = showBand_2 ? display.all : display.none)
+
+upperBand_3 = plot(upperBandValue3, title="Upper Band #3", color=color.teal, offset=offset, display = showBand_3 ? display.all : display.none)
+lowerBand_3 = plot(lowerBandValue3, title="Lower Band #3", color=color.teal, offset=offset, display = showBand_3 ? display.all : display.none)
+fill(upperBand_3, lowerBand_3, title="Bands Fill #3", color= color.new(color.teal, 95)    , display = showBand_3 ? display.all : display.none)
+
+Q_1 = time(timeframe.period, i_sess_1,tZone)
+Q_2 = time(timeframe.period, i_sess_2,tZone)
+
+bgcolor(time == Q_1 and DAT_1 == true? #3abb3e9d : na,title = "SESSION 1")
+bgcolor(time == Q_2 and DAT_2 == true? color.rgb(58, 104, 189, 38) : na,title = "SESSION 2")
+
+KJ_1 = input.bool(false,"Session Start Entry")
+// Input variables
+ema5_length = input.int(14, title="ema 5 Length")
+ema20_length = input.int(15, title="ema 20 Length")
+ema50_length = input.int(30, title="ema 50 Length")
+
+// Simple Moving Averages
+ema5 = ta.ema(close, ema5_length)
+ema20 = ta.ema(close, ema20_length)
+ema50 = ta.ema(close, ema50_length)
+
+// Conditions
+long_condition = ema5 > ema20 and ema20 > ema50
+short_condition = ema50 > ema20 and ema20 > ema5
+
+//////////////////////////////
+
+length = input.int(14,"CHOP LENGTH", minval=1)
+ci = 100 * math.log10(math.sum(ta.atr(1), length) / (ta.highest(length) - ta.lowest(length))) / math.log10(length)
+CH_1 = input.float(30,"CHOP BELOW")
+
+CH_2 = input.bool(true,"CHOP FILTER")
+
+//////////////////////////////////
+
+DP = input.bool(true,"DAILY FILTER")
+
+WP = input.bool(false,"HTF Continuation Filter",inline = "21")
+resCustom = input.timeframe('W',"",inline = "21")
+
+[DO,DC] = request.security(syminfo.tickerid,"D",[open,close])
+[WO,WC] = request.security(syminfo.tickerid,resCustom,[open,close])
+
+Long_re = long_condition and ( (not(time == Q_1)[1] and (time == Q_1)) or (not(time == Q_2)[1] and (time == Q_2)) ) and KJ_1 == true and ( CH_2 == true ? ci <= CH_1 : true ) and (DP == true ? DO < DC : true ) and (WP == true ? WO < WC : true )
+Short_re = short_condition and ( (not(time == Q_1)[1] and (time == Q_1)) or (not(time == Q_2)[1] and (time == Q_2)) ) and KJ_1 == true and ( CH_2 == true ? ci <= CH_1 : true ) and (DP == true ? DO > DC : true ) and (WP == true ? WO > WC : true )
+
+var bool Long_1 = false
+var bool Short_1 = false
+
+if long_condition
+	Long_1 := true
+	Short_1 := false
+
+if short_condition
+	Long_1 := false
+	Short_1 := true
+
+Long = Long_1 == true and Long_1[1] == false and ( CH_2 == true ? ci <= CH_1 : true ) and (DP == true ? DO < DC : true ) and (WP == true ? WO < WC : true )
+Short = Short_1 == true and Short_1[1] == false and ( CH_2 == true ? ci <= CH_1 : true ) and (DP == true ? DO > DC : true ) and (WP == true ? WO > WC : true )
+
+TI = DAT_1 == true and DAT_2 == true ? time == Q_1 or time == Q_2 : DAT_1 == true ? time == Q_1 : DAT_2 == true ? time == Q_2 : true
+
+Long_EN = ( Long and TI ) or (Long_re and TI)
+Short_EN = ( Short and TI ) or (Short_re and TI)
+
+// Plotting emas
+plot(ema5, color=color.green, title="ema 5")
+plot(ema20, color=color.orange, title="ema 20")
+plot(ema50, color=color.red, title="ema 50")
+
+bLong_prev = false
+[lOpen,lClose] = request.security(syminfo.tickerid, tLong,[open,close])
+if bLong
+	bLong_prev := lOpen < lClose ? true : false
+
+bShort_prev = false
+[sOpen,sClose] = request.security(syminfo.tickerid, tShort,[open,close])
+if bShort
+	bShort_prev := sOpen > sClose ? true : false
+
+if long_condition
+	strategy.close("Short")
+
+if short_condition
+	strategy.close("Long")
+
+long_entry = false
+short_entry = false
+
+//if Long_EN and close < vwapValue and close[1] < vwapValue[1]
+if Long_EN 
+	if (fPremium and close < vwapValue ) or (fContinuation and close > vwapValue) or (fPremium == false and fContinuation == false)
+		if bLong == false or bLong_prev == true
+			if bVolume== false or lastVolume > volume_delta
+				long_entry := true
+				strategy.entry("Long", strategy.long)
+
+//if Short_EN and close > vwapValue and close[1] > vwapValue[1]
+if Short_EN
+	if (fPremium and close > vwapValue) or (fContinuation and close < vwapValue) or (fPremium == false and fContinuation == false)
+		if bShort == false or bShort_prev == true
+			if bVolume== false or math.abs(lastVolume) > volume_delta
+				short_entry = true
+				strategy.entry("Short", strategy.short)
+
+
+plotshape(long_entry,"Long",style = shape.triangleup,location = location.belowbar,color = color.green,size = size.normal )
+plotshape(short_entry,"Short",style = shape.triangledown,location = location.abovebar,color = color.red,size = size.normal )

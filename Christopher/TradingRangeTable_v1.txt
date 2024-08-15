@@ -1,0 +1,583 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © TheMacroStrategist
+
+//@version=5
+
+// # ========================================================================= #
+// #                   |   Indicator  |
+// # ========================================================================= #
+
+SCRIPT_NAME = "TradingRangeTable"
+
+indicator(
+ title                = SCRIPT_NAME,
+ shorttitle           = SCRIPT_NAME,
+ overlay              = true,
+ max_lines_count      = 500,
+ max_labels_count     = 500,
+ max_boxes_count      = 500
+ )
+// # ========================================================================= #
+// #                   |   Indicator  |
+// # ========================================================================= #
+
+// # ========================================================================= #
+// #                   |   Inputs  |
+// # ========================================================================= #
+
+i_table_chris_position = input.string(defval = "Top Right", title = "Big Table Position", options=["Top Right", "Middle Right", "Bottom Right", "Top Left", "Middle Left", "Bottom Left", "Middle Center", "Top Center", "Bottom Center"], group = "Table Positions")
+i_table_chris2_position = input.string(defval = "Top Left", title = "Big Table Position", options=["Top Right", "Middle Right", "Bottom Right", "Top Left", "Middle Left", "Bottom Left", "Middle Center", "Top Center", "Bottom Center"], group = "Table Positions")
+table_bg_color = input.color(defval = color.white, title = "Table Background Color", group = "Table")
+table_border_color = input.color(defval = color.black, title = "Table Borders Color", group = "Table") 
+table_border_width = input.int(defval = 1, title = "Table Borders Width", group = "Table") 
+table_frame_color = input.color(defval = color.black, title = "Table Frame Color", group = "Table")
+table_frame_width = input.int(defval = 3, title = "Table Frame Width", group = "Table") 
+
+ticker_count = input.int(defval = 10, title = "Ticker Count", group = "Table") 
+simple string[] sec = array.new<string>(15)
+
+sec1 = input.symbol(defval = "SPY", title = "Ticker 1", group = "Tickers")
+sec2 = input.symbol(defval = "QQQ", title = "Ticker 2", group = "Tickers")
+sec3 = input.symbol(defval = "IWM", title = "Ticker 3", group = "Tickers")
+sec4 = input.symbol(defval = "TLT", title = "Ticker 4", group = "Tickers")
+sec5 = input.symbol(defval = "SLV", title = "Ticker 5", group = "Tickers")
+sec6 = input.symbol(defval = "GLD", title = "Ticker 6", group = "Tickers")
+sec7 = input.symbol(defval = "USO", title = "Ticker 7", group = "Tickers")
+sec8 = input.symbol(defval = "VIX", title = "Ticker 8", group = "Tickers")
+sec9 = input.symbol(defval = "EURUSD", title = "Ticker 9", group = "Tickers")
+sec10 = input.symbol(defval = "USDJPY", title = "Ticker 10", group = "Tickers")
+sec11 = input.symbol(defval = "USDJPY", title = "Ticker 11", group = "Tickers")
+sec12 = input.symbol(defval = "USDJPY", title = "Ticker 12", group = "Tickers")
+sec13 = input.symbol(defval = "USDJPY", title = "Ticker 13", group = "Tickers")
+sec14 = input.symbol(defval = "USDJPY", title = "Ticker 14", group = "Tickers")
+sec15 = input.symbol(defval = "USDJPY", title = "Ticker 15", group = "Tickers")
+
+kc_length = input.int(20, minval=1, group = "KC")
+kc_mult = input.float(2.0, "Multiplier", group = "KC")
+kc_src = input.source(close, title="Source", group = "KC")
+kc_exp = input.bool(true, "Use Exponential MA", group = "KC")
+kc_BandsStyle = input.string("Average True Range", options = ["Average True Range", "True Range", "Range"], title="Bands Style", group = "KC")
+kc_atrlength = input.int(10, "ATR Length", group = "KC")
+
+zscore_period = input.int(20, minval=1, title = "ZScore Period", group = "ZScore")
+
+// # ========================================================================= #
+// #                   |   Inputs  |
+// # ========================================================================= #
+
+// # ========================================================================= #
+// #                   |   General  |
+// # ========================================================================= #
+
+// Define a function that returns the full name based on the symbol
+getFullName(symbol) =>
+    if symbol == "BATS:SPY"
+        "S&P 500"
+    else if symbol == "BATS:QQQ"
+        "INVESCO QQQ TRUST"
+    else if symbol == "BATS:IWM"
+        "ISHARES TRUST"
+    else if symbol == "BATS:TLT"
+        "ISHARES 20+ YEAR TREASURY BOND ETF"
+    else if symbol == "BATS:SLV"
+        "ISHARES SILVER TRUST"
+    else if symbol == "BATS:GLD"
+        "SPDR GOLD TRUST"
+    else if symbol == "BATS:USO"
+        "UNITED STATES OIL FUND"
+    else if symbol == "TVC:VIX"
+        "VOLATILITY S&P 500"
+    else if symbol == "NDX"
+        "Nasdaq 100"
+    else if symbol == "DJI"
+        "Dow Jones Industrial Average"
+    else if symbol == "RUT"
+        "Russell 2000"
+    else
+        symbol
+
+f_security(_sym, _res, _src) => 
+    request.security(_sym, _res, _src[1], barmerge.gaps_off, barmerge.lookahead_on)
+
+// # ========================================================================= #
+// #                   |   Calculations  |
+// # ========================================================================= #
+
+esma(source, length)=>
+    s = ta.sma(source, length)
+    e = ta.ema(source, length)
+    kc_exp ? e : s
+x = 0
+float[] CLOSEA = array.new<float>(15)
+float[] HIGHA = array.new<float>(15)
+float[] LOWA = array.new<float>(15)
+float[] TRA = array.new<float>(15)
+float[] ATRA = array.new<float>(15)
+float[] RMAA = array.new<float>(15)
+float[] STDEVA = array.new<float>(15)
+float[] SMAA = array.new<float>(15)
+
+[CLOSE_1, HIGH_1, LOW_1, TR_1, ATR_1, RMA_1, STDEV1, SMA1]         = request.security(sec1, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA, 0, CLOSE_1)
+array.set(HIGHA, 0, HIGH_1)
+array.set(LOWA, 0, LOW_1)
+array.set(TRA, 0, TR_1)
+array.set(ATRA, 0, ATR_1)
+array.set(RMAA, 0, RMA_1)
+array.set(STDEVA, 0, STDEV1)
+array.set(SMAA, 0, SMA1)
+[CLOSE_2, HIGH_2, LOW_2, TR_2, ATR_2, RMA_2, STDEV2, SMA2]         = request.security(sec2 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA, 1, CLOSE_2)
+array.set(HIGHA, 1, HIGH_2)
+array.set(LOWA, 1, LOW_2)
+array.set(TRA, 1, TR_2)
+array.set(ATRA, 1, ATR_2)
+array.set(RMAA, 1, RMA_2)
+array.set(STDEVA, 1, STDEV2)
+array.set(SMAA, 1, SMA2)
+[CLOSE_3, HIGH_3, LOW_3, TR_3, ATR_3, RMA_3, STDEV3, SMA3]         = request.security(sec3 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA, 2, CLOSE_3)
+array.set(HIGHA, 2, HIGH_3)
+array.set(LOWA, 2, LOW_3)
+array.set(TRA, 2, TR_3)
+array.set(ATRA, 2, ATR_3)
+array.set(RMAA, 2, RMA_3)
+array.set(STDEVA, 2, STDEV3)
+array.set(SMAA, 2, SMA3)
+[CLOSE_4, HIGH_4, LOW_4, TR_4, ATR_4, RMA_4, STDEV4, SMA4]         = request.security(sec4 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA, 3, CLOSE_4)
+array.set(HIGHA, 3, HIGH_4)
+array.set(LOWA, 3, LOW_4)
+array.set(TRA, 3, TR_4)
+array.set(ATRA, 3, ATR_4)
+array.set(RMAA, 3, RMA_4)
+array.set(STDEVA, 3, STDEV4)
+array.set(SMAA, 3, SMA4)
+[CLOSE_5, HIGH_5, LOW_5, TR_5, ATR_5, RMA_5, STDEV5, SMA5]         = request.security(sec5 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA, 4, CLOSE_5)
+array.set(HIGHA, 4, HIGH_5)
+array.set(LOWA, 4, LOW_5)
+array.set(TRA, 4, TR_5)
+array.set(ATRA, 4, ATR_5)
+array.set(RMAA, 4, RMA_5)
+array.set(STDEVA, 4, STDEV5)
+array.set(SMAA, 4, SMA5)
+if ticker_count > 5
+    [CLOSE_6, HIGH_6, LOW_6, TR_6, ATR_6, RMA_6, STDEV6, SMA6]         = request.security(sec6 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 5, CLOSE_6)
+    array.set(HIGHA, 5, HIGH_6)
+    array.set(LOWA, 5, LOW_6)
+    array.set(TRA, 5, TR_6)
+    array.set(ATRA, 5, ATR_6)
+    array.set(RMAA, 5, RMA_6)
+    array.set(STDEVA, 5, STDEV6)
+    array.set(SMAA, 5, SMA6)
+if ticker_count > 6
+    [CLOSE_7, HIGH_7, LOW_7, TR_7, ATR_7, RMA_7, STDEV7, SMA7]         = request.security(sec7 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 6, CLOSE_7)
+    array.set(HIGHA, 6, HIGH_7)
+    array.set(LOWA, 6, LOW_7)
+    array.set(TRA, 6, TR_7)
+    array.set(ATRA, 6, ATR_7)
+    array.set(RMAA, 6, RMA_7)
+    array.set(STDEVA, 6, STDEV7)
+    array.set(SMAA, 6, SMA7)
+if ticker_count > 7
+    [CLOSE_8, HIGH_8, LOW_8, TR_8, ATR_8, RMA_8, STDEV8, SMA8]         = request.security(sec8 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 7, CLOSE_8)
+    array.set(HIGHA, 7, HIGH_8)
+    array.set(LOWA, 7, LOW_8)
+    array.set(TRA, 7, TR_8)
+    array.set(ATRA, 7, ATR_8)
+    array.set(RMAA, 7, RMA_8)
+    array.set(STDEVA, 7, STDEV8)
+    array.set(SMAA, 7, SMA8)
+if ticker_count > 8
+    [CLOSE_9, HIGH_9, LOW_9, TR_9, ATR_9, RMA_9, STDEV9, SMA9]         = request.security(sec9 , timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 8, CLOSE_9)
+    array.set(HIGHA, 8, HIGH_9)
+    array.set(LOWA, 8, LOW_9)
+    array.set(TRA, 8, TR_9)
+    array.set(ATRA, 8, ATR_9)
+    array.set(RMAA, 8, RMA_9)
+    array.set(STDEVA, 8, STDEV9)
+    array.set(SMAA, 8, SMA9)
+if ticker_count > 9
+    [CLOSE_10, HIGH_10, LOW_10, TR_10, ATR_10, RMA_10, STDEV10, SMA10] = request.security(sec10, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 9, CLOSE_10)
+    array.set(HIGHA, 9, HIGH_10)
+    array.set(LOWA, 9, LOW_10)
+    array.set(TRA, 9, TR_10)
+    array.set(ATRA, 9, ATR_10)
+    array.set(RMAA, 9, RMA_10)
+    array.set(STDEVA, 9, STDEV10)
+    array.set(SMAA, 9, SMA10)
+if ticker_count > 10
+    [CLOSE_11, HIGH_11, LOW_11, TR_11, ATR_11, RMA_11, STDEV11, SMA11] = request.security(sec11, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 10, CLOSE_11)
+    array.set(HIGHA, 10, HIGH_11)
+    array.set(LOWA, 10, LOW_11)
+    array.set(TRA, 10, TR_11)
+    array.set(ATRA, 10, ATR_11)
+    array.set(RMAA, 10, RMA_11)
+    array.set(STDEVA, 10, STDEV11)
+    array.set(SMAA, 10, SMA11)
+if ticker_count > 11
+    [CLOSE_12, HIGH_12, LOW_12, TR_12, ATR_12, RMA_12, STDEV12, SMA12] = request.security(sec12, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 11, CLOSE_12)
+    array.set(HIGHA, 11, HIGH_12)
+    array.set(LOWA, 11, LOW_12)
+    array.set(TRA, 11, TR_12)
+    array.set(ATRA, 11, ATR_12)
+    array.set(RMAA, 11, RMA_12)
+    array.set(STDEVA, 11, STDEV12)
+    array.set(SMAA, 11, SMA12)
+if ticker_count > 12
+    [CLOSE_13, HIGH_13, LOW_13, TR_13, ATR_13, RMA_13, STDEV13, SMA13] = request.security(sec13, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 12, CLOSE_13)
+    array.set(HIGHA, 12, HIGH_13)
+    array.set(LOWA, 12, LOW_13)
+    array.set(TRA, 12, TR_13)
+    array.set(ATRA, 12, ATR_13)
+    array.set(RMAA, 12, RMA_13)
+    array.set(STDEVA, 12, STDEV13)
+    array.set(SMAA, 12, SMA13)
+if ticker_count > 13
+    [CLOSE_14, HIGH_14, LOW_14, TR_14, ATR_14, RMA_14, STDEV14, SMA14] = request.security(sec14, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 13, CLOSE_14)
+    array.set(HIGHA, 13, HIGH_14)
+    array.set(LOWA, 13, LOW_14)
+    array.set(TRA, 13, TR_14)
+    array.set(ATRA, 13, ATR_14)
+    array.set(RMAA, 13, RMA_14)
+    array.set(STDEVA, 13, STDEV14)
+    array.set(SMAA, 13, SMA14)
+if ticker_count > 14
+    [CLOSE_15, HIGH_15, LOW_15, TR_15, ATR_15, RMA_15, STDEV15, SMA15] = request.security(sec15, timeframe.period, [kc_src[x], high[x], low[x], ta.tr(true)[x], ta.atr(kc_atrlength)[x], ta.rma(high - low, kc_length)[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA, 14, CLOSE_15)
+    array.set(HIGHA, 14, HIGH_15)
+    array.set(LOWA, 14, LOW_15)
+    array.set(TRA, 14, TR_15)
+    array.set(ATRA, 14, ATR_15)
+    array.set(RMAA, 14, RMA_15)
+    array.set(STDEVA, 14, STDEV15)
+    array.set(SMAA, 14, SMA15)
+
+f_zscore_symbol(_close, _stdev, _sma) =>
+    nRes = (_close - _sma) / _stdev
+
+pip() => syminfo.mintick * (syminfo.type == "forex" ? 10 : 1)
+
+f_kc_symbol(_src, _high, _low, _tr, _atr, _rma) =>
+    kc_ma = esma(_src, kc_length)
+    kc_rangema = kc_BandsStyle == "True Range" ? _tr : kc_BandsStyle == "Average True Range" ? _atr : _rma
+    upper = kc_ma + (kc_rangema * kc_mult)// * pip())
+    lower = kc_ma - (kc_rangema * kc_mult)// * pip())
+    [upper, lower]
+
+float[] UPPERA = array.new<float>(15)
+float[] LOWERA = array.new<float>(15)
+
+for i = 0 to ticker_count - 1
+    [UPPER_1, LOWER_1] = f_kc_symbol(array.get(CLOSEA, i), array.get(HIGHA, i), array.get(LOWA, i), array.get(TRA, i), array.get(ATRA, i), array.get(RMAA, i))
+    array.set(UPPERA, i, UPPER_1)
+    array.set(LOWERA, i, LOWER_1)
+    
+float[] ZSCOREA = array.new<float>(15)
+
+for i = 0 to ticker_count - 1
+    ZSCORE_1 = f_zscore_symbol(array.get(CLOSEA, i), array.get(STDEVA, i), array.get(SMAA, i))
+    array.set(ZSCOREA, i, ZSCORE_1)
+
+float[] CLOSEA4H = array.new<float>(15)
+float[] STDEVA4H = array.new<float>(15)
+float[] SMAA4H = array.new<float>(15)
+
+[CLOSE4H_1, STDEV4H_1, SMA4H_1]         = request.security(sec1, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA4H, 0, CLOSE4H_1)
+array.set(STDEVA4H, 0, STDEV4H_1)
+array.set(SMAA4H, 0, SMA4H_1)
+
+[CLOSE4H_2, STDEV4H_2, SMA4H_2]         = request.security(sec2, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA4H, 1, CLOSE4H_2)
+array.set(STDEVA4H, 1, STDEV4H_2)
+array.set(SMAA4H, 1, SMA4H_2)
+
+[CLOSE4H_3, STDEV4H_3, SMA4H_3]         = request.security(sec3, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA4H, 2, CLOSE4H_3)
+array.set(STDEVA4H, 2, STDEV4H_3)
+array.set(SMAA4H, 2, SMA4H_3)
+
+[CLOSE4H_4, STDEV4H_4, SMA4H_4]         = request.security(sec4, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA4H, 3, CLOSE4H_4)
+array.set(STDEVA4H, 3, STDEV4H_4)
+array.set(SMAA4H, 3, SMA4H_4)
+
+[CLOSE4H_5, STDEV4H_5, SMA4H_5]         = request.security(sec5, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA4H, 4, CLOSE4H_5)
+array.set(STDEVA4H, 4, STDEV4H_5)
+array.set(SMAA4H, 4, SMA4H_5)
+if ticker_count > 5
+    [CLOSE4H_6, STDEV4H_6, SMA4H_6]         = request.security(sec6, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 5, CLOSE4H_6)
+    array.set(STDEVA4H, 5, STDEV4H_6)
+    array.set(SMAA4H, 5, SMA4H_6)
+if ticker_count > 6
+    [CLOSE4H_7, STDEV4H_7, SMA4H_7]         = request.security(sec7, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 6, CLOSE4H_7)
+    array.set(STDEVA4H, 6, STDEV4H_7)
+    array.set(SMAA4H, 6, SMA4H_7)
+if ticker_count > 7
+    [CLOSE4H_8, STDEV4H_8, SMA4H_8]         = request.security(sec8, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 7, CLOSE4H_8)
+    array.set(STDEVA4H, 7, STDEV4H_8)
+    array.set(SMAA4H, 7, SMA4H_8)
+if ticker_count > 8
+    [CLOSE4H_9, STDEV4H_9, SMA4H_9]         = request.security(sec9, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 8, CLOSE4H_9)
+    array.set(STDEVA4H, 8, STDEV4H_9)
+    array.set(SMAA4H, 8, SMA4H_9)
+if ticker_count > 9
+    [CLOSE4H_10, STDEV4H_10, SMA4H_10]         = request.security(sec10, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 9, CLOSE4H_10)
+    array.set(STDEVA4H, 9, STDEV4H_10)
+    array.set(SMAA4H, 9, SMA4H_10)
+if ticker_count > 10
+    [CLOSE4H_11, STDEV4H_11, SMA4H_11]         = request.security(sec11, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 10, CLOSE4H_11)
+    array.set(STDEVA4H, 10, STDEV4H_11)
+    array.set(SMAA4H, 10, SMA4H_11)
+if ticker_count > 11
+    [CLOSE4H_12, STDEV4H_12, SMA4H_12]         = request.security(sec12, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 11, CLOSE4H_12)
+    array.set(STDEVA4H, 11, STDEV4H_12)
+    array.set(SMAA4H, 11, SMA4H_12)
+if ticker_count > 12
+    [CLOSE4H_13, STDEV4H_13, SMA4H_13]         = request.security(sec13, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 12, CLOSE4H_13)
+    array.set(STDEVA4H, 12, STDEV4H_13)
+    array.set(SMAA4H, 12, SMA4H_13)
+if ticker_count > 13
+    [CLOSE4H_14, STDEV4H_14, SMA4H_14]         = request.security(sec14, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 13, CLOSE4H_14)
+    array.set(STDEVA4H, 13, STDEV4H_14)
+    array.set(SMAA4H, 13, SMA4H_14)
+if ticker_count > 14
+    [CLOSE4H_15, STDEV4H_15, SMA4H_15]         = request.security(sec15, "4H", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA4H, 14, CLOSE4H_15)
+    array.set(STDEVA4H, 14, STDEV4H_15)
+    array.set(SMAA4H, 14, SMA4H_15)
+
+float[] CLOSEA1D = array.new<float>(15)
+float[] STDEVA1D = array.new<float>(15)
+float[] SMAA1D = array.new<float>(15)
+
+[CLOSE1D_1, STDEV1D_1, SMA1D_1]         = request.security(sec1, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA1D, 0, CLOSE1D_1)
+array.set(STDEVA1D, 0, STDEV1D_1)
+array.set(SMAA1D, 0, SMA1D_1)
+
+[CLOSE1D_2, STDEV1D_2, SMA1D_2]         = request.security(sec2, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA1D, 1, CLOSE1D_2)
+array.set(STDEVA1D, 1, STDEV1D_2)
+array.set(SMAA1D, 1, SMA1D_2)
+
+[CLOSE1D_3, STDEV1D_3, SMA1D_3]         = request.security(sec3, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA1D, 2, CLOSE1D_3)
+array.set(STDEVA1D, 2, STDEV1D_3)
+array.set(SMAA1D, 2, SMA1D_3)
+
+[CLOSE1D_4, STDEV1D_4, SMA1D_4]         = request.security(sec4, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA1D, 3, CLOSE1D_4)
+array.set(STDEVA1D, 3, STDEV1D_4)
+array.set(SMAA1D, 3, SMA1D_4)
+
+[CLOSE1D_5, STDEV1D_5, SMA1D_5]         = request.security(sec5, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+array.set(CLOSEA1D, 4, CLOSE1D_5)
+array.set(STDEVA1D, 4, STDEV1D_5)
+array.set(SMAA1D, 4, SMA1D_5)
+if ticker_count > 5
+    [CLOSE1D_6, STDEV1D_6, SMA1D_6]         = request.security(sec6, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 5, CLOSE1D_6)
+    array.set(STDEVA1D, 5, STDEV1D_6)
+    array.set(SMAA1D, 5, SMA1D_6)
+if ticker_count > 6
+    [CLOSE1D_7, STDEV1D_7, SMA1D_7]         = request.security(sec7, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 6, CLOSE1D_7)
+    array.set(STDEVA1D, 6, STDEV1D_7)
+    array.set(SMAA1D, 6, SMA1D_7)
+if ticker_count > 7
+    [CLOSE1D_8, STDEV1D_8, SMA1D_8]         = request.security(sec8, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 7, CLOSE1D_8)
+    array.set(STDEVA1D, 7, STDEV1D_8)
+    array.set(SMAA1D, 7, SMA1D_8)
+if ticker_count > 8
+    [CLOSE1D_9, STDEV1D_9, SMA1D_9]         = request.security(sec9, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 8, CLOSE1D_9)
+    array.set(STDEVA1D, 8, STDEV1D_9)
+    array.set(SMAA1D, 8, SMA1D_9)
+if ticker_count > 9
+    [CLOSE1D_10, STDEV1D_10, SMA1D_10]         = request.security(sec10, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 9, CLOSE1D_10)
+    array.set(STDEVA1D, 9, STDEV1D_10)
+    array.set(SMAA1D, 9, SMA1D_10)
+if ticker_count > 10
+    [CLOSE1D_11, STDEV1D_11, SMA1D_11]         = request.security(sec11, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 10, CLOSE1D_11)
+    array.set(STDEVA1D, 10, STDEV1D_11)
+    array.set(SMAA1D, 10, SMA1D_11)
+if ticker_count > 11
+    [CLOSE1D_12, STDEV1D_12, SMA1D_12]         = request.security(sec12, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 11, CLOSE1D_12)
+    array.set(STDEVA1D, 11, STDEV1D_12)
+    array.set(SMAA1D, 11, SMA1D_12)
+if ticker_count > 12
+    [CLOSE1D_13, STDEV1D_13, SMA1D_13]         = request.security(sec13, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 12, CLOSE1D_13)
+    array.set(STDEVA1D, 12, STDEV1D_13)
+    array.set(SMAA1D, 12, SMA1D_13)
+if ticker_count > 13
+    [CLOSE1D_14, STDEV1D_14, SMA1D_14]         = request.security(sec14, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 13, CLOSE1D_14)
+    array.set(STDEVA1D, 13, STDEV1D_14)
+    array.set(SMAA1D, 13, SMA1D_14)
+if ticker_count > 14
+    [CLOSE1D_15, STDEV1D_15, SMA1D_15]         = request.security(sec15, "1D", [kc_src[x], ta.stdev(close, zscore_period)[x], ta.sma(close, zscore_period)[x]], barmerge.gaps_off, barmerge.lookahead_on)
+    array.set(CLOSEA1D, 14, CLOSE1D_15)
+    array.set(STDEVA1D, 14, STDEV1D_15)
+    array.set(SMAA1D, 14, SMA1D_15)
+
+float[] TACVOL4H = array.new<float>(15)
+
+for i = 0 to ticker_count - 1
+    TACVOL4H_1 = f_zscore_symbol(array.get(CLOSEA4H, i), array.get(STDEVA4H, i), array.get(SMAA4H, i))
+    array.set(TACVOL4H, i, TACVOL4H_1)
+
+float[] TACVOL1D = array.new<float>(15)
+
+for i = 0 to ticker_count - 1
+    TACVOL1D_1 = f_zscore_symbol(array.get(CLOSEA1D, i), array.get(STDEVA1D, i), array.get(SMAA1D, i))
+    array.set(TACVOL1D, i, TACVOL1D_1)
+
+// # ========================================================================= #
+// #                   |   Calculations  |
+// # ========================================================================= #
+
+
+// # ========================================================================= #
+// #                   |   Display  |
+// # ========================================================================= #
+
+table_chris_position = switch i_table_chris_position
+    "Top Right" => position.top_right
+    "Middle Right" => position.middle_right
+    "Bottom Right" => position.bottom_right
+    "Top Left" => position.top_left
+    "Middle Left" => position.middle_left
+    "Bottom Left" => position.bottom_left
+    "Middle Center" => position.middle_center
+    "Top Center" => position.top_center
+    "Bottom Center" => position.bottom_center
+
+table_chris2_position = switch i_table_chris2_position
+    "Top Right" => position.top_right
+    "Middle Right" => position.middle_right
+    "Bottom Right" => position.bottom_right
+    "Top Left" => position.top_left
+    "Middle Left" => position.middle_left
+    "Bottom Left" => position.bottom_left
+    "Middle Center" => position.middle_center
+    "Top Center" => position.top_center
+    "Bottom Center" => position.bottom_center
+
+var chris_table = table.new(
+ position       = table_chris_position,
+ columns        = 6,
+ rows           = 16,
+ bgcolor        = table_bg_color,
+ frame_color    = table_frame_color,
+ frame_width    = table_frame_width,
+ border_color   = table_border_color,
+ border_width   = table_border_width 
+ )
+
+if barstate.islast
+
+    // Headers
+    table.cell(table_id = chris_table, column = 0, row = 0, text = "TICKER")
+    table.cell(table_id = chris_table, column = 1, row = 0, text = "NAME")
+    table.cell(table_id = chris_table, column = 2, row = 0, text = "TOP RANGE")
+    table.cell(table_id = chris_table, column = 3, row = 0, text = "BOTTOM RANGE")
+    table.cell(table_id = chris_table, column = 4, row = 0, text = "Z-SCORE")
+    table.cell(table_id = chris_table, column = 5, row = 0, text = "TACVOL")
+
+    // Tickers
+    table.cell(table_id = chris_table, column = 0, row = 1, text = sec1)
+    table.cell(table_id = chris_table, column = 0, row = 2, text = sec2)
+    table.cell(table_id = chris_table, column = 0, row = 3, text = sec3)
+    table.cell(table_id = chris_table, column = 0, row = 4, text = sec4)
+    table.cell(table_id = chris_table, column = 0, row = 5, text = sec5)
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 0, row = 6, text = sec6)
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 0, row = 7, text = sec7)
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 0, row = 8, text = sec8)
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 0, row = 9, text = sec9)
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 0, row = 10, text = sec10)
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 0, row = 11, text = sec11)
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 0, row = 12, text = sec12)
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 0, row = 13, text = sec13)
+    if ticker_count > 13
+        table.cell(table_id = chris_table, column = 0, row = 14, text = sec14)
+    if ticker_count > 14
+        table.cell(table_id = chris_table, column = 0, row = 15, text = sec15)
+    // Name
+    table.cell(table_id = chris_table, column = 1, row = 1, text = getFullName(sec1))
+    table.cell(table_id = chris_table, column = 1, row = 2, text = getFullName(sec2))
+    table.cell(table_id = chris_table, column = 1, row = 3, text = getFullName(sec3))
+    table.cell(table_id = chris_table, column = 1, row = 4, text = getFullName(sec4))
+    table.cell(table_id = chris_table, column = 1, row = 5, text = getFullName(sec5))
+    if ticker_count > 5
+        table.cell(table_id = chris_table, column = 1, row = 6, text = getFullName(sec6))
+    if ticker_count > 6
+        table.cell(table_id = chris_table, column = 1, row = 7, text = getFullName(sec7))
+    if ticker_count > 7
+        table.cell(table_id = chris_table, column = 1, row = 8, text = getFullName(sec8))
+    if ticker_count > 8
+        table.cell(table_id = chris_table, column = 1, row = 9, text = getFullName(sec9))
+    if ticker_count > 9
+        table.cell(table_id = chris_table, column = 1, row = 10, text = getFullName(sec10))
+    if ticker_count > 10
+        table.cell(table_id = chris_table, column = 1, row = 11, text = getFullName(sec11))
+    if ticker_count > 11
+        table.cell(table_id = chris_table, column = 1, row = 12, text = getFullName(sec12))
+    if ticker_count > 12
+        table.cell(table_id = chris_table, column = 1, row = 13, text = getFullName(sec13))
+    if ticker_count > 13
+        table.cell(table_id = chris_table, column = 1, row = 14, text = getFullName(sec14))
+    if ticker_count > 14
+        table.cell(table_id = chris_table, column = 1, row = 15, text = getFullName(sec15))
+
+    // Top Range
+    for i = 0 to ticker_count -1
+        table.cell(table_id = chris_table, column = 2, row = i + 1, text = str.tostring(array.get(UPPERA, i), "#.#####"))
+
+    // Bottom Range
+    for i = 0 to ticker_count -1
+        table.cell(table_id = chris_table, column = 3, row = i + 1, text = str.tostring(array.get(LOWERA, i), "#.#####"))
+
+    // Z-Score
+    for i = 0 to ticker_count -1
+        table.cell(table_id = chris_table, column = 4, row = i + 1, text = str.tostring(array.get(ZSCOREA, i), "#.##"))
+
+    // TACVOL-Score
+    for i = 0 to ticker_count -1
+        TMP = (array.get(TACVOL1D, i) +array.get(TACVOL4H, i))
+        table.cell(table_id = chris_table, column = 5, row = i + 1, text = str.tostring(TMP, "#.##"))
+

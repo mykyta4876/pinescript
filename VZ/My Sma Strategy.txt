@@ -1,0 +1,28 @@
+
+//@version=5
+strategy("My Sma strategy", overlay=true, margin_long=100, margin_short=100)
+
+sma0 = ta.sma(close, 20)
+delta = close - sma0
+
+plot(sma0,title="Long SMA",color=color.yellow,linewidth=2)
+plot(close,color=color.blue,linewidth=2)
+
+flag_buy = false
+flag_sell = false
+
+if barstate.isconfirmed
+    if (ta.crossover(delta, 0))
+        flag_buy := true
+
+    if (ta.crossunder(delta, 0))
+        flag_sell := true
+
+//plotshape(series=flag_buy, title="P", style=shape.triangleup, location=location.belowbar, color=color.green, text="Buy", size=size.small)   
+//plotshape(series=flag_sell, title="N", style=shape.triangledown, location=location.abovebar, color=color.red, text="Sell", size=size.small)
+
+if (flag_buy)
+    strategy.entry("Long", strategy.long)
+
+if (flag_sell)
+    strategy.entry("Short", strategy.short)
