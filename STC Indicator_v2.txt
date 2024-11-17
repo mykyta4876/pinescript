@@ -1,0 +1,53 @@
+//@version=5
+indicator(title='[SHK] Schaff Trend Cycle (STC)', shorttitle='STC', overlay=false)
+
+// Input parameters
+length = input(12, 'Length')
+fastLength = input(26, 'FastLength')
+slowLength = input(50, 'SlowLength')
+smoothK = input(0.5, 'Smooth Factor')
+
+// Calculate MA difference
+calcMADiff(source, fast_len, slow_len) =>
+    fastMA = ta.ema(source, fast_len)
+    slowMA = ta.ema(source, slow_len)
+    macd = fastMA - slowMA
+    macd
+
+// Calculate Schaff Trend Cycle
+calcSTC(len, fast_len, slow_len) =>
+    var stc1 = 0.0
+    var stc2 = 0.0
+    var stc3 = 0.0
+    var stcFinal = 0.0
+    
+    macd = calcMADiff(close, fast_len, slow_len)
+    lowest = ta.lowest(macd, len)
+    highest = ta.highest(macd, len) - lowest
+    
+    stc1 := highest > 0 ? (macd - lowest) / highest * 100 : nz(stc1[1])
+    stc2 := na(stc2[1]) ? stc1 : stc2[1] + smoothK * (stc1 - stc2[1])
+    
+    lowest2 = ta.lowest(stc2, len)
+    highest2 = ta.highest(stc2, len) - lowest2
+    
+    stc3 := highest2 > 0 ? (stc2 - lowest2) / highest2 * 100 : nz(stc3[1])
+    stcFinal := na(stcFinal[1]) ? stc3 : stcFinal[1] + smoothK * (stc3 - stcFinal[1])
+    stcFinal
+
+// Calculate STC and color
+stcValue = calcSTC(length, fastLength, slowLength)
+stcColor = stcValue > stcValue[1] ? color.new(color.green, 20) : color.new(color.red, 20)
+
+
+// Alerts
+if stcValue[2] <= stcValue[1] and stcValue[1] > stcValue
+    alert("Red", alert.freq_once_per_bar)
+if stcValue[2] >= stcValue[1] and stcValue[1] < stcValue
+    alert("Green", alert.freq_once_per_bar)
+
+// Plotting
+plot(stcValue, color=stcColor, title='STC', linewidth=2)
+upperLevel = plot(75, color=color.new(color.gray, 70))
+lowerLevel = plot(25, color=color.new(color.gray, 70))
+fill(upperLevel, lowerLevel, color=color.new(color.gray, 96))

@@ -1,0 +1,50 @@
+//@version=5
+indicator("Volatility Checker", overlay=false)
+
+// Input parameters
+lookback_period = input.int(14, "Lookback Period", minval=1)
+std_dev_threshold = input.float(200, "Standard Deviation Threshold", minval=0.1, step=0.1)
+ema_distance = input.float(0.01, "EMA Distance Threshold", minval=0.001, step=0.001)
+rsi_threshold = input.float(5, "RSI Distance from 50 Threshold", minval=1, step=1)
+
+// Calculate indicators
+ema_5m = ta.ema(close, 200)
+ema_15m = request.security(syminfo.tickerid, "15", ta.ema(close, 200))
+rsi_15m = request.security(syminfo.tickerid, "15", ta.rsi(close, 14))
+std_dev_5m = ta.stdev(close, lookback_period)
+std_dev_15m = request.security(syminfo.tickerid, "15", ta.stdev(close, lookback_period))
+
+// Calculate rate of change for standard deviation
+std_dev_5m_roc = (std_dev_5m - std_dev_5m[1]) / std_dev_5m[1] * 100
+
+// Check conditions
+price_not_close_to_ema = math.abs(close - ema_5m) / close > ema_distance and 
+                         math.abs(close - ema_15m) / close > ema_distance
+rsi_not_close_to_50 = math.abs(rsi_15m - 50) > rsi_threshold
+std_dev_low_and_increasing = std_dev_5m < std_dev_threshold and std_dev_5m_roc > 0
+
+// Combine all conditions
+volatility_signal = price_not_close_to_ema and rsi_not_close_to_50 and std_dev_low_and_increasing
+
+// Plot 15m RSI
+plot(rsi_15m, title="15m RSI", color=color.purple, linewidth=2)
+hline(50, "RSI Midline", color=color.gray, linestyle=hline.style_dotted)
+hline(30, "RSI Oversold", color=color.red, linestyle=hline.style_dotted)
+hline(70, "RSI Overbought", color=color.green, linestyle=hline.style_dotted)
+
+// Display RSI value as label
+var label rsi_label = na
+label.delete(rsi_label)
+rsi_label := label.new(bar_index, rsi_15m, text="RSI: " + str.tostring(rsi_15m, "#.##"), color=color.purple, textcolor=color.white, size=size.small)
+
+// Plot signals on price chart
+plotshape(volatility_signal, title="Volatility Signal", location=location.top, color=color.green, style=shape.triangleup, size=size.small, force_overlay = true)
+
+plot(ema_5m, title="5m EMA", color=color.blue, force_overlay = true)
+plot(ema_15m, title="15m EMA", color=color.red, force_overlay = true)
+
+plot(std_dev_5m, title="5m StdDev", color=color.green, linewidth=2)
+hline(std_dev_threshold, "StdDev Threshold", color=color.red, linestyle=hline.style_dotted)
+
+plot(std_dev_15m, title="15m StdDev", color=color.orange, linewidth=2)
+plot(close, title="price", color=color.white, display = display.data_window)

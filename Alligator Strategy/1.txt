@@ -1,0 +1,110 @@
+First, we identity periods of volatility, we use 5-minute/15-minute standard deviation indicators to look for increase % from low levels, and that the prices are not close to the 200 EMAs of the 15-minute, 5-minute time frames and that the 15-minute RSI is not close to 50.
+once that is satisfied, we look at the 3-minute charts and use the follow strategies.
+
+we identity periods of volatility , we use 5 minute/15 minute standard deviation indicators to look for increase % from low levels, and that the prices are not close to the 200 EMAs of the 15 minute, 5 minute time frames and that the 15 minute RSI is not close to 50.
+so price is not close to the emas of the 15 min/5 minute time frames, rsi is not close to 50 for 15 min time frame, standard deviation is low n increasing at a positive rate on the 5 min time frame.
+I need pinescript code for this indicator.
+draw the arrows on the chart when the conditions are met.
+draw the emas, rsi, standard deviation, and price on the chart.
+
+1.	Indicators:
+1)	Williams Alligator
+-	Jaw (blue line): Starts with the 13-bar SMMA and is smoothed by eight bars on subsequent values. 
+-	Teeth (red line): Starts with the eight-bar SMMA and is smoothed by five bars on subsequent values. 
+-	Lips (green line): Starts with the five-bar SMMA and is smoothed by three bars on subsequent values.
+2)	200 EMA (Exponential Moving Average)
+2.	Chart:
+1)	Time based charts 
+-	main charts: 3m, 5m, 15m; 
+-	additional charts: 1m, 1h
+ 
+2)	Tick based chart 
+-	2000 tick chart
+3.	The Pullback Strategy
+This strategy uses the Alligator’s moving averages to determine a pullback in an ongoing trend, thus providing a good entry point to ride the trend.
+1)	Classical Variation
+(1)	Rules for Entry:
+-	only take long trades when the market trades above 200 EMA
+-	only take short trades when the market trades below 200 EMA 
+-	time frames of 15m and 1h are confirming the entry / are not negating the entry (e.g. by the placement of their 200 EMA)
+-	price on 3m chart goes to the Teeth / area between the Lips and the Teeth / and bounces from there in the direction of the trend 
+-	a candle finishes above/below the Lips = ENTRY
+ 
+ 
+(2)	Rule for Exit:
+-	a candle finishes above/below the Lips
+ 
+2)  3m Teeth/5m Lips entry – “Classical Elite Entry”
+- named in a fancy way like that for the overall highest probability A+++ set-up in The Pullback strategy of My System:
+- traders that tend to take very little trades that have the highest probability of success are encouraged to pay attention here:
+simply a situation, when there is a Pullback from Teeth / Lips-Teeth area on 3m chart and a Pullback off of the Lips (candle doesn’t finish below/above the Lips) on 5m chart
+ 
+3) Modern Variation
+(1) Objectives:
+- take long trades when the market trades above 200 EMA 
+- take short trades when the market trades below 200 EMA 
+- time frames of 15m and 1h are confirming the entry / are not negating the entry
+- also take trades “regardless” of 200 EMA -> based on statistics, apply Reversion/Regression to the Mean theory and take long trades below 200 EMA and short trades above 200 EMA of 3m and 5m chart - be sure the higher TFs (15m, 1h) are not in conflict with this notion -> i.e. their 200 EMAs or their Gator’s averages are not too close to your entry in the “wrong way”
+- be aware this style of trading is not that common (and recommended) and its occurrence is rare in The Pullback Strategy (due to closeness of Gator’s moving averages and 200 EMA of lower time frames) and is more common in The Breakout Strategy; or more like: this hypothetical set-up always follows an earlier set-up of The Breakout Strategy (explained lower in part of The Breakout Strategy)
+(2) Rules for Entry:
+- price on 3m chart goes to the Teeth / area between the Lips and the Teeth / and bounces from there in the direction of the trend 
+- a candle finishes above/below the Lips = ENTRY
+- price on 3m chart goes to the Jaw / area between the Teeth and the Jaw / and bounces from there in the direction of the trend 
+- a candle finishes above/below the Lips = ENTRY
+ 
+4) Classical vs. Modern Variation
+- people trading Modern Variation tend to pay less attention to/respect 200 EMAs (in general), relying on the theory of reversion to the mean (note that it went from a “rule” in the Classical to an “objective” in the Modern) 
+- the further away the price is from the 200EMA (especially on higher TFs – 15m, 1h), the higher probability of success in a trade 
+- note that it’s never a good idea to go long when the price is just below the (any) 200 EMA and vice versa with a short position; always wait for a confirmation is such a case – a candle finishing above/below 200 EMA
+- people trading the Modern Variation also incorporate Alligator’s “Jaw” in their system and include Pullbacks from this area as well. Note that oftentimes it requires a “decisive” candle that bounces off of the Jaw and finishes all the way above/below the Lips – this is not a rule though and there are many valid set-ups where it takes more candles to form the Pullback (the price might consolidate/range/try multiple times to break through the Jaw) – a candle finishing above/below the Lips should still be convincing/decisive enough. 
+- in Modern, you have inherently overall higher number of set-ups available, although the “Jaw Pullbacks” are more likely to end up in a range and/or reversal (you can imagine in as the pullback was not “weak” enough [and the trend strong enough] to occur in the area between the Lips and the Teeth), resulting in the trend possibly losing its strength. Because of this, Modern traders do not usually exit by “candle finishing below/above the Lips” rule but rather by a predetermined take profit
+- in conclusion, modernist either trades the classical style with general less consideration to 200 EMA, or he adds another kind of Pullback to his repertoire of entries
+5) 3m Jaw/5m Teeth entry – “Modern Elite Entry”
+- very similar to the Classical Elite Entry mentioned above, only based on the principle of a Modern Pullback – price on 3m chart goes to the Teeth-Jaw area; price on 5m chart goes to the Lips-Teeth area (this can be generally simply seen as a Classical Pullback on 5m chart)
+- do not forget to go for a predetermined take profit on Modern Pullback based entries instead of waiting for a candle finishing below/above the Lips
+ 
+6) Hypermodern Variation
+- as opposed to the two previous variations, you use 2000 tick chart as your main chart 
+- you can trade more traditional way with Pullbacks off of the Teeth or Jaw – the price pullbacks and a candle finishes above/below the Lips = entry 
+- although, the true Hypermodern traders are the risk takers that go for a lower win rate and (much) higher average win to average loss ratio, because the whole theory of their entries is to get in as soon as possible. I.e. they do not wait for a pullback to form entirely to enter a position. They try to get in on its bottom. In this way, they are in early and their gains are generally bigger but they’re also more often wrong.
+(1) Objectives:
+- 200 EMA is a vague guide that tells you “Do not take trades close to me” 
+- you still watch time-based charts, especially 5m, 15m and 1h charts – and expect their cooperation -> 2000t chart tends to present a set-up sooner than these time-based charts; the general rules of thumb still apply here though
+(2) Rules for Entry:
+- price touches the Teeth of 2000 tick chart = ENTRY 
+- price touches the Jaw of 2000 tick chart = ENTRY
+trader expects the Pullback to occur on the Teeth of the Gator or on the Jaw of the Gator 
+there are several approaches a trader can choose:
+very tight stop loss under/above every Gator’s moving average
+i.e. for example, a long entry order on the Teeth (a.k.a. Teeth- Touch), SL placed just below the Teeth; if the SL is hit, a long entry order on the Jaw (Jaw-Touch) with a tight SL just below the Jaw
+smaller position size entry at the Teeth with a SL below/above the Jaw with second order waiting at the Jaw itself (this is essentially an averaging down approach); if the price doesn’t reach the Jaw and reverses as a trader anticipated, adding to the position after a candle finishes above/below the Lips (optional; this is where the Classic or Modern trader would start the position).
+limit order for entry only on the Jaw with a tight SL below/above it; if the marker Pullbacks sooner than reaching the Jaw, you enter in a Classical/Modern variation style (the price pullback anywhere between Lips and Jaw – but not quite reaching the Jaw – and a candle finishes above/below the Lips)
+(3) Exit:
+- Hypermodern traders rarely follow the classical rule of exit -> finishing above/below the Lips (although at times it can bring much better results) 
+- the exit is usually by a predetermined take profit
+ 
+7) Hypermodernism vs. The Others
+- you don’t wait where the candle finishes, you watch for where it reaches
+- hypermodern trades are the real risk-takers, like to live dangerously type of folks – they risk entering a position relying on it being a Pullback at the time the Pullback itself is not yet confirmed and might just as well be a reversal
+- this bigger risk is offset by bigger potential reward – these traders are in a trade (way) before the Classics and Modernists, and might exit the position already for a nice profit in a place where the others are only entering
+- the risk is limited by inherently present tight stop loss
+- these traders usually focus on scalping smaller moves with bigger position sizes – bigger position sizes are viable only in some sub-variations of the Hypermodernism where the total SL is tight enough, so to speak (the only reason they can go for a bigger position size is because they have a tight stop loss)
+- these traders are good losers and don’t mind losing 4 trades in row and then be at breakeven/ in green after one successful trade
+8) Random Tips:
+- Pullback Strategy on 3m is often met by The Breakout Strategy on 1m
+- when going for Elite Entries, 5m candle oftentimes finishes sooner than current ongoing 3m candle – it is advised (generally) to follow a principle of “higher time frame, higher trust” – in this case it means to enter on the close of 5m candle
+- it doesn’t really matter where the wicks (don’t) reach in Classical and Modern approach, it’s all about where the candle opens and closes – as far as the strategy goes – wicks of course matter a lot in your stop loss, take profit and in Hypermodern variation
+- a candle/its wick doesn’t need to hit a moving average (Lips, Teeth, Jaw) exactly and precisely, there’s always a standard deviation/room for error in charting systems
+- do not forget the strategy’s win rate oscillates in the interval of 60 to 70%; this means that with a perfect execution, you’re still going to lose money 3 to 4 times out of 10, no matter what you do and how well you follow the principles of the system
+- you can merge and hybrid the variations, making you truly calling it “My System” – e.g. you take a Classical rule of only longs above 200 EMA and only shorts below it, and merge it with the Hypermodern style of trading – early entries based on 2000 tick chart
+- due to lower win rate and a situation where you oftentimes take a long series of (small) losses, the Hypermodern approach is not suitable for people that are bad losers
+- Hypermodern style of trading is mostly popular on /ES and recommended SL is 2 points
+
+
+4.	Break Out Strategy
+for break out, what’s worked for me for breakouts has been waiting for a candle to start in the mouth and finish outside of it, then entering directly after a confirmation candle finishes with a strong gap between the wick and jaw or teeth. Then SL either at the base of the wick or below the mouth depending on how the breakout aligns with technical analysis. Had great success backtesting this with bar replay, though you get a lot of false signals and a win rate of only ~30-40% but a profit factor of 5 or more.
+ 
+
+once we hit one reward, we move the trade to break even then implement a trailing stop loss/close when the green line crosses the red line.
+during the entry for the trade for the break out, there has to be a significant gap between the blue line and the red line.  Also, for the reverse pull back entry, the smoothened lines protruding into the future the lines should have space between them and not be close to crossing each other.
+for stop loss, for the reverse pull back, we have a set number of points for it

@@ -1,0 +1,13 @@
+[Unit]
+Description=backend flask service
+After=network.target
+
+[Service]
+User=elonmusk710628
+Group=www-data
+WorkingDirectory=/home/elonmusk710628/myflaskapp
+Environment="PATH=/home/elonmusk710628/myflaskapp/venv/bin"
+ExecStart=/home/elonmusk710628/myflaskapp/venv/bin/gunicorn --workers 3 --bind unix:/home/elonmusk710628/myflaskapp/flaskapp.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target

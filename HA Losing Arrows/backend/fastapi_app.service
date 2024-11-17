@@ -1,0 +1,14 @@
+[Unit]
+Description=FastAPI service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/purehtc
+ExecStart=/root/.local/share/virtualenvs/purehtc-Fa3e95Ua/bin/python3 /home/purehtc/main.py
+Restart=on-failure
+RestartSec=3
+Environment="TRADING_PASS=120120"
+
+[Install]
+WantedBy=multi-user.target

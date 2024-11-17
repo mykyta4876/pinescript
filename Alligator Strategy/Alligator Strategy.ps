@@ -1,0 +1,93 @@
+// Pine Script for Trading Strategy
+
+//@version=5
+strategy("My Alligator Strategy", overlay=true)
+
+// Input parameters
+volatility_period = input(15, "Volatility Period")
+volatility_threshold = input(1.5, "Volatility Threshold")
+rsi_period = input(14, "RSI Period")
+rsi_threshold = input(50, "RSI Threshold")
+
+// EMA parameters
+ema_short = input(5, "Short EMA")
+ema_medium = input(8, "Medium EMA")
+ema_long = input(13, "Long EMA")
+ema_200 = input(200, "200 EMA")
+
+// Alligator parameters
+jaw_length = 13
+teeth_length = 8
+lips_length = 5
+jaw_offset = 8
+teeth_offset = 5
+lips_offset = 3
+
+// Calculate indicators
+volatility = ta.stdev(close, volatility_period) / ta.sma(close, volatility_period) * 100
+rsi = ta.rsi(close, rsi_period)
+
+ema_200_val = ta.ema(close, ema_200)
+
+// Alligator
+jaw = ta.sma(hl2, jaw_length)
+teeth = ta.sma(hl2, teeth_length)
+lips = ta.sma(hl2, lips_length)
+
+jaw_plot = jaw[jaw_offset]
+teeth_plot = teeth[teeth_offset]
+lips_plot = lips[lips_offset]
+
+// Plotting
+plot(jaw_plot, color=color.blue, title="Jaw")
+plot(teeth_plot, color=color.red, title="Teeth")
+plot(lips_plot, color=color.green, title="Lips")
+plot(ema_200_val, color=color.purple, title="200 EMA")
+
+// Volatility and trend conditions
+volatile_market = volatility > volatility_threshold
+trending_market = math.abs(close - ema_200_val) / ema_200_val > 0.01 and math.abs(rsi - 50) > 5
+
+// Entry conditions
+long_entry = volatile_market and trending_market and close > ema_200_val and close > lips_plot and close[1] <= lips_plot
+short_entry = volatile_market and trending_market and close < ema_200_val and close < lips_plot and close[1] >= lips_plot
+
+// Exit conditions
+long_exit = close < lips_plot
+short_exit = close > lips_plot
+
+// Execute trades
+if (long_entry)
+    strategy.entry("Long", strategy.long)
+
+if (short_entry)
+    strategy.entry("Short", strategy.short)
+
+if (long_exit)
+    strategy.close("Long")
+
+if (short_exit)
+    strategy.close("Short")
+
+// Trailing stop loss
+trail_points = input(10, "Trailing Stop Loss Points")
+strategy.exit("TS Long", "Long", trail_points=trail_points, trail_offset=0)
+strategy.exit("TS Short", "Short", trail_points=trail_points, trail_offset=0)
+
+// Break-even stop
+if (strategy.position_size > 0 and (high - strategy.position_avg_price) >= trail_points)
+    strategy.exit("BE Long", "Long", stop=strategy.position_avg_price)
+
+if (strategy.position_size < 0 and (strategy.position_avg_price - low) >= trail_points)
+    strategy.exit("BE Short", "Short", stop=strategy.position_avg_price)
+
+// This script implements a basic version of the described strategy. It includes:
+// 1. Volatility detection using standard deviation
+// 2. Trend confirmation using 200 EMA and RSI
+// 3. Entry based on price crossing the Alligator's lips
+// 4. Exit when price crosses back through the lips
+// 5. Trailing stop loss and break-even stop
+//
+// Note: This is a simplified version and may need further refinement and testing.
+// Additional features like multiple timeframe analysis, tick charts, and more
+// complex entry/exit rules can be added to enhance the strategy.

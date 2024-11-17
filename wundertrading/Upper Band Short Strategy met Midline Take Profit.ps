@@ -1,0 +1,74 @@
+//@version=5
+strategy("Top Profit Strategy", overlay=true, initial_capital=1000, commission_type=strategy.commission.percent, commission_value=0.07)
+
+// Parameters
+lookback = input.int(20, minval=1, title="Lookback Periode")
+multiplier = input.float(1.0, minval=0.1, title="Volatiliteit Multiplier")
+max_trades_per_day = input.int(2, title="Maximale Trades per Dag")
+stop_loss_atr_multiplier = input.float(1.0, minval=0.1, title="Stop Loss ATR Multiplier")
+trailing_stop_atr_multiplier = input.float(3, minval=0.1, title="Trailing Stop ATR Multiplier")
+
+// New parameters for additional conditions
+rsi_period = input.int(14, minval=1, title="RSI Period")
+rsi_overbought = input.int(70, minval=50, maxval=100, title="RSI Overbought Level")
+ema_fast_period = input.int(12, minval=1, title="Fast EMA Period")
+ema_slow_period = input.int(26, minval=1, title="Slow EMA Period")
+
+// Bereken ATR
+atr = ta.atr(14)
+
+var float trailing_stop_price = na
+
+// Bereken de hoogste high en laagste low
+highest_high = ta.highest(high, lookback)
+lowest_low = ta.lowest(low, lookback)
+
+// Bereken de midline en bands
+midline = (highest_high + lowest_low) / 2
+upper_band = midline + (atr * multiplier)
+lower_band = midline - (atr * multiplier)
+
+// Plot de bands
+plot(upper_band, color=color.green, title="Upper Band")
+plot(lower_band, color=color.red, title="Lower Band")
+plot(midline, color=color.blue, title="Midline")
+
+// Calculate RSI
+rsi = ta.rsi(close, rsi_period)
+
+// Calculate EMAs
+ema_fast = ta.ema(close, ema_fast_period)
+ema_slow = ta.ema(close, ema_slow_period)
+
+// Plot additional indicators
+plot(rsi, color=color.purple, title="RSI", display=display.none)
+plot(ema_fast, color=color.yellow, title="Fast EMA")
+plot(ema_slow, color=color.orange, title="Slow EMA")
+
+// Handelsvoorwaarden
+short_condition = ta.crossunder(close, upper_band) and
+                  rsi > rsi_overbought and
+                  ema_fast < ema_slow
+
+// Teller voor aantal trades per dag
+var int trades_today = 0
+
+// Reset aantal trades aan het begin van elke dag
+if ta.change(time("D"))
+    trades_today := 0
+
+// Beperk het aantal trades per dag
+if (trades_today < max_trades_per_day)
+    if (short_condition and strategy.position_size == 0)
+        trailing_stop_price := close + (atr * trailing_stop_atr_multiplier)
+        strategy.entry("Short", strategy.short, comment="ENTER-SHORT_KRAKEN-FUTURES_XRPUSD_Jeffrey-xrp__")
+        trades_today += 1
+
+stop_price = strategy.position_avg_price + (atr * stop_loss_atr_multiplier)
+
+// Exit op midline met stop loss en trailing stop
+if (strategy.position_size < 0)
+    trailing_stop = close + (atr * trailing_stop_atr_multiplier)
+    if (trailing_stop < stop_price)
+        trailing_stop_price := trailing_stop
+    strategy.exit("Exit Short", "Short", limit=midline, stop=trailing_stop_price, comment="EXIT-SHORT_KRAKEN-FUTURES_XRPUSD_Jeffrey-xrp__")

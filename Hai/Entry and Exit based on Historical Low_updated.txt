@@ -1,0 +1,45 @@
+//@version=5
+strategy("Entry and Exit based on Historical Low", overlay=true, margin_long=100, margin_short=100)
+
+// Input parameters
+lowLookbackPeriod = input.int(365, title="Lookback Period for Low", minval=1) // Set to 365 days (or one year) as an example
+entryMargin = input.float(1.05, title="Entry Margin (1.05 = 5% above low)", minval=1)
+exitMargin = input.float(1.2, title="Exit Margin (1.2 = 20% above entry)")
+
+
+
+// Calculate lowest price over the specified lookback period
+historicalLow = ta.lowest(low, lowLookbackPeriod)
+
+
+
+// Define entry and exit prices
+entryPrice = historicalLow * entryMargin
+exitPrice = entryPrice * exitMargin
+
+
+
+// Define entry and exit conditions
+enterLong = (close <= entryPrice) // Enter long if price is at or below the entry level
+exitLong = (close >= exitPrice) // Exit if price reaches the exit level
+
+
+
+// Plot lines for visual reference
+plot(historicalLow, color=color.red, linewidth=1, title="Historical Low")
+plot(entryPrice, color=color.green, linewidth=1, title="Entry Trigger")
+plot(exitPrice, color=color.blue, linewidth=1, title="Exit Trigger")
+
+
+
+// Background colors to indicate signals
+bgcolor(enterLong ? color.new(color.green, 90) : na, title="Entry Zone Highlight")
+bgcolor(exitLong ? color.new(color.red, 90) : na, title="Exit Zone Highlight")
+
+
+if enterLong
+    // Strategy: Execute trades based on conditions
+    strategy.entry("Long Entry", strategy.long)
+
+if exitLong
+    strategy.close("Long Entry")

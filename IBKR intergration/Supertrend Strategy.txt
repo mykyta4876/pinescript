@@ -1,0 +1,232 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © slopez3415
+
+//@version=5
+strategy(title='SUPERTREND ATR WITH TRAILING STOP LOSS', shorttitle='Supertrend Strat', overlay=true)
+
+// === INPUT TO SELECT BARS BACK
+barsBack = input(title='ATR Period', defval=1)
+
+// === INPUT TO SELECT MULTPLIER FACTOR 
+multplierFactor = input.float(title='ATR multplierFactoriplier', step=0.1, defval=3.0)
+
+
+// LOGIC TO FIND DIRECTION WHEN THERE IS TREND CHANGE ACCORDING VOLATILITY
+atr = multplierFactor * ta.atr(barsBack)
+
+longStop = hl2 - atr
+longStopPrev = nz(longStop[1], longStop)
+longStop := close[1] > longStopPrev ? math.max(longStop, longStopPrev) : longStop
+
+shortStop = hl2 + atr
+shortStopPrev = nz(shortStop[1], shortStop)
+shortStop := close[1] < shortStopPrev ? math.min(shortStop, shortStopPrev) : shortStop
+
+direction = 1
+direction := nz(direction[1], direction)
+direction := direction == -1 and close > shortStopPrev ? 1 : direction == 1 and close < longStopPrev ? -1 : direction
+
+
+longColor = color.blue
+shortColor = color.blue
+
+var valueToPlot = 0.0
+var colorToPlot = color.white
+
+if direction == 1
+    valueToPlot := longStop
+    colorToPlot := color.green
+    colorToPlot
+else
+    valueToPlot := shortStop
+    colorToPlot := color.red
+    colorToPlot
+
+
+
+// N-POLE Gaussian Filter indicator implementation
+import loxx/loxxexpandedsourcetypes/4
+
+greencolor = #2DD204  
+redcolor = #D2042D 
+
+//factorial calc
+fact(int n)=>
+    float a = 1
+    for i = 1 to n 
+        a *= i
+    a
+
+//alpha calc
+_alpha(int period, int poles)=>
+    w = 2.0 * math.pi / period
+    float b = (1.0 - math.cos(w)) / (math.pow(1.414, 2.0 / poles) - 1.0)
+    float a = - b + math.sqrt(b * b + 2.0 * b)
+    a
+    
+//n-pole calc
+_makeCoeffs(simple int period, simple int order)=>
+    coeffs = matrix.new<float>(order + 1, 3, 0.)
+    float a = _alpha(period, order)
+    for r = 0 to order 
+        out = nz(fact(order) / (fact(order - r) * fact(r)), 1)
+        matrix.set(coeffs, r, 0, out)
+        matrix.set(coeffs, r, 1, math.pow(a, r))
+        matrix.set(coeffs, r, 2, math.pow(1.0 - a, r))
+    coeffs
+    
+//n-pole calc
+_npolegf(float src, simple int period, simple int order)=>
+    var coeffs = _makeCoeffs(period, order)
+    float filt = src * matrix.get(coeffs, order, 1)
+    int sign = 1
+    for r = 1 to order 
+        filt += sign * matrix.get(coeffs, r, 0) * matrix.get(coeffs, r, 2) * nz(filt[r])
+        sign *= -1
+    filt
+
+//std filter
+_filt(float src, int len, float filter)=>
+    float price = src
+    float filtdev = filter * ta.stdev(src, len)
+    price := math.abs(price - nz(price[1])) < filtdev ? nz(price[1]) : price
+    price
+    
+smthtype = input.string("Kaufman", "Heiken-Ashi Better Smoothing", options = ["AMA", "T3", "Kaufman"], group=  "Source Settings")
+srcoption = input.string("Close", "Source", group= "Source Settings", options = ["Close"])
+
+period = input.int(25,'Period', group = "Basic Settings")
+order = input.int(5,'Order', group = "Basic Settings", minval = 1)
+
+filterop = input.string("Gaussian Filter", "Filter Options", options = ["Price", "Gaussian Filter", "Both", "None"], group=  "Filter Settings")
+filter = input.float(1, "Filter Devaitions", minval = 0, group= "Filter Settings")
+filterperiod = input.int(10, "Filter Period", minval = 0, group= "Filter Settings")
+
+colorbars = input.bool(true, "Color bars?", group = "UI Options")
+showSigs = input.bool(true, "Show signals?", group= "UI Options")
+
+kfl=input.float(0.666, title="* Kaufman's Adaptive MA (KAMA) Only - Fast End", group = "Moving Average Inputs")
+ksl=input.float(0.0645, title="* Kaufman's Adaptive MA (KAMA) Only - Slow End", group = "Moving Average Inputs")
+amafl = input.int(2, title="* Adaptive Moving Average (AMA) Only - Fast", group = "Moving Average Inputs")
+amasl = input.int(30, title="* Adaptive Moving Average (AMA) Only - Slow", group = "Moving Average Inputs")
+
+[haclose, haopen, hahigh, halow, hamedian, hatypical, haweighted, haaverage] = request.security(ticker.heikinashi(syminfo.tickerid), timeframe.period, [close, open, high, low, hl2, hlc3, hlcc4, ohlc4])
+
+float src = switch srcoption
+    "Close" => loxxexpandedsourcetypes.rclose()
+    => haclose
+
+src := filterop == "Both" or filterop == "Price" and filter > 0 ? _filt(src, filterperiod, filter) : src
+
+out = _npolegf(src, period, order)
+
+out := filterop == "Both" or filterop == "Gaussian Filter" and filter > 0 ? _filt(out, filterperiod, filter) : out
+
+sig = nz(out[1])
+
+state = 0
+if (out > sig) 
+    state := 1
+if (out < sig) 
+    state := -1
+
+pregoLong = out > sig and (nz(out[1]) < nz(sig[1]) or nz(out[1]) == nz(sig[1]))
+pregoShort = out < sig and (nz(out[1]) > nz(sig[1]) or nz(out[1]) == nz(sig[1]))
+
+contsw = 0
+contsw := nz(contsw[1])
+contsw := pregoLong ? 1 : pregoShort ? -1 : nz(contsw[1])
+
+goLong = pregoLong and nz(contsw[1]) == -1
+goShort = pregoShort and nz(contsw[1]) == 1 
+
+var color colorout = na
+colorout := state == -1 ? redcolor : state == 1 ? greencolor : nz(colorout[1])
+
+
+// *** Trailing Stop Loss *** 
+// Generating Entry Conditions, enter at open of the candle 
+// deteremines whether the TSL is updated only at the close of each candle "Candle Close Based"
+// or "Real-Time" where the stop loss will adjust with the price movement during the candle.
+tsl_ty =  input.string("Real-Time","Trailling SL Type",["Candle Close Based","Real-Time"],group = "Trailling Stoploss")=="Candle Close Based"
+
+// Compute the trailing stop loss prices
+// the amount in dollars that the stop loss will trail from long/short positions
+trail_dollars_long = input.float(0.75, title='Stoploss - Long ($)',group = "Trailling Stoploss") 
+trail_dollars_short = input.float(0.75, title='Stoploss - Short ($)',group = "Trailling Stoploss") 
+
+// Entry Conditions
+// For short entries, I had to leave 'direction' as is because it causes too many entries and is unable to be used on strategy tester on TV
+longCondition = (direction == 1) and (state == 1)
+shortCondition = (direction == 1) and (state == -1)
+
+// assigns the initial stop loss price when a trade is opened
+long_tsl = close - trail_dollars_long
+short_tsl = close + trail_dollars_short
+
+// variables that hold the current stop loss price for long/short positions
+var long_stop_price = 0.0
+var short_stop_price = 0.0
+
+
+// Strategy Entries
+var entry = close
+if longCondition and strategy.position_size == 0
+    strategy.entry('Long', strategy.long, comment = "Supertrend_Strategy_Long_Entry")
+    long_stop_price:=  long_tsl
+    entry:= close
+
+if shortCondition and strategy.position_size == 0
+    strategy.entry('Short', strategy.short, comment = "Supertrend_Strategy_Short_Entry")
+    short_stop_price:=  short_tsl
+    entry:= close
+
+
+// check and update the stop loss depending on price movement
+// * the conditional statement here updates the stop loss to the max/min of the current trailing stop         
+// * this ensures that the stop loss moves in the direction of the trade. (upward for long, downward for short.
+if tsl_ty
+    long_stop_price := if (strategy.position_size > 0)
+        math.max(long_tsl, long_stop_price[1])
+    else
+        long_tsl
+
+if tsl_ty
+    short_stop_price := if (strategy.position_size < 0)
+        math.min(short_tsl, short_stop_price[1])
+    else
+        short_tsl
+
+// Strategy exits 
+strategy.exit("Long Exit",from_entry ="Long",stop = long_stop_price ,trail_price = tsl_ty?na:entry, trail_offset = tsl_ty?na:(trail_dollars_long/syminfo.mintick), comment = "Supertrend_Strategy_Long_Exit")
+strategy.exit("Short Exit",from_entry ="Short",stop = short_stop_price ,trail_price = tsl_ty?na:entry, trail_offset = tsl_ty?na:(trail_dollars_short/syminfo.mintick), comment = "Supertrend_Strategy_Short_Exit")
+
+
+// Ploting the TSL levels
+plot(series=strategy.position_size > 0 ? long_stop_price : na, color=color.new(#40ccfb, 0), style=plot.style_cross, linewidth=3)
+plot(series=strategy.position_size < 0 ? short_stop_price : na, color=color.new(#40ccfb, 0), style=plot.style_cross, linewidth=3)
+
+plot(valueToPlot == 0.0 ? na : valueToPlot, title='BuyLine', linewidth=2, color=color.new(colorToPlot, 0))
+//plotshape(direction == 1 and direction[1] == -1 ? longStop : na, title='Buy', style=shape.labelup, location=location.absolute, size=size.normal, text='Buy', textcolor=color.new(color.white, 0), color=color.new(color.green, 0))
+//plotshape(direction == -1 and direction[1] == 1 ? shortStop : na, title='Sell', style=shape.labeldown, location=location.absolute, size=size.normal, text='Sell', textcolor=color.new(color.white, 0), color=color.new(color.red, 0))
+
+plot(out, "N-Pole GF", color = colorout, linewidth = 3)
+barcolor(colorbars ? colorout : na)
+
+//plotshape(showSigs and goLong, title = "Long", color = color.yellow, textcolor = color.yellow, text = "L", style = shape.triangleup, location = location.belowbar, size = size.tiny)
+//plotshape(showSigs and goShort, title = "Short", color = color.fuchsia, textcolor = color.fuchsia, text = "S", style = shape.triangledown, location = location.abovebar, size = size.tiny)
+
+
+
+// *** example for trailing stop loss *** //
+// Assuming you're trading a stock at $100 and want a trailing stop loss of $0.10 //
+// For Long Position:
+
+// When you enter a long trade at $100, the stop-loss is initially set at $99.90 (100 - 0.10).
+// If the price moves to $101, the new stop-loss will be the higher of $100.90 (101 - 0.10) and the previous stop ($99.90), which would be $100.90.
+// The stop-loss will keep moving upward as the price increases but will not decrease if the price goes down.
+// For Short Position:
+
+// If you enter a short trade at $100, the stop-loss is set at $100.10 (100 + 0.10).
+// If the price moves to $99, the new stop-loss would be set at $99.10 (99 + 0.10), 
+// ensuring that the stop-loss always tightens as the price moves in your favor but doesn't loosen.

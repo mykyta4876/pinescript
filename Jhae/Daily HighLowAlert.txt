@@ -1,0 +1,29 @@
+//Created By Lariane 2019
+//modified version of Mike Witts indicator 
+//modified version of Chris Moodys indicator
+//modified version of aVAvzFR's indicator
+//modified version of disciplinedtrader's indicator
+study(title="Daily High/Low+Alert", shorttitle="Daily H/L/M/O/C+W/M", overlay=true)
+active = input(true, title="Show On Chart")
+pricehigh = security(tickerid, 'D', high[0])
+pricelow = security(tickerid, 'D', low[0])
+pricemid = (security(tickerid, 'D', high[0])+security(tickerid, 'D', low[0]))/2
+priceopen = security(tickerid, 'D', open[0])
+priceclose = security(tickerid, 'D', close[1])
+priceweek = security(tickerid, 'W', open[0])
+pricemonth = security(tickerid, 'M', open[0])
+//Daily Plots
+offs_daily = 0 
+plot(active and pricehigh ? pricehigh : na, title="Daily High", style=linebr, linewidth=2, color=red)
+plot(active and pricelow ? pricelow : na, title="Daily Low", style=linebr, linewidth=2, color=green)
+plot(active and pricemid ? pricemid : na, title="Daily Mid", style=linebr, linewidth=2, color=blue)
+plot(active and priceopen ? priceopen : na, title="Daily Open", style=linebr, linewidth=2, color=purple)
+plot(active and priceclose ? priceclose : na, title="Previous Daily Close", style=linebr, linewidth=2, color=black)
+plot(active and priceweek ? priceweek : na, title="Weekly Open", style=linebr, linewidth=2, color=yellow)
+plot(active and pricemonth ? pricemonth : na, title="Monthly Open", style=linebr, linewidth=2, color=orange)
+
+// Alert Conditions
+alertcondition(cross(close, priceweek), title="Cross Weekly Open", message="Price crossed Weekly Open")
+alertcondition(cross(close, priceclose), title="Cross Previous Daily Close", message="Price crossed Previous Daily Close")
+alertcondition(cross(close, pricelow), title="Cross Price Low", message="Price crossed price Low")
+

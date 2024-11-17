@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<moomoo_opend>
+  <ip>127.0.0.1</ip>
+  <api_port>11111</api_port>
+  <lang>en</lang>
+  <log_level>info</log_level>
+  <future_trade_api_time_zone>UTC+8</future_trade_api_time_zone>
+  <websocket_ip>127.0.0.1</websocket_ip>
+</moomoo_opend>

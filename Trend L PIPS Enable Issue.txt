@@ -1,0 +1,1133 @@
+
+//Created by Compoundtraders (CT)
+//Licenced on Github. Not open source code. You can not freely distributed to anyone.  
+//This source code is subject to the terms of the Mozilla Public Licence 2.0 at https://mozilla.otrg/MPL/2.0/
+
+//@version=5
+strategy("Trend L PIPS Enable Issue", overlay = true,process_orders_on_close = true,calc_on_every_tick = true, max_bars_back = 500,default_qty_value = 3)
+var pip_size = syminfo.mintick * (syminfo.type == "forex" ? 10 : 1)
+
+gs=input.bool(false,"Switch Global ")
+
+pricefl=input.bool(true,"Enable Price Filter Long")
+pricefs=input.bool(true,"Enable Price Filter Short")
+resetl=input.float(100,"Long reset price")
+resets=input.float(100,"Short reset price")
+
+// istp1 = input.bool(true,"",inline = "tg1") 
+// istp2 = input.bool(true,"",inline = "tg2")
+// istp3 = input.bool(true,"",inline = "tg3")
+
+useTSl  = input.bool(true,"Use TG Pip")
+tp1 = input.float(20,"TG Pip 1",inline = "tg1")*pip_size
+tp2 = input.float(40,"TG Pip 2",inline = "tg2")*pip_size
+tp3 = input.float(60,"TG Pip 3",inline = "tg3")*pip_size
+tp4 = input.float(80,"TG Pip 4",inline = "tg4")*pip_size
+
+slpip1 = input.float(10,"SL Pip ",inline = "tg1")*pip_size
+slpip2 = input.float(30,"SL Pip ",inline = "tg2")*pip_size
+slpip3 = input.float(50,"SL Pip ",inline = "tg3")*pip_size
+slpip4 = input.float(70,"SL Pip ",inline = "tg4")*pip_size
+ 
+exitPer1 = input.int(25,"Exit %",inline = "tg1")
+exitPer2 = input.int(25,"Exit %",inline = "tg2")
+exitPer3 = input.int(25,"Exit %",inline = "tg3")
+ 
+
+ma(type, src, len) =>
+    float result = 0
+    if type == 'SMA'  // Simple
+        result := ta.sma(src, len)
+        result
+    if type == 'EMA'  // Exponential
+        result := ta.ema(src, len)
+        result
+    if type == 'DEMA'  // Double Exponential
+        e = ta.ema(src, len)
+        result := 2 * e - ta.ema(e, len)
+        result
+    if type == 'TEMA'  // Triple Exponential
+        e = ta.ema(src, len)
+        result := 3 * (e - ta.ema(e, len)) + ta.ema(ta.ema(e, len), len)
+        result
+    if type == 'HMA'  // Hull
+        result := ta.wma(2 * ta.wma(src, len / 2) - ta.wma(src, len), math.round(math.sqrt(len)))
+        result
+    result
+
+use_date_range = input.bool(false, "Restrict Entries To Date Range", group="Entry Position Settings", tooltip="When checked: will only enter a trade when the signal is within the specified date range below.")
+startTime = input.time(timestamp("1 Jan 2022 00:00"), "  Start", group="Entry Position Settings")
+endTime = input.time(timestamp("1 Jan 2091 00:00"), "  End",  group="Entry Position Settings")
+inDateRange = use_date_range ? (time >= startTime and time < endTime) : true
+i_enable_long_after_price  = input(true, "Enable Long After Price ", inline = 'ptl')
+i_enable_short_after_price = input(true, "Enable Short After Price", inline = 'pts')
+
+i_long_price_th  = input(0.8848, "", inline = 'ptl')
+i_short_price_th = input(0.8848, "", inline = 'pts')
+
+isEnableCandleEntryBuy = input.bool(false,"Enable Candle close Entry Long")
+isEnableCandleEntrySell = input.bool(false,"Enable Candle close Entry Short")
+
+
+//-------------------- 
+
+grwilal = "====== Williams Alligator ========"
+isWillEntryLong = input.bool(true,"Williams Alligator Long Entry",group = grwilal)
+isWillEntryShort = input.bool(true,"Williams Alligator Short Entry",group = grwilal)
+usetmfw = input.bool(true,"Use",group = grwilal,inline = "tmfx")
+willHTF = input.timeframe("","Timefrme",inline = "tmfx",group = grwilal)
+cdlSize = input.float(0,"Williams Alligator entry candle size",group = grwilal)
+
+cdlSizeWill = math.abs(open - close) > cdlSize*pip_size 
+
+useGB = input.bool(false,"Use Green Blue",group = grwilal)
+useGR = input.bool(false,"Use Green Red",group = grwilal)
+useGRB = input.bool(true,"Use Green Red Blue",group = grwilal)
+
+smma(src, length) =>
+	smma =  0.0
+	smma := na(smma[1]) ? ta.sma(src, length) : (smma[1] * (length - 1) + src) / length
+	smma
+jawLength = input.int(13, minval=1, title="Jaw Length",group = grwilal)
+teethLength = input.int(8, minval=1, title="Teeth Length",group = grwilal)
+lipsLength = input.int(5, minval=1, title="Lips Length",group = grwilal)
+jawOffset = input(8, title="Jaw Offset",group = grwilal)
+teethOffset = input(5, title="Teeth Offset",group = grwilal)
+lipsOffset = input(3, title="Lips Offset",group = grwilal)
+ 
+getWilitTmf()=>
+	jaw = smma(hl2, jawLength)
+	teeth = smma(hl2, teethLength)
+	lips = smma(hl2, lipsLength)
+
+	isBuyWA1  = (useGB ? lips[lipsOffset] > jaw[jawOffset] and close > lips[lipsOffset] : false  ) or (useGR ? lips[lipsOffset] > teeth[teethOffset] and close > lips[lipsOffset] : false  ) or (useGRB ? lips[lipsOffset] > teeth[teethOffset] and teeth[teethOffset] > jaw[jawOffset] and close > lips[lipsOffset] : false  )   and close > open
+	isSellWA1 = (useGB ? lips[lipsOffset] < jaw[jawOffset]and close < lips[lipsOffset]  : false  ) or (useGR ? lips[lipsOffset] < teeth[teethOffset]and close < lips[lipsOffset]  : false  ) or (useGRB ? lips[lipsOffset] < teeth[teethOffset] and teeth[teethOffset] < jaw[jawOffset] and close < lips[lipsOffset] : false  )  and   close < open 
+
+	[isBuyWA1,isSellWA1,jaw,teeth,lips]
+
+[isBuyWA1,isSellWA1,jaw,teeth,lips] = getWilitTmf()
+[isBuyWA1_tmf,isSellWA1_tmf,jaw_h,teeth_h,lips_h] = request.security(syminfo.tickerid,willHTF, getWilitTmf())
+
+plot(jaw, "Jaw", offset = jawOffset, color=#2962FF)
+plot(teeth, "Teeth", offset = teethOffset, color=#E91E63)
+plot(lips, "Lips", offset = lipsOffset, color=#66BB6A)
+
+
+isBuyWA =  (isWillEntryLong ? isBuyWA1 and not isBuyWA1[1] and (usetmfw ? isBuyWA1_tmf and not isBuyWA1_tmf[1] : true) and cdlSizeWill  and close > open : true) 
+isSellWA = (isWillEntryShort ? isSellWA1 and not isSellWA1[1] and (usetmfw ? isSellWA1_tmf and not isSellWA1_tmf[1] : true) and cdlSizeWill  and   close < open : true) 
+
+
+//--------------------
+
+
+grpineceone = "-------------- Pine Connect ----------"
+// useinput =  input.bool(true,"Use Input Syntex")
+
+i_syntexLong        =  input.text_area("LicenseID,buy,EURUSD,risk=0.01","Buy Alert Message",    group = grpineceone,tooltip = "Use this message in message box  ------->\n {{strategy.order.alert_message}} ")
+i_syntexShort       =  input.text_area("LicenseID,sell,EURUSD,risk=0.01","Sell Alert Message",  group = grpineceone,tooltip = "Use this message in message box  ------->\n {{strategy.order.alert_message}} ")
+i_syntexLongClose   =  input.text_area("LicenseID,closelong,EURUSD","Buy Exit Alert Message" ,  group = grpineceone,tooltip = "Use this message in message box  ------->\n {{strategy.order.alert_message}} ")
+i_syntexShortClose  =  input.text_area("LicenseID,closeshort,EURUSD","Sell Exit Alert Message", group = grpineceone,tooltip = "Use this message in message box  ------->\n {{strategy.order.alert_message}} ")
+i_syntexCancleLong  =  input.text_area("LicenseID,cancellong,EURUSD","Cancel Long Order",       group = grpineceone,tooltip = "Use this message in message box  ------->\n {{strategy.order.alert_message}} ")
+i_syntexCancleShort =  input.text_area("LicenseID,cancelshort,EURUSD","Cancel Short Order",     group = grpineceone,tooltip = "Use this message in message box  ------->\n {{strategy.order.alert_message}} ")
+tg1Alert_long = input.text_area("Target 1 Message Long","Target 1 Message Long",tooltip = " ",    group = grpineceone)
+tg2Alert_long = input.text_area("Target 2 Message Long","Target 2 Message Long",tooltip = " ",    group = grpineceone)
+tg3Alert_long = input.text_area("Target 3 Message Long","Target 3 Message Long",tooltip = " ",    group = grpineceone)
+tg4Alert_long = input.text_area("Target 4 Message Long","Target 4 Message Long",tooltip = " ",    group = grpineceone)
+tg1Alert_Short = input.text_area("Target 1 Message Short","Target 1 Message Short",tooltip = " ",    group = grpineceone)
+tg2Alert_Short = input.text_area("Target 2 Message Short","Target 2 Message Short",tooltip = " ",    group = grpineceone)
+tg3Alert_Short = input.text_area("Target 3 Message Short","Target 3 Message Short",tooltip = " ",    group = grpineceone)
+tg4Alert_Short = input.text_area("Target 4 Message Short","Target 4 Message Short",tooltip = " ",    group = grpineceone)
+
+//i_delay_in_sec = input(defval = 55, title = 'Cancel long short delay send')
+i_ptobar = input.float(10,title='Price to bar ratio')
+i_enable_session = input(false, "Enable Session Hault") 
+i_plot_session   = input(false, "Plot Session Hault") 
+i_session = input.session("1600-1605", "Session (Not valid) (Exchange Time)")
+inSession = i_enable_session ? not na(time(timeframe.period, i_session)):false
+bgcolor((i_enable_session and i_plot_session ? inSession : false) ? color.rgb(120, 126, 134, 67) : na,title="Session Hault")
+
+i_enable_long  = input(false, "Enable Long Angles")
+i_enable_short = input(false, "Enable Short Angles")
+
+
+
+i_tbltxt = input.string(defval='Normal',       title='Angle Table', options=['Auto', 'Normal', 'Tiny', 'Small', 'Large', 'huge'],inline="pivot")
+i_tblps  = input.string(defval='Bottom Right', title='',            options=['Top Right','Top Left','Top Center', 'Bottom Right', 'Bottom Left', 'Bottom Center','Middle Right','Middle Left','Middle Center'],inline="pivot")
+
+i_use_ma_1 = input.bool(false , "Use Ma 1")
+i_use_ma_2 = input.bool(false , "Use Ma 2")
+i_use_ma_3 = input.bool(false , "Use Ma 3")
+i_use_ma_4 = input.bool(false , "Use Ma 4")
+
+i_ma_1_src = input.source(close , "Fast MA    ", inline = "Ma1")
+i_ma_2_src = input.source(close , "Mid Fast MA", inline = "Ma2")
+i_ma_3_src = input.source(close , "Mid Slow MA", inline = "Ma3")
+i_ma_4_src = input.source(close , "Slow MA    ", inline = "Ma4")
+
+i_ma_1_prd = input.int(9 ,  "Period", inline = "Ma1")
+i_ma_2_prd = input.int(9 ,  "Period", inline = "Ma2")
+i_ma_3_prd = input.int(21 , "Period", inline = "Ma3")
+i_ma_4_prd = input.int(32 , "Period", inline = "Ma4")
+
+i_ent_ang_ma1_b_start = input.int(0,"MA 1 Buy Angle Range", inline = "11",minval=0)
+i_ent_ang_ma2_b_start = input.int(0,"MA 2 Buy Angle Range", inline = "21",minval=0)
+i_ent_ang_ma3_b_start = input.int(0,"MA 3 Buy Angle Range", inline = "31",minval=0)
+i_ent_ang_ma4_b_start = input.int(0,"MA 4 Buy Angle Range", inline = "41",minval=0)
+
+i_ent_ang_ma1_b_end = input.int(90, "", inline = "11",minval=0)
+i_ent_ang_ma2_b_end = input.int(90, "", inline = "21",minval=0)
+i_ent_ang_ma3_b_end = input.int(90, "", inline = "31",minval=0)
+i_ent_ang_ma4_b_end = input.int(90, "", inline = "41",minval=0)
+
+i_ent_ang_ma1_s_start = input.int(0,"MA 1 Sell Angle Range", inline = "111", maxval=0)
+i_ent_ang_ma2_s_start = input.int(0,"MA 2 Sell Angle Range", inline = "211", maxval=0)
+i_ent_ang_ma3_s_start = input.int(0,"MA 3 Sell Angle Range", inline = "311", maxval=0)
+i_ent_ang_ma4_s_start = input.int(0,"MA 4 Sell Angle Range", inline = "411", maxval=0)
+
+i_ent_ang_ma1_s_end = input.int(-90,"", inline = "111", maxval=0)
+i_ent_ang_ma2_s_end = input.int(-90,"", inline = "211", maxval=0)
+i_ent_ang_ma3_s_end = input.int(-90,"", inline = "311", maxval=0)
+i_ent_ang_ma4_s_end = input.int(-90,"", inline = "411", maxval=0)
+
+
+i_ma_1_type = input.string("HULL", "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "Ma1")
+i_ma_2_type = input.string("EMA" , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "Ma2")
+i_ma_3_type = input.string("EMA" , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "Ma3")
+i_ma_4_type = input.string("EMA" , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "Ma4")
+
+// ma_1 = ma(i_ma_1_type,i_ma_1_src,i_ma_1_prd)
+// ma_2 = ma(i_ma_2_type,i_ma_2_src,i_ma_2_prd)
+// ma_3 = ma(i_ma_3_type,i_ma_3_src,i_ma_3_prd)
+// ma_4 = ma(i_ma_4_type,i_ma_4_src,i_ma_4_prd)
+
+ma_1 = i_ma_1_type == "SMA" ? ta.sma(i_ma_1_src , i_ma_1_prd) : i_ma_1_type == "EMA" ? ta.ema(i_ma_1_src , i_ma_1_prd) : ta.hma(i_ma_1_src , i_ma_1_prd) 
+ma_2 = i_ma_2_type == "SMA" ? ta.sma(i_ma_2_src , i_ma_2_prd) : i_ma_2_type == "EMA" ? ta.ema(i_ma_2_src , i_ma_2_prd) : ta.hma(i_ma_2_src , i_ma_2_prd) 
+ma_3 = i_ma_3_type == "SMA" ? ta.sma(i_ma_3_src , i_ma_3_prd) : i_ma_3_type == "EMA" ? ta.ema(i_ma_3_src , i_ma_3_prd) : ta.hma(i_ma_3_src , i_ma_3_prd) 
+ma_4 = i_ma_4_type == "SMA" ? ta.sma(i_ma_4_src , i_ma_4_prd) : i_ma_4_type == "EMA" ? ta.ema(i_ma_4_src , i_ma_4_prd) : ta.hma(i_ma_4_src , i_ma_4_prd) 
+
+gh = "candle low high"
+ee = "Exit"
+ab1 = "HULL Exit 1"
+
+i_use_ex1 = input.bool(false, "Use HULL Exit 1 ?", group = ab1)
+i_exit_ma_1_src = input.source(close , "Hull ma fast", inline = "eMa1" , group = ab1)
+i_exit_ma_2_src = input.source(open , "Hull ma slow",  inline = "eMa2" , group = ab1)
+i_angle_hull_exit_1_buy  =  input.float(0,"Angle greater than for long ",group = ab1)
+i_angle_hull_exit_1_sell =  input.float(0,"Angle less than for short ",  group = ab1)
+
+ab2 = "SIDEWAYS Exit 2"
+i_use_ex2 = input.bool(false, "Use SIDEWAYS Exit 2 ?", group = ab2)
+i_exit_ma_3_src = input.source(close , "Hull ma fast", inline = "eMa3" , group = ab2)
+i_exit_ma_4_src = input.source(close , "Hull ma slow", inline = "eMa4" , group = ab2)
+
+ab3 = "ISL long"
+i_use_ex3_1 = input.bool(false, "Use ISL long?", group = ab3)
+i_exit_ma_5_src = input.source(low , "Hull fast long", inline = "eMa5" , group = ab3)
+i_exit_ma_6_src = input.source(low , "Ema slow long",  inline = "eMa6" , group = ab3)
+
+ab4 = "ISL Short"
+i_use_ex3_2 = input.bool(false, "Use ISL Short?", group = ab4)
+i_exit_ma_7_src = input.source(high , "Hull fast short ", inline = "eMa7" , group = ab4)
+i_exit_ma_8_src = input.source(high , "Ema slow short",   inline = "eMa8" , group = ab4)
+
+i_exit_ma_1_prd = input.int(9  , "Period", inline = "eMa1" , group = ab1)
+i_exit_ma_2_prd = input.int(10 , "Period", inline = "eMa2" , group = ab1)
+i_exit_ma_3_prd = input.int(9  , "Period", inline = "eMa3" , group = ab2)
+i_exit_ma_4_prd = input.int(21 , "Period", inline = "eMa4" , group = ab2)
+i_exit_ma_5_prd = input.int(2  , "Period", inline = "eMa5" , group = ab3)
+i_exit_ma_6_prd = input.int(30 , "Period", inline = "eMa6" , group = ab3)
+i_exit_ma_7_prd = input.int(2  , "Period", inline = "eMa7" , group = ab4)
+i_exit_ma_8_prd = input.int(30 , "Period", inline = "eMa8" , group = ab4)
+
+i_exit_ma_1_type = input.string("HULL" , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "eMa1" , group = ab1)
+i_exit_ma_2_type = input.string("HULL" , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "eMa2" , group = ab1)
+i_exit_ma_3_type = input.string("HULL" , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "eMa3" , group = ab2)
+i_exit_ma_4_type = input.string("EMA"  , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "eMa4" , group = ab2)
+i_exit_ma_5_type = input.string("HULL" , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "eMa5" , group = ab3)
+i_exit_ma_6_type = input.string("EMA"  , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "eMa6" , group = ab3)
+i_exit_ma_7_type = input.string("HULL" , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "eMa7" , group = ab4)
+i_exit_ma_8_type = input.string("EMA"  , "type", options = ["SMA", "EMA", "HULL", 'DEMA', 'TEMA'], inline = "eMa8" , group = ab4)
+
+// exit_ma_1 = ma(i_exit_ma_1_type,i_exit_ma_1_src,i_exit_ma_1_prd)
+// exit_ma_2 = ma(i_exit_ma_2_type,i_exit_ma_2_src,i_exit_ma_2_prd)
+// exit_ma_3 = ma(i_exit_ma_3_type,i_exit_ma_3_src,i_exit_ma_3_prd)
+// exit_ma_4 = ma(i_exit_ma_4_type,i_exit_ma_4_src,i_exit_ma_4_prd)
+// exit_ma_5 = ma(i_exit_ma_5_type,i_exit_ma_5_src,i_exit_ma_5_prd)
+// exit_ma_6 = ma(i_exit_ma_6_type,i_exit_ma_6_src,i_exit_ma_6_prd)
+// exit_ma_7 = ma(i_exit_ma_7_type,i_exit_ma_7_src,i_exit_ma_7_prd)
+// exit_ma_8 = ma(i_exit_ma_8_type,i_exit_ma_8_src,i_exit_ma_8_prd)
+ 
+exit_ma_1 = i_exit_ma_1_type == "SMA" ? ta.sma(i_exit_ma_1_src , i_exit_ma_1_prd) : i_exit_ma_1_type == "EMA" ? ta.ema(i_exit_ma_1_src , i_exit_ma_1_prd) : ta.hma(i_exit_ma_1_src , i_exit_ma_1_prd) 
+exit_ma_2 = i_exit_ma_2_type == "SMA" ? ta.sma(i_exit_ma_2_src , i_exit_ma_2_prd) : i_exit_ma_2_type == "EMA" ? ta.ema(i_exit_ma_2_src , i_exit_ma_2_prd) : ta.hma(i_exit_ma_2_src , i_exit_ma_2_prd) 
+exit_ma_3 = i_exit_ma_3_type == "SMA" ? ta.sma(i_exit_ma_3_src , i_exit_ma_3_prd) : i_exit_ma_3_type == "EMA" ? ta.ema(i_exit_ma_3_src , i_exit_ma_3_prd) : ta.hma(i_exit_ma_3_src , i_exit_ma_3_prd) 
+exit_ma_4 = i_exit_ma_4_type == "SMA" ? ta.sma(i_exit_ma_4_src , i_exit_ma_4_prd) : i_exit_ma_4_type == "EMA" ? ta.ema(i_exit_ma_4_src , i_exit_ma_4_prd) : ta.hma(i_exit_ma_4_src , i_exit_ma_4_prd) 
+exit_ma_5 = i_exit_ma_5_type == "SMA" ? ta.sma(i_exit_ma_5_src , i_exit_ma_5_prd) : i_exit_ma_5_type == "EMA" ? ta.ema(i_exit_ma_5_src , i_exit_ma_5_prd) : ta.hma(i_exit_ma_5_src , i_exit_ma_5_prd) 
+exit_ma_6 = i_exit_ma_6_type == "SMA" ? ta.sma(i_exit_ma_6_src , i_exit_ma_6_prd) : i_exit_ma_6_type == "EMA" ? ta.ema(i_exit_ma_6_src , i_exit_ma_6_prd) : ta.hma(i_exit_ma_6_src , i_exit_ma_6_prd) 
+exit_ma_7 = i_exit_ma_7_type == "SMA" ? ta.sma(i_exit_ma_7_src , i_exit_ma_7_prd) : i_exit_ma_7_type == "EMA" ? ta.ema(i_exit_ma_7_src , i_exit_ma_7_prd) : ta.hma(i_exit_ma_7_src , i_exit_ma_7_prd) 
+exit_ma_8 = i_exit_ma_8_type == "SMA" ? ta.sma(i_exit_ma_8_src , i_exit_ma_8_prd) : i_exit_ma_8_type == "EMA" ? ta.ema(i_exit_ma_8_src , i_exit_ma_8_prd) : ta.hma(i_exit_ma_8_src , i_exit_ma_8_prd) 
+
+
+// plot(i_use_ex1 ? exit_ma_1 : na, color = color.lime , linewidth = 2)
+plot( ta.hma(open, 10) , color = color.purple, linewidth = 2 , title = "Exit ma 2")
+// plot(i_use_ex2 ? exit_ma_3 : na, color = color.aqua, linewidth = 2)
+// plot(i_use_ex2 ? exit_ma_4 : na, color = color.gray, linewidth = 2)
+
+i_ma_rising_step_1 = input.int(4, "MA 1 Number of steps ?")
+i_ma_rising_step_2 = input.int(4, "MA 2 Number of steps ?")
+i_ma_rising_step_3 = input.int(4, "MA 3 Number of steps ?")
+i_ma_rising_step_4 = input.int(4, "MA 4 Number of steps ?")
+
+plot(i_use_ma_1 ? ma_1 : na, color = color.green , title = "Ma fast")
+plot(i_use_ma_2 ? ma_2 : na, color = color.red,    title = "Ma mid fast")
+plot(i_use_ma_3 ? ma_3 : na, color = color.blue,   title = "Ma mid slow")
+plot(i_use_ma_4 ? ma_4 : na, color = color.black,  title = "Ma slow")
+
+entry_ma_buy_all  = ma_1 > ma_2 and ma_3 > ma_4 and ma_2 > ma_3
+entry_ma_sell_all = ma_1 < ma_2 and ma_3 < ma_4 and ma_2 < ma_3 
+
+
+ma_algin_buy = i_use_ma_1 and i_use_ma_2 and  i_use_ma_3 == false and i_use_ma_4 == false ?     
+     ma_1 > ma_2  :     
+     i_use_ma_1 and i_use_ma_2 and  i_use_ma_3  and i_use_ma_4 == false ?
+     ma_1 > ma_2 and ma_2 > ma_3  :     
+     i_use_ma_1 and i_use_ma_2 and  i_use_ma_3 == false  and i_use_ma_4  ?     
+     ma_1 > ma_2 and ma_2 > ma_4 :     
+     i_use_ma_1 and i_use_ma_2 == false and  i_use_ma_3  and i_use_ma_4 ?     
+     ma_1 > ma_3 and ma_3 > ma_4 :     
+     i_use_ma_1 == false and i_use_ma_2 == false and  i_use_ma_3  and i_use_ma_4 ?     
+     ma_3 > ma_4  :      
+     i_use_ma_1 and i_use_ma_2 and  i_use_ma_3  == false  and i_use_ma_4 ?     
+     ma_1 > ma_4 :     
+     i_use_ma_1 == false and i_use_ma_2 and i_use_ma_3 and i_use_ma_4  == false  ?     
+     ma_2 > ma_3  :     
+     i_use_ma_1 and i_use_ma_2 and i_use_ma_3 and i_use_ma_4 ?     
+     entry_ma_buy_all:     
+     i_use_ma_1  and i_use_ma_2 == false and  i_use_ma_3 == false and i_use_ma_4 == false ?     
+     close > ma_1 :     
+     i_use_ma_1 == false  and i_use_ma_2  and  i_use_ma_3 == false and i_use_ma_4 == false ?     
+     close > ma_2 :     
+     i_use_ma_1 == false  and i_use_ma_2  == false and  i_use_ma_3 and i_use_ma_4 == false ?     
+     close > ma_3 :     
+     i_use_ma_1 == false  and i_use_ma_2 == false  and  i_use_ma_3  == false and i_use_ma_4  ?     
+     close > ma_4 :     
+     false
+
+
+
+ma_algin_sell = i_use_ma_1 and i_use_ma_2 and  i_use_ma_3 == false and i_use_ma_4 == false ?  
+ ma_1 < ma_2  :
+ i_use_ma_1 and i_use_ma_2 and  i_use_ma_3  and i_use_ma_4 == false ?
+ ma_1 < ma_2 and ma_2 < ma_3  :
+ i_use_ma_1 and i_use_ma_2 and  i_use_ma_3 == false  and i_use_ma_4  ?
+ ma_1 < ma_2 and ma_2 < ma_4  :
+ i_use_ma_1 and i_use_ma_2 == false and  i_use_ma_3  and i_use_ma_4 ?
+ ma_1 < ma_3 and ma_3 < ma_4 :
+ i_use_ma_1 == false and i_use_ma_2 == false and  i_use_ma_3  and i_use_ma_4 ?
+ ma_3 < ma_4 :
+ i_use_ma_1 and i_use_ma_2 and  i_use_ma_3  == false  and i_use_ma_4 ?
+ ma_1 < ma_4  :
+ i_use_ma_1 == false and i_use_ma_2 and i_use_ma_3 and i_use_ma_4  == false  ?
+ ma_2 < ma_3  : 
+ i_use_ma_1 and i_use_ma_2 and i_use_ma_3 and i_use_ma_4 ?
+ entry_ma_sell_all  : 
+ i_use_ma_1  and i_use_ma_2 == false and  i_use_ma_3 == false and i_use_ma_4 == false ?
+ close < ma_1 :
+ i_use_ma_1 == false  and i_use_ma_2  and  i_use_ma_3 == false and i_use_ma_4 == false ?
+ close < ma_2 :
+ i_use_ma_1 == false  and i_use_ma_2  == false and  i_use_ma_3 and i_use_ma_4 == false ?
+ close < ma_3 :
+ i_use_ma_1 == false  and i_use_ma_2 == false  and  i_use_ma_3  == false and i_use_ma_4  ?
+ close < ma_4 : false
+
+
+ma_rising = i_use_ma_1 ? ta.rising(ma_1 , i_ma_rising_step_1) : true and 
+ i_use_ma_2 ? ta.rising(ma_2 , i_ma_rising_step_2) : true  and
+ i_use_ma_3 ? ta.rising(ma_3 , i_ma_rising_step_3) : true  and 
+ i_use_ma_4 ? ta.rising(ma_4 , i_ma_rising_step_4) : true 
+
+ma_falling = i_use_ma_1 ? ta.falling(ma_1 , i_ma_rising_step_1) : true and 
+ i_use_ma_2 ? ta.falling(ma_2 , i_ma_rising_step_2) : true  and
+ i_use_ma_3 ? ta.falling(ma_3 , i_ma_rising_step_3) : true  and 
+ i_use_ma_4 ? ta.falling(ma_4 , i_ma_rising_step_4) : true 
+
+price_buy_cond  = i_enable_long_after_price  ? close > i_long_price_th  : true
+price_sell_cond = i_enable_short_after_price ? close < i_short_price_th : true
+
+// volumne inputs --------------------------------------------------------
+vol_grp = 'Volume Profie'
+
+// First Volume Filter
+i_enable_vol_filter     = input(defval = false, title = 'Enable Volume Filter',                 group = vol_grp)
+i_num_candles_vol_long  = input(defval = 3,     title = '# of increasing volume candles long',  group = vol_grp)
+i_num_candles_vol_short = input(defval = 3,     title = '# of increasing volume candles short', group = vol_grp)
+
+vol_cond_long  = true
+vol_cond_short = true
+
+for i = 0 to i_num_candles_vol_long
+    vol_cond_long := vol_cond_long and (volume[i] >= volume[i+1])
+
+for i = 0 to i_num_candles_vol_short
+    vol_cond_short := vol_cond_short and (volume[i] >= volume[i+1])
+
+vol_cond_long  := i_enable_vol_filter ? vol_cond_long  : true
+vol_cond_short := i_enable_vol_filter ? vol_cond_short : true
+
+// Second Volume Filter
+i_enable_vol_filter_2  = input(defval = false, title = 'Enable Volume Filter 2',  group = vol_grp)
+vol_cond_2 = i_enable_vol_filter_2 ? volume > volume[1] and volume > volume[2] : true
+
+final_vol_cond_long  = vol_cond_long  and vol_cond_2
+final_vol_cond_short = vol_cond_short and vol_cond_2
+// vol profile end  --------------------------------------------------------
+
+
+i_scb_percentage  = input.float(35.0, "SCB Candle  % size")
+i_base_percentage = input.float(75.0, "BASE Candle  % size")
+
+p_candle_size = math.abs(close[1] - open[1])
+c_candle_size = math.abs(close - open) 
+
+scb_candle_perc_pts  = (p_candle_size * i_scb_percentage ) / 100 
+base_candle_perc_pts = (p_candle_size * i_base_percentage ) / 100 
+
+scb_candle_buy  = close[1] > open[1] and close >= open and c_candle_size <= scb_candle_perc_pts
+scb_candle_sell = close[1] < open[1] and close <= open and c_candle_size <= scb_candle_perc_pts
+
+base_candle_buy  = close < open and close[1] > open[1] and c_candle_size <= base_candle_perc_pts
+base_candle_sell = close > open and close[1] < open[1] and c_candle_size <= base_candle_perc_pts
+
+
+hull_slow = ta.hma(open, 7)
+small_hal = ta.hma(low, 2)
+
+
+var buy_running  = false
+var sell_running = false
+var rev_buy_running  = false
+var rev_sell_running = false
+var buy_exit  = false
+var sell_exit = false
+if strategy.position_size==0 and buy_running
+    buy_running:=false
+    alert(i_syntexLongClose,freq = alert.freq_once_per_bar)
+if strategy.position_size==0 and sell_running
+    sell_running:=false
+    alert(i_syntexShortClose,freq = alert.freq_once_per_bar) 
+//---------------------------------------------------------------------------------------
+
+
+
+getAngle(asource)=>
+    pointStart =  asource
+    pointPrevious = asource[1]
+    slope = pointStart - pointPrevious 
+    slopePtobar = slope/i_ptobar
+    angle_ = math.atan(slopePtobar) * 180
+    angle = angle_/math.pi
+    angle
+
+angle_ma1 = getAngle(ma_1)
+angle_ma2 = getAngle(ma_2)
+angle_ma3 = getAngle(ma_3)
+angle_ma4 = getAngle(ma_4)
+
+isValidAngeMa1_buy  = angle_ma1 >= i_ent_ang_ma1_b_start and angle_ma1 <= i_ent_ang_ma1_b_end
+isValidAngeMa2_buy  = angle_ma2 >= i_ent_ang_ma2_b_start and angle_ma2 <= i_ent_ang_ma2_b_end
+isValidAngeMa3_buy  = angle_ma3 >= i_ent_ang_ma3_b_start and angle_ma3 <= i_ent_ang_ma3_b_end 
+isValidAngeMa4_buy  = angle_ma4 >= i_ent_ang_ma4_b_start and angle_ma4 <= i_ent_ang_ma4_b_end
+
+isValidAngeMa1_sell = angle_ma1 <= i_ent_ang_ma1_s_start and angle_ma1 >= i_ent_ang_ma1_s_end
+isValidAngeMa2_sell = angle_ma2 <= i_ent_ang_ma2_s_start and angle_ma2 >= i_ent_ang_ma2_s_end
+isValidAngeMa3_sell = angle_ma3 <= i_ent_ang_ma3_s_start and angle_ma3 >= i_ent_ang_ma3_s_end 
+isValidAngeMa4_sell = angle_ma4 <= i_ent_ang_ma4_s_start and angle_ma4 >= i_ent_ang_ma4_s_end
+
+isValidAngeMa_buy  =  isValidAngeMa1_buy  and isValidAngeMa2_buy  and isValidAngeMa3_buy  and isValidAngeMa4_buy  
+isValidAngeMa_sell =  isValidAngeMa1_sell and isValidAngeMa2_sell and isValidAngeMa3_sell and isValidAngeMa4_sell  
+
+if barstate.islast or barstate.ishistory
+    tblpost = switch i_tblps
+        'Middle Right'  => position.middle_right
+        'Middle Left'   => position.middle_left
+        'Middle Center' => position.middle_center
+        'Top Right'     => position.top_right
+        'Top Left'      => position.top_left
+        'Top Center'    => position.top_center
+        'Bottom Right'  => position.bottom_right
+        'Bottom Left'   => position.bottom_left
+        'Bottom Center' => position.bottom_center
+
+    var txt_siz = i_tbltxt == 'Auto' ? 
+     size.auto   : i_tbltxt == 'Normal' ? 
+     size.normal : i_tbltxt == 'Tiny' ? 
+     size.tiny   : i_tbltxt == 'Small' ? 
+     size.small  : i_tbltxt == 'Large' ? 
+     size.large  : i_tbltxt == 'huge' ? 
+     size.huge   : size.normal
+    
+    var table tbl = table.new(tblpost, 2, 4, border_color=color.rgb(120, 123, 134, 100),border_width=1)
+    table.clear(tbl, 0, 0,1, 3)
+    bgclr   =  color.gray
+    table.cell(tbl, 0, 0, "EMA 1", bgcolor = bgclr ,text_size=txt_siz,text_color=color.white)
+    table.cell(tbl, 0, 1, "EMA 2", bgcolor = bgclr ,text_size=txt_siz,text_color=color.white)
+    table.cell(tbl, 0, 2, "EMA 3", bgcolor = bgclr ,text_size=txt_siz,text_color=color.white)
+    table.cell(tbl, 0, 3, "EMA 4", bgcolor = bgclr ,text_size=txt_siz,text_color=color.white)
+    table.cell(tbl, 1, 0, str.tostring(angle_ma1,"#.##")+"°", bgcolor = color.green ,text_size=txt_siz,text_color=color.white)
+    table.cell(tbl, 1, 1, str.tostring(angle_ma2,"#.##")+"°", bgcolor = color.red ,text_size=txt_siz,text_color=color.white)
+    table.cell(tbl, 1, 2, str.tostring(angle_ma3,"#.##")+"°", bgcolor = color.blue ,text_size=txt_siz,text_color=color.white)
+    table.cell(tbl, 1, 3, str.tostring(angle_ma4,"#.##")+"°", bgcolor = color.black ,text_size=txt_siz,text_color=color.white)
+
+//------------------------------------------
+
+main_buy_signal  = isBuyWA and
+     i_enable_long and
+     (not buy_running ) and 
+     (scb_candle_buy  or base_candle_buy)  and 
+     ma_algin_buy  and 
+     ma_rising  and 
+     barstate.isconfirmed  and  
+     isValidAngeMa_buy and 
+     final_vol_cond_long and
+     exit_ma_1 > exit_ma_2 and
+     not rev_buy_running and
+     price_buy_cond and
+     not (inSession )
+     and inDateRange
+
+main_sell_signal = isSellWA and
+     i_enable_short and
+     (not sell_running) and 
+     (scb_candle_sell or base_candle_sell) and 
+     ma_algin_sell and 
+     ma_falling and 
+     barstate.isconfirmed  and  
+     isValidAngeMa_sell and 
+     final_vol_cond_short and
+     exit_ma_1 < exit_ma_2 and
+     not rev_sell_running and
+     price_sell_cond and 
+     not(inSession)
+     and inDateRange
+
+getLineAngle(barsSinceTradeStart) =>
+    tradeStart = close[barsSinceTradeStart]
+    tradeEnd   = close
+    slope = (tradeEnd - tradeStart) / i_ptobar/ barsSinceTradeStart
+    angle = math.atan(slope) * 180.0 / math.pi
+    angle    
+
+
+//#region Trailing stop logic start ------------------------------------------------------
+
+
+i_enable_stop_long           = input(defval = true, title = 'Enable Stop trailing Long')
+i_enable_stop_short          = input(defval = true, title = 'Enable Stop trailing Short')
+i_stop_type_long             = input.string(defval = 'Running Candle', title = 'Long Stop Exit On',  options = ['Running Candle', 'Close Candle'])
+i_stop_type_short            = input.string(defval = 'Running Candle', title = 'Short Stop Exit On', options = ['Running Candle', 'Close Candle'])
+i_trail_percent_long         = input(defval = 10.0, title = 'Stop trailing % Long')
+i_trail_percent_short        = input(defval = 10.0, title = 'Stop trailing % Short')
+i_enable_initial_stop_long   = input(defval = true, title = 'Enable Initial Stop Long')
+i_enable_initial_stop_short  = input(defval = true, title = 'Enable Initial Stop Short')
+i_initial_stop_pips_buy      = input.float(defval = 10.0, title = "Initial Stop Pips Long")
+i_initial_stop_pips_sell     = input.float(defval = 10.0, title = "Initial Stop Pips Short")
+
+
+var hl=0.0
+var ls=0.0
+var initial_buy_stop_val  = i_initial_stop_pips_buy * pip_size
+var initial_sell_stop_val = i_initial_stop_pips_sell * pip_size
+
+var entry_price = 0.0
+var float trailing_stop_price = na
+var float initial_stop_price = na
+
+
+
+
+varip isTimeExit =  false
+var isbuy =  false
+
+sec = int(timeframe.multiplier*60 - (time_close - timenow) / 1000)
+
+var isSLActive1 = false
+var isSLActive2 = false
+var isSLActive3 = false
+var isSLActive4 = false
+var float slPrs1= na
+var float slPrs2 = na
+var float slPrs3 = na
+var float slPrs4 = na
+var float tg1 =na
+var float tg2 =na
+var float tg3 =na
+var float tg4 =na
+var float lstSl = na
+
+isSpacB =  (isEnableCandleEntryBuy ?  not inSession and inDateRange and barstate.isconfirmed and barstate.isrealtime and strategy.position_size == 0  : false)
+// isBuyWA := isBuyWA and not inSession and inDateRange and barstate.isconfirmed
+
+if ((main_buy_signal or isSpacB ) and (pricefl==false or close>hl ) and buy_running==false)
+    strategy.entry("Buy",strategy.long,alert_message = i_syntexLong)
+     
+    //alert("Buy Signal", alert.freq_once_per_bar_close)
+    isTimeExit := true
+    sec := 0
+    isbuy := true
+    buy_running := true
+    entry_price := close
+    trailing_stop_price := entry_price
+    //if close> open 
+    initial_stop_price  := low - initial_buy_stop_val
+    lstSl := initial_stop_price
+    hl:=high
+    if useTSl
+        slPrs1 := entry_price + slpip1
+        slPrs2 := entry_price + slpip2
+        slPrs3 := entry_price + slpip3
+        slPrs4 := entry_price + slpip4
+        isSLActive1 := false
+        isSLActive2 := false
+        isSLActive3 := false 
+        isSLActive4 := false
+        tg1 := entry_price +  tp1
+        tg2 := entry_price +  tp2
+        tg3 := entry_price +  tp3
+        tg4 := entry_price +  tp4
+ 
+
+if buy_running and high>hl
+    hl:=high
+if pricefl and ta.crossunder(close,resetl) and gs==false
+    hl:=resetl
+if pricefs and ta.crossover(close,resets) and gs==false
+    ls:=resets       
+
+isSpacS =  (isEnableCandleEntrySell ?  not inSession and inDateRange and barstate.isconfirmed and barstate.isrealtime and strategy.position_size == 0 : false)
+// isSellWA  := isSellWA and not inSession and inDateRange and barstate.isconfirmed
+
+if ((main_sell_signal or isSpacS   ) and (pricefs==false or close<ls ) and sell_running==false) 
+    strategy.entry("Sell",strategy.short,alert_message = i_syntexShort)
+    //alert("Sell Signal", alert.freq_once_per_bar_close)
+    isTimeExit := true
+    sec := 0
+    isbuy := false
+    sell_running := true
+    entry_price := close
+    trailing_stop_price := entry_price
+    initial_stop_price  := high + initial_sell_stop_val
+    lstSl := initial_stop_price
+    ls:=low
+    if useTSl
+        slPrs1 := entry_price - slpip1
+        slPrs2 := entry_price - slpip2
+        slPrs3 := entry_price - slpip3
+        slPrs4 := entry_price - slpip4
+        isSLActive1 := false
+        isSLActive2 := false
+        isSLActive3 := false
+        isSLActive4 := false
+        tg1 := entry_price -  tp1
+        tg2 := entry_price -  tp2
+        tg3 := entry_price -  tp3
+        tg4 := entry_price -  tp4
+  
+
+if strategy.position_size != 0  and barstate.isconfirmed
+     
+    if strategy.position_size > 0  
+        if  high > tg1 and not isSLActive1
+            isSLActive1 := true
+            initial_stop_price := slPrs1
+        if high < slPrs1 and  isSLActive1
+            isSLActive1 := false
+            initial_stop_price := lstSl
+        
+        if  high > tg2 and not isSLActive2
+            isSLActive2 := true
+            initial_stop_price := slPrs2
+        if high < slPrs2 and  isSLActive2
+            isSLActive2 := false
+            initial_stop_price := lstSl
+
+        if  high > tg3 and not isSLActive3
+            isSLActive3 := true
+            initial_stop_price := slPrs3
+        if high < slPrs3 and  isSLActive3
+            isSLActive3 := false
+            initial_stop_price := lstSl
+
+        if  high > tg4 and not isSLActive4
+            isSLActive4 := true
+            initial_stop_price := slPrs4
+        if high < slPrs4 and  isSLActive4
+            isSLActive4 := false
+            initial_stop_price := lstSl
+
+    if strategy.position_size < 0  
+        if low < tg1 and not isSLActive1
+            isSLActive1 := true
+            initial_stop_price := slPrs1
+        if low > slPrs1 and isSLActive1
+            isSLActive1 := false
+            initial_stop_price := lstSl
+
+        if low < tg2 and not isSLActive2
+            isSLActive2 := true
+            initial_stop_price := slPrs2
+        if low > slPrs2 and isSLActive2
+            isSLActive2 := false
+            initial_stop_price := lstSl
+
+        if low < tg3 and not isSLActive3
+            isSLActive3 := true
+            initial_stop_price := slPrs3
+        if low > slPrs3 and isSLActive3
+            isSLActive3 := false
+            initial_stop_price := lstSl
+
+        if low < tg4 and not isSLActive4
+            isSLActive4 := true
+            initial_stop_price := slPrs4
+        if low > slPrs4 and isSLActive4
+            isSLActive4 := false
+            initial_stop_price := lstSl
+ 
+
+if sell_running and low<ls
+    ls:=low
+
+plot(useTSl and strategy.position_size != 0 ?  tg1  : na,"TG 1",style = plot.style_cross)
+plot(useTSl  and strategy.position_size != 0 ?  tg2 : na,"TG 2",style = plot.style_cross)
+plot(useTSl  and strategy.position_size != 0 ?  tg3  : na,"TG 3",style = plot.style_cross)
+plot(useTSl  and strategy.position_size != 0 ?  tg4  : na,"TG 4",style = plot.style_cross)
+
+
+bars_since_long  = buy_running  ? ta.barssince(buy_running  and (not buy_running[1]))  : 0
+bars_since_short = sell_running ? ta.barssince(sell_running and (not sell_running[1])) : 0
+
+
+//#region main trade exit logic
+var longTradeLineAngle  = 0.0
+var shortTradeLineAngle = 0.0
+
+longTradeLineAngle  := getLineAngle(bars_since_long)
+shortTradeLineAngle := getLineAngle(bars_since_short)
+    
+isValidAngeExit1_long  = longTradeLineAngle  >= i_angle_hull_exit_1_buy  or longTradeLineAngle  < 0
+isValidAngeExit1_short = shortTradeLineAngle <= i_angle_hull_exit_1_sell or shortTradeLineAngle > 0
+
+hull_long_exit_1  = i_use_ex1 ? exit_ma_1 < exit_ma_2 and isValidAngeExit1_long  : false
+hull_short_exit_1 = i_use_ex1 ? exit_ma_1 > exit_ma_2 and isValidAngeExit1_short : false
+
+SIDEWAYS_Exit_long  = i_use_ex2 ? exit_ma_3 < exit_ma_4 : false
+SIDEWAYS_Exit_short = i_use_ex2 ? exit_ma_3 > exit_ma_4 : false
+
+isl_long_exit_mid_candle  = i_use_ex3_1  ? exit_ma_5 < exit_ma_6 and buy_running  : false
+isl_short_exit_mid_candle = i_use_ex3_2  ? exit_ma_7 > exit_ma_8 and sell_running : false
+
+main_buy_exit = 
+     (hull_long_exit_1 or SIDEWAYS_Exit_long) and
+     barstate.isconfirmed and buy_running
+
+main_sell_exit = 
+     (hull_short_exit_1 or SIDEWAYS_Exit_short) and
+     barstate.isconfirmed and sell_running
+
+
+if main_buy_exit and not(inSession)
+    strategy.close("Buy","Close Buy Main",alert_message = i_syntexLongClose)
+    //alert("Buy Exit", alert.freq_once_per_bar_close)
+    buy_running := false
+
+if isl_long_exit_mid_candle and not(inSession)
+    strategy.close("Buy","Close Buy ISL",alert_message = i_syntexLongClose)
+    //alert("ISL exit long", alert.freq_once_per_bar)
+    buy_running := false
+    
+if main_sell_exit and not(inSession)
+    strategy.close("Sell","Close Sell Main",alert_message = i_syntexShortClose)
+    //alert("Sell Exit", alert.freq_once_per_bar_close)
+    sell_running := false
+
+if isl_short_exit_mid_candle and not(inSession)
+    strategy.close("Sell","Close Sell ISL",alert_message = i_syntexShortClose)
+    //alert("ISL exit Short", alert.freq_once_per_bar)
+    sell_running := false
+
+
+//if sec > i_delay_in_sec and isTimeExit  
+//    if isbuy
+//        alert(i_syntexCancleLong)
+//        label.new(bar_index,low,style = label.style_label_up,text = "Candle All Order",color = color.rgb(255, 82, 82, 100))
+//    else
+//        alert(i_syntexCancleShort)
+//        label.new(bar_index,high,style = label.style_label_down,text = "Candle All Order",color = color.rgb(255, 82, 82, 100))
+
+//    isTimeExit := false
+
+
+bgcolor(buy_running  ? color.rgb(15, 225, 169, 82) : na,title = "buy_running")
+bgcolor(sell_running ? color.rgb(230, 40, 176, 82)  : na,title="sell_running")
+bgcolor(main_buy_signal ? color.rgb(76, 175, 79, 82) : main_sell_signal ? color.rgb(255, 82, 82, 81) : na,title = "main signal")
+//#endregion
+
+
+
+trail_amount_long  = math.abs(close - trailing_stop_price) * i_trail_percent_long/100
+trail_amount_short = math.abs(close - trailing_stop_price) * i_trail_percent_short/100
+
+//#region -> trigger for trailing stop to be enabled
+// trigger_trail_stop is the switch which is enabled when a candle closes in favour of the trade
+var trigger_trail_stop_long  = false   
+var trigger_trail_stop_short = false
+if not buy_running
+    trigger_trail_stop_long := false
+if not sell_running
+    trigger_trail_stop_short := false
+
+// stop_trig_cond is the condition to define a candle closing in favour of the trade
+buy_stop_trig_cond  = buy_running  and close > close[1] and close > entry_price and bars_since_long  > 0
+sell_stop_trig_cond = sell_running and close < close[1] and close < entry_price and bars_since_short > 0
+
+if buy_stop_trig_cond and barstate.isconfirmed and not trigger_trail_stop_long
+    trigger_trail_stop_long := true
+
+if sell_stop_trig_cond and barstate.isconfirmed and not trigger_trail_stop_short
+    trigger_trail_stop_short := true
+
+//#endregion
+
+
+if buy_running and close > close[1] and close > trailing_stop_price and barstate.isconfirmed and trigger_trail_stop_long
+    trailing_stop_price := trailing_stop_price + trail_amount_long
+
+if sell_running and close < close[1] and close < trailing_stop_price and barstate.isconfirmed and trigger_trail_stop_short
+    trailing_stop_price := trailing_stop_price - trail_amount_short
+
+
+var float final_stop_price = na
+
+if buy_running
+    if i_enable_initial_stop_long and not trigger_trail_stop_long
+        final_stop_price := initial_stop_price
+    else if i_enable_stop_long and trigger_trail_stop_long
+        final_stop_price := trailing_stop_price
+
+else if sell_running
+    if i_enable_initial_stop_short and not trigger_trail_stop_short
+        final_stop_price := initial_stop_price
+    else if i_enable_stop_short and trigger_trail_stop_short
+        final_stop_price := trailing_stop_price
+else
+    final_stop_price := na
+var trail2=0.0
+entr2=input.bool(true,"Enable Trailing stop 2 Long")
+//entr2s=input.bool(true,"Enable Trailing stop 2 Short")
+end1=input.bool(true,"Enable Previous Candle Trailing 2 Long")
+end1t=input.string("low",title="Previous Candle value select Long",options = ["low","open","close","high"])
+ent1=input.bool(false,"Enable Entry Candle Trailing 2 Long")
+ent1t=input.string("low",title="Entry Candle value select Long",options = ["low","open","close","high"])
+longtr2p=input.float(10,"% Increase trailing stop 2 Long")/100/1000
+entr2s=input.bool(true,"Enable Trailing stop 2 Short")
+end1s=input.bool(true,"Enable Previous Candle Trailing 2 Short")
+end1ts=input.string("high",title="Previous Candle value select Short",options = ["low","open","close","high"])
+ent1s=input.bool(false,"Enable Entry Candle Trailing 2 Short")
+ent1ts=input.string("high",title="Entry Candle value select Short",options = ["low","open","close","high"])
+
+shorttr2p=input.float(10,"% Increase trailing stop 2 Short")/100/1000
+
+//plot(final_stop_price, title = 'Trailing Stop', color = color.yellow, style = plot.style_linebr)
+//plot(initial_stop_price, title = 'Initial Stop', color = color.yellow, style = plot.style_linebr)
+if strategy.position_size==0
+    trail2:=na
+if buy_running and buy_running[1]==false//strategy.position_size>0 and strategy.position_size[1]==0 or strategy.position_size[1]<0
+    trail2:=initial_stop_price
+    if end1 //and barstate.isconfirmed
+        if end1t=="low"
+            trail2:=low[1]<open[1]?low[1]:open[1]
+        if end1t=="open"
+            trail2:=open[1]
+        if end1t=="close"
+            trail2:=close[1]
+        if end1t=="high"
+            trail2:=high[1]>close[1]?high[1]:close[1] 
+    if ent1 and barstate.isconfirmed
+        if ent1t=="low"
+            trail2:=low[0]<open[0]?low[0]:open[0]
+        if ent1t=="open"
+            trail2:=open[0]
+        if ent1t=="close"
+            trail2:=close[0]
+        if ent1t=="high"
+            trail2:=high[0]>close[0]?high[0]:close[0]
+
+        
+if buy_running and buy_running[1] and buy_running[2]==false //and close>trail2[1]//strategy.position_size[1]>0 and strategy.position_size>0 and  (strategy.position_size[2]==0 or strategy.position_size[2]<0)
+            
+    //if close>trail2[1]
+    trail2:=trail2[1] * (1 + longtr2p)
+if buy_running and buy_running[1] and buy_running[2] //and close>trail2[1] //and close[1]>close[2]//strategy.position_size[2]>0 and close>close[1] and strategy.position_size>0
+    trail2:=trail2[1] * (1 + longtr2p)
+if sell_running and sell_running[1]== false
+
+    trail2:=initial_stop_price  
+    if end1s //and barstate.isconfirmed
+        if end1ts=="low"
+            trail2:=low[1]<close[1]?low[1]:close[1]
+        if end1ts=="open"
+            trail2:=open[1]
+        if end1ts=="close"
+            trail2:=close[1]
+        if end1ts=="high"
+            trail2:=high[1]>open[1]?high[1]:open[1] 
+    if ent1s and barstate.isconfirmed
+        if ent1ts=="low"
+            trail2:=low[0]<close[0]?low[0]:close[0]
+        if ent1ts=="open"
+            trail2:=open[0]
+        if ent1ts=="close"
+            trail2:=close[0]
+        if ent1ts=="high"
+            trail2:=high[0]>open[0]?high[0]:open[0]
+
+if sell_running and sell_running[1] and sell_running[2]==false  //and close<trail2[1]//strategy.position_size[1]<0 and strategy.position_size<0 and  (strategy.position_size[2]==0 or strategy.position_size[2]>0)
+    trail2:=trail2[1] *( 1 - shorttr2p )
+if sell_running and sell_running[1] and sell_running[2] //and close<trail2[1] //and close[1]<close[2]//strategy.position_size[2]<0 and close<close[1] and strategy.position_size<0
+    trail2:=trail2[1] *( 1 - shorttr2p )           
+plot(trail2, title = 'trail 2 Stop', color = color.red, style = plot.style_linebr)
+if buy_running[1] and not(inSession) and close<trail2 and entr2 and buy_running
+    strategy.close("Buy","Trailing Buy Stop 2 Exit",alert_message = i_syntexLongClose)
+    buy_running:=false
+if sell_running[1] and not(inSession) and close>trail2 and entr2s and sell_running
+    strategy.close("Sell","Trailing Sell Stop 2 Exit",alert_message = i_syntexShortClose) 
+    sell_running:=false  
+long_stop_exit  = false
+short_stop_exit = false
+plot(final_stop_price, title = 'Trailing Stop', color = color.green, style = plot.style_linebr)
+plot(initial_stop_price, title = 'Initial Stop', color = color.green, style = plot.style_linebr)
+plot(lstSl, title = 'Trailing Stop', color = color.yellow, style = plot.style_linebr)
+//long_stop_exit  = false
+//short_stop_exit = false
+long_initial_stop_exit = false
+short_initial_stop_exit = false
+if inSession
+    strategy.cancel("Close Initial Stop")
+       
+if  i_enable_initial_stop_long 
+    if not(inSession)
+        long_initial_stop_exit := (low <= initial_stop_price) and buy_running and (i_stop_type_long == 'Close Candle' ? barstate.isconfirmed : true) //and barstate.isconfirmed
+
+        if buy_running  //and (i_stop_type_long  == 'Close Candle' ? barstate.isconfirmed : true) //and barstate.isconfirmed
+            strategy.exit("Close Initial Stop 1","Buy",stop=initial_stop_price,limit = tg1,alert_loss = i_syntexLongClose,alert_profit = tg1Alert_long,qty_percent = exitPer1,comment_loss = "Close Initial Stop",comment_profit = "TG1")
+            strategy.exit("Close Initial Stop 2","Buy",stop=initial_stop_price,limit = tg2,alert_loss = i_syntexLongClose,alert_profit = tg2Alert_long,qty_percent = exitPer2,comment_loss = "Close Initial Stop",comment_profit = "TG2")
+            strategy.exit("Close Initial Stop 3","Buy",stop=initial_stop_price,limit = tg3,alert_loss = i_syntexLongClose,alert_profit = tg3Alert_long,qty_percent = exitPer3,comment_loss = "Close Initial Stop",comment_profit = "TG3")
+            strategy.exit("Close Initial Stop 4","Buy",stop=initial_stop_price,limit = tg4,alert_loss = i_syntexLongClose,alert_profit = tg4Alert_long,qty_percent = 100,comment_loss = "Close Initial Stop",comment_profit = "TG4")
+        
+else 
+    if buy_running  //and (i_stop_type_long  == 'Close Candle' ? barstate.isconfirmed : true) //and barstate.isconfirmed
+        strategy.exit("Close Initial Stop 1","Buy",stop=initial_stop_price,limit = tg1,alert_loss = i_syntexLongClose,alert_profit = tg1Alert_long,qty_percent = exitPer1,comment_loss = "Close Initial Stop",comment_profit = "TG1")
+        strategy.exit("Close Initial Stop 2","Buy",stop=initial_stop_price,limit = tg2,alert_loss = i_syntexLongClose,alert_profit = tg2Alert_long,qty_percent = exitPer2,comment_loss = "Close Initial Stop",comment_profit = "TG2")
+        strategy.exit("Close Initial Stop 3","Buy",stop=initial_stop_price,limit = tg3,alert_loss = i_syntexLongClose,alert_profit = tg3Alert_long,qty_percent = exitPer3,comment_loss = "Close Initial Stop",comment_profit = "TG3")
+        strategy.exit("Close Initial Stop 4","Buy",stop=initial_stop_price,limit = tg4,alert_loss = i_syntexLongClose,alert_profit = tg4Alert_long,qty_percent = 100,comment_loss = "Close Initial Stop",comment_profit = "TG4")
+        
+
+if  i_enable_initial_stop_short   
+    if  not(inSession) //and strat
+        short_initial_stop_exit := (high >= initial_stop_price) and sell_running and (i_stop_type_short == 'Close Candle' ? barstate.isconfirmed : true) //and barstate.isconfirmed
+        if sell_running  //and (i_stop_type_long  == 'Close Candle' ? barstate.isconfirmed : true) //and barstate.isconfirmed
+            strategy.exit("Close Initial Stop 1","Sell",stop=initial_stop_price,limit = tg1,alert_loss = i_syntexShortClose,alert_profit = tg1Alert_Short,qty_percent = exitPer1,comment_loss = "Close Initial Stop",comment_profit = "TG1")
+            strategy.exit("Close Initial Stop 2","Sell",stop=initial_stop_price,limit = tg2,alert_loss = i_syntexShortClose,alert_profit = tg2Alert_Short,qty_percent = exitPer2,comment_loss = "Close Initial Stop",comment_profit = "TG2")
+            strategy.exit("Close Initial Stop 3","Sell",stop=initial_stop_price,limit = tg3,alert_loss = i_syntexShortClose,alert_profit = tg3Alert_Short,qty_percent = exitPer3,comment_loss = "Close Initial Stop",comment_profit = "TG3")
+            strategy.exit("Close Initial Stop 4","Sell",stop=initial_stop_price,limit = tg4,alert_loss = i_syntexShortClose,alert_profit = tg4Alert_Short,qty_percent = 100,comment_loss = "Close Initial Stop",comment_profit = "TG4")
+
+else
+    if sell_running  //and (i_stop_type_long  == 'Close Candle' ? barstate.isconfirmed : true) //and barstate.isconfirmed
+        strategy.exit("Close Initial Stop 1","Sell",stop=initial_stop_price,limit = tg1,alert_loss = i_syntexShortClose,alert_profit = tg1Alert_Short,qty_percent = exitPer1,comment_loss = "Close Initial Stop",comment_profit = "TG1")
+        strategy.exit("Close Initial Stop 2","Sell",stop=initial_stop_price,limit = tg2,alert_loss = i_syntexShortClose,alert_profit = tg2Alert_Short,qty_percent = exitPer2,comment_loss = "Close Initial Stop",comment_profit = "TG2")
+        strategy.exit("Close Initial Stop 3","Sell",stop=initial_stop_price,limit = tg3,alert_loss = i_syntexShortClose,alert_profit = tg3Alert_Short,qty_percent = exitPer3,comment_loss = "Close Initial Stop",comment_profit = "TG3")
+        strategy.exit("Close Initial Stop 4","Sell",stop=initial_stop_price,limit = tg4,alert_loss = i_syntexShortClose,alert_profit = tg4Alert_Short,qty_percent = 100,comment_loss = "Close Initial Stop",comment_profit = "TG4")
+
+
+//if long_initial_stop_exit and not(inSession)
+//    strategy.close("Buy","Initial Buy Stop Exit",alert_message = i_syntexLongClose)
+    //alert("Trailing Stop Buy Exit", alert.freq_once_per_bar)
+//    buy_running := false
+
+//if short_initial_stop_exit and not(inSession)
+//    strategy.close("Sell","Inital Sell Stop Exit",alert_message = i_syntexShortClose)
+    //alert("Trailing Stop Sell Exit", alert.freq_once_per_bar)
+//    sell_running := false
+
+if final_stop_price
+    long_stop_exit  := (close < final_stop_price) and buy_running  and (i_stop_type_long  == 'Close Candle' ? barstate.isconfirmed : true)
+    short_stop_exit := (close > final_stop_price) and sell_running and (i_stop_type_short == 'Close Candle' ? barstate.isconfirmed : true)
+
+if long_stop_exit and not(inSession)
+    strategy.close("Buy","Trailing Buy Stop Exit",alert_message = i_syntexLongClose)
+    //alert("Trailing Stop Buy Exit", alert.freq_once_per_bar)
+    buy_running := false
+
+if short_stop_exit and not(inSession)
+    strategy.close("Sell","Trailing Sell Stop Exit",alert_message = i_syntexShortClose)
+    //alert("Trailing Stop Sell Exit", alert.freq_once_per_bar)
+    sell_running := false
+
+//# region safety stop 
+i_enable_safety_stop_long  = input(defval = true, title = 'Enable Safety Stop Long')
+i_enable_safety_stop_short = input(defval = true, title = 'Enable Safety Stop Short')
+i_enable_safety_stop_long_trailing  = input(defval = true, title = 'Enable Safety Stop Long Trailing')
+i_enable_safety_stop_short_trailing = input(defval = true, title = 'Enable Safety Stop Short Trailing')
+i_safety_stop_perc_buy     = input(defval = 0.01, title = "Safety Stop Percent Increase Long")
+i_safety_stop_perc_sell    = input(defval = 0.01, title = "Safety Stop Percent Increase Short")
+
+var float safety_stop_buy_val  = na
+var float safety_stop_sell_val = na
+
+if trigger_trail_stop_long and (not trigger_trail_stop_long[1]) and i_enable_safety_stop_long
+    safety_stop_buy_val  := entry_price * (1 + i_safety_stop_perc_buy/100)
+
+if trigger_trail_stop_short and (not trigger_trail_stop_short[1]) and i_enable_safety_stop_short
+    safety_stop_sell_val  := entry_price * (1 - i_safety_stop_perc_sell/100)
+
+if not buy_running
+    safety_stop_buy_val := na
+if not sell_running
+    safety_stop_sell_val := na
+
+if trailing_stop_price != trailing_stop_price[1] and barstate.isconfirmed
+    if safety_stop_buy_val and i_enable_safety_stop_long_trailing
+        safety_stop_buy_val  := safety_stop_buy_val  * (1 + i_safety_stop_perc_buy/100)
+    if safety_stop_sell_val and i_enable_safety_stop_short_trailing
+        safety_stop_sell_val := safety_stop_sell_val * (1 - i_safety_stop_perc_sell/100)
+
+// t = table.new(position.bottom_center, 1,5)
+
+// table.cell(t, 0, 0, str.tostring(safety_stop_buy_val), text_color = color.white)
+// table.cell(t, 0, 1, str.tostring(safety_stop_sell_val), text_color = color.white)
+// table.cell(t, 0, 2, str.tostring((not safety_stop_buy_val) or not (safety_stop_sell_val)), text_color = color.white)
+
+safety_stop_plot_val = safety_stop_buy_val ? safety_stop_buy_val : safety_stop_sell_val
+
+plot(safety_stop_plot_val, "Saftey Stop", color = color.aqua , style = plot.style_linebr)
+
+if safety_stop_buy_val and not(inSession) and close < safety_stop_buy_val and buy_running
+    strategy.close("Buy","Safety Stop Buy Exit",alert_message = i_syntexLongClose)
+    //alert("Safety Stop Buy Exit", alert.freq_once_per_bar)
+    buy_running := false
+
+if safety_stop_sell_val and not(inSession) and close > safety_stop_sell_val and sell_running
+    strategy.close("Sell","Safety Stop Sell Exit",alert_message = i_syntexShortClose)
+    //alert("Safety Stop Sell Exit", alert.freq_once_per_bar)
+    sell_running := false
+//#endregion safety stop
+
+//#endregion Trailing stop logic End ------------------------------------------------------
+
+
+//#region Reverse entry logic
+//i_enable_rev_long   = input(defval = true, title = 'Enable Reverse Long Trades')
+//i_enable_rev_short  = input(defval = true, title = 'Enable Reverse Short Trades')
+//i_rev_trail_percent_long  = input(defval = 10.0, title = 'Reverse Stop trailing % Long')
+//i_rev_trail_percent_short = input(defval = 10.0, title = 'Reverse Stop trailing % Short')
+//i_rev_stop_type_long     = input.string(defval = 'Running Candle', title = 'Reverse Long Stop Exit On',  options = ['Running Candle', 'Close Candle'])
+//i_rev_stop_type_short    = input.string(defval = 'Running Candle', title = 'Reverse Short Stop Exit On', options = ['Running Candle', 'Close Candle'])
+//i_use_doji               = input(defval = true, title = "Enable Doji Confirmation")
+//i_rev_doji_size          = input.float(0.1, minval=0.0001, title="Doji's Max Body size")
+//barcolor(math.abs(open - close) <= (high - low) * i_rev_doji_size ? color.yellow : na)
+//rev_doji = i_use_doji ? (math.abs(open - close) <= (high - low) * i_rev_doji_size ? true : false) : true
+
+//var float rev_trailing_stop_price = na
+//var float rev_entry_price = na
+
+//rev_sell_signal = (not trigger_trail_stop_long)  and long_stop_exit  and not(buy_running or sell_running) and i_enable_rev_short and rev_doji[1]
+//rev_buy_signal  = (not trigger_trail_stop_short) and short_stop_exit and not(buy_running or sell_running) and i_enable_rev_long  and rev_doji[1]
+
+//if rev_sell_signal
+//    strategy.entry("Reverse Sell", strategy.short, alert_message = i_syntexShort)
+//    alert("Reverse Sell Signal", alert.freq_once_per_bar_close)
+//    rev_sell_running := true
+//    rev_entry_price := close
+//    rev_trailing_stop_price := final_stop_price
+
+//if rev_buy_signal
+//    strategy.entry("Reverse Buy", strategy.long, alert_message = i_syntexLong)
+//    alert("Reverse Buy Signal", alert.freq_once_per_bar_close)
+//    rev_buy_running := true
+//    rev_entry_price := close
+//    rev_trailing_stop_price := final_stop_price
+
+
+//rev_trail_amount_long  = math.abs(close - rev_trailing_stop_price) * i_rev_trail_percent_long/100
+//rev_trail_amount_short = math.abs(close - rev_trailing_stop_price) * i_rev_trail_percent_short/100
+
+//bars_since_rev_entry = ta.barssince(rev_sell_signal or rev_sell_signal)
+
+//if rev_sell_running and close < close[1] and close < rev_trailing_stop_price and barstate.isconfirmed
+//    rev_trailing_stop_price := rev_trailing_stop_price - rev_trail_amount_short
+
+//if rev_buy_running and close > close[1] and close > rev_trailing_stop_price and barstate.isconfirmed
+//    rev_trailing_stop_price := rev_trailing_stop_price + rev_trail_amount_long
+
+//rev_short_exit_cond = (bars_since_rev_entry == 0) ? (close > open) : (close > rev_trailing_stop_price) and (i_rev_stop_type_short == 'Close Candle' ? barstate.isconfirmed : true)
+//rev_long_exit_cond  = (bars_since_rev_entry == 0) ? (close < open) : (close < rev_trailing_stop_price) and (i_rev_stop_type_long  == 'Close Candle' ? barstate.isconfirmed : true)
+
+
+//if rev_short_exit_cond
+//    strategy.close("Reverse Sell","Reverse Sell Exit",alert_message = i_syntexShortClose)
+//    alert("Reverse Sell Exit", alert.freq_once_per_bar_close)
+//    rev_sell_running := false
+
+//if rev_long_exit_cond
+//    strategy.close("Reverse Buy","Reverse Buy Exit",alert_message = i_syntexLongClose)
+//    alert("Reverse Buy Exit", alert.freq_once_per_bar_close)
+//    rev_buy_running := false
+ 
+//rev_stop_plot_val = (rev_buy_running or rev_sell_running) and bars_since_rev_entry > 0 ? rev_trailing_stop_price : na
+
+//plot(rev_stop_plot_val, title = 'Reverse Trailing Stop', color = color.orange, style = plot.style_linebr)
+
+
+//bgcolor(rev_buy_running  ? color.rgb(15, 225, 33, 76)   : na)
+//bgcolor(rev_sell_running ? color.rgb(245, 135, 9, 65)   : na)
+//bgcolor(rev_buy_signal   ? color.rgb(105, 238, 109, 53) : rev_sell_signal ? color.rgb(235, 117, 20, 56) : na)
+
+
+//# region safety stop for reverse entries
+//i_enable_rev_safety_stop_long  = input(defval = true, title = 'Reverse Enable Safety Stop Long')
+//i_enable_rev_safety_stop_short = input(defval = true, title = 'Reverse Enable Safety Stop Short')/
+//i_rev_safety_stop_perc_buy     = input(defval = 0.01, title = "Reverse Safety Stop Percent Increase Long")
+//i_rev_safety_stop_perc_sell    = input(defval = 0.01, title = "Reverse Safety Stop Percent Increase Short")
+
+//var float rev_safety_stop_buy_val  = na
+//var float rev_safety_stop_sell_val = na
+
+//rev_safety_stop_buy_val  :=  bars_since_rev_entry > 0 and rev_buy_running  and i_enable_rev_safety_stop_long  ? rev_entry_price * (1 + i_rev_safety_stop_perc_buy/100) : na
+//rev_safety_stop_sell_val :=  bars_since_rev_entry > 0 and rev_sell_running and i_enable_rev_safety_stop_short ? rev_entry_price * (1 - i_rev_safety_stop_perc_sell/100) : na
+
+//rev_safety_stop_plot_val = rev_safety_stop_buy_val ? rev_safety_stop_buy_val : rev_safety_stop_sell_val
+
+//plot(rev_safety_stop_plot_val, "Reverse Safety Stop", color = color.aqua , style = plot.style_linebr)
+
+//if rev_safety_stop_buy_val and close < rev_safety_stop_buy_val and rev_buy_running
+//    strategy.close("Reverse Buy","Reverse Safety Stop Buy Exit",alert_message = i_syntexLongClose)
+//    alert("Reverse Safety Stop Buy Exit", alert.freq_once_per_bar)
+//    rev_buy_running := false
+
+//if rev_safety_stop_sell_val and close > rev_safety_stop_sell_val and rev_sell_running
+//    strategy.close("Reverse Sell","Reverse Safety Stop Sell Exit",alert_message = i_syntexShortClose)
+//    alert("Reverse Safety Stop Sell Exit", alert.freq_once_per_bar)
+//    rev_sell_running := false
+//#endregion safety stop for reverse entries
+
+
+//#endregion
+
+
+
+
+
+
+
+
+
+

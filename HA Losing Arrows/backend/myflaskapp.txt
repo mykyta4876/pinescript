@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name sapiogenics.com 34.66.169.234;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/elonmusk710628/myflaskapp/flaskapp.sock;
+    }
+}
