@@ -44,7 +44,7 @@ executor = ThreadPoolExecutor(max_workers=1)
 def get_codename(symbol, datetmp, option_value, strikeprice, roundingprice, fixed_multiple, order_tag):
     if order_tag == 0:
         bid_price = strikeprice + (roundingprice * fixed_multiple) if option_value == "call" else strikeprice - (roundingprice * fixed_multiple)
-    elif order_tag == 1:
+    elif order_tag > 0:
         bid_price = strikeprice
     else:
         return ""
@@ -588,7 +588,7 @@ def exit_positions(data, symbol, action, api_key, ordertag):
             if order_id in orders:
                 del orders[order_id]
             exit_buy_todo_orders[order_id] = order
-    elif ordertag == 1:
+    elif ordertag > 0:
         copy_orders = orders.copy()
         to_exit_orders = {
             order_id: order for order_id, order in copy_orders.items()
@@ -609,7 +609,7 @@ def forward_order1(data, api_key):
 
     action = data.get("action")
     symbol = data.get("symbol", "")
-    ordertag = data.get("order_tag")
+    ordertag = int(data.get("order_tag", -1))
 
     if action and symbol:
         return exit_positions(data, symbol, action, api_key, ordertag)
@@ -632,14 +632,18 @@ def forward_order1(data, api_key):
         logger.error("Invalid strike price")
         return jsonify({"error": "Invalid strike price"}), 400
 
+    if ordertag == -1:
+        logger.error("Missing order tag")
+        return jsonify({"error": "Missing order tag"}), 400
+    
     if ordertag == 0 and (side != "SELL" or not all([datetmp, symbol, roundingprice])):
         logger.error("Missing or invalid fields in request")
         return jsonify({"error": "Missing or invalid fields"}), 400
 
-    if ordertag == 1 and not all([datetmp, symbol]):
+    if ordertag > 0 and not all([datetmp, symbol]):
         logger.error("Missing or invalid fields in request")
         return jsonify({"error": "Missing or invalid fields"}), 400
-
+    
     buy_code_name = get_codename(symbol, datetmp, option_value, strikeprice, roundingprice, multiple_value, ordertag)
     if not buy_code_name:
         logger.error("Invalid option type")
@@ -648,7 +652,7 @@ def forward_order1(data, api_key):
     headers = {"Content-Type": "application/json", "api-key": api_key}
 
     # Naked Strategy
-    if ordertag == 1:
+    if ordertag > 0:
         code_name = buy_code_name
         order_data = {
             "symbol": code_name,
