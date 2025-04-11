@@ -3,7 +3,7 @@ import logging.config
 import pytz
 from datetime import datetime
 
-NY_TZ = pytz.timezone("America/New_York")
+CST_TZ = pytz.timezone("America/Chicago")
 
 class OpenCloseFileHandler(logging.FileHandler):
     def emit(self, record):
@@ -31,13 +31,6 @@ LOGGING_CONFIG = {
             "mode": "a",
             "encoding": "utf-8",
         },
-        "uvicorn_file": {
-            "()": OpenCloseFileHandler,
-            "filename": "uvicorn_logs.log",
-            "formatter": "default",
-            "mode": "a",
-            "encoding": "utf-8",
-        },
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
@@ -50,27 +43,51 @@ LOGGING_CONFIG = {
             "level": "DEBUG",
             "propagate": True,
         },
-        "uvicorn": {
-            "handlers": ["uvicorn_file", "console"],
-            "level": "DEBUG",
+        "ibapi.utils": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
             "propagate": False,
         },
-        "uvicorn.error": {
-            "handlers": ["uvicorn_file", "console"],
-            "level": "DEBUG",
+        "ibapi.client": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
             "propagate": False,
         },
-        "uvicorn.access": {
-            "handlers": ["uvicorn_file", "console"],
-            "level": "DEBUG",
+        "ibapi.connection": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "ibapi.reader": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "urllib3.connectionpool": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "ibapi.comm": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "ibapi.decoder": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "ibapi.wrapper": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
             "propagate": False,
         },
     },
 }
 
-
 def timetz(*_):
-    return datetime.now(NY_TZ).timetuple()
+    return datetime.now(CST_TZ).timetuple()
 
 logger = logging.getLogger("logs")
 logging.Formatter.converter = timetz

@@ -49,7 +49,6 @@ def set_message():
         return jsonify({"error": "Missing message"}), 400
         
     logger.info(f"Message: {message}")
-    
     # Handle different alerts and execute corresponding orders
     if "Supertrend_Strategy_Long_Entry" == message and last_message != 'Supertrend_Strategy_Long_Entry' and last_message != 'Supertrend_Strategy_Short_Entry':
         save_message('BUY') 
@@ -91,9 +90,9 @@ def get_message():
     return jsonify({"message": read_message()}), 200
 
 def save_message(message):
-    with open('messages.txt', 'w') as file:
+    with open('messages.txt', 'a') as file:
         logger.info(message)
-        file.write(message)
+        file.write("," + message)
 
 def read_message():
     message = ""

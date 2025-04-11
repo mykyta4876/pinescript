@@ -1,0 +1,11 @@
+[31-Aug-2024 08:28:25 America/Fortaleza] PHP Fatal error:  Uncaught RuntimeException: Erro: Variáveis de ambiente essenciais não estão configuradas. in /home2/gtmeto31/public_html/TESTE/global.php:11
+Stack trace:
+#0 /home2/gtmeto31/public_html/TESTE/assets/includes/index.php(4): include()
+#1 {main}
+  thrown in /home2/gtmeto31/public_html/TESTE/global.php on line 11
+[31-Aug-2024 08:28:47 America/Fortaleza] PHP Warning:  Undefined array key "PAINEL_USER" in /home2/gtmeto31/public_html/TESTE/assets/includes/index.php on line 19
+[31-Aug-2024 08:28:49 America/Fortaleza] PHP Warning:  Undefined array key "PAINEL_USER" in /home2/gtmeto31/public_html/TESTE/assets/includes/index.php on line 19
+[01-Apr-2025 05:15:47 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function dir_exists() in /home/dttibcom/public_html/trendcatcher.ai/assets/includes/main.php:70
+Stack trace:
+#0 {main}
+  thrown in /home/dttibcom/public_html/trendcatcher.ai/assets/includes/main.php on line 70

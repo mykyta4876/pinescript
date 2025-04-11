@@ -1,0 +1,65 @@
+2025-01-15 09:30:21,986 - logs - INFO - request data: {'symbol': 'SPXW', 'date': '20250115', 'strikeprice': '5905', 'option': 'put', 'side': 'BUY', 'type': 'MARKET', 'quantity': '1', 'BarSize': '1m', 'MaxPositions': '1', 'EntryReverse': 'r', 'Restriction': 'vw', 'Exit3': 'y', 'Exit3Percent': '0.4', 'ExitReverse': 'r', 'MinimumEntryPrice': '0.50', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'account': 'Moo_Paper_Engine4_Puts', 'order_tag': '2'}
+2025-01-15 09:30:23,944 - logs - INFO - request data: {'symbol': 'SPXW', 'date': '20250115', 'strikeprice': '5910', 'option': 'call', 'side': 'BUY', 'type': 'MARKET', 'quantity': '1', 'BarSize': '1m', 'MaxPositions': '1', 'EntryReverse': 'r', 'Restriction': 'vw', 'Exit3': 'y', 'Exit3Percent': '0.4', 'ExitReverse': 'r', 'MinimumEntryPrice': '0.50', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'account': 'Moo_Paper_Engine4_Calls', 'order_tag': '2'}
+2025-01-15 15:59:00,652 - logs - INFO - request data: {'symbol': 'SPXW', 'action': 'exit_calls', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'order_tag': '2'}
+2025-01-15 15:59:00,654 - logs - ERROR - Invalid strike price
+2025-01-15 15:59:00,654 - logs - ERROR - Invalid strike price
+2025-01-15 15:59:00,972 - logs - INFO - request data: {'symbol': 'SPXW', 'action': 'exit_puts', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'order_tag': '2'}
+2025-01-15 15:59:00,974 - logs - ERROR - Invalid strike price
+2025-01-15 15:59:00,975 - logs - ERROR - Invalid strike price
+2025-01-16 09:30:18,209 - logs - INFO - request data: {'symbol': 'SPXW', 'date': '20250116', 'strikeprice': '5960', 'option': 'put', 'side': 'BUY', 'type': 'MARKET', 'quantity': '1', 'BarSize': '1m', 'MaxPositions': '1', 'EntryReverse': 'r', 'Restriction': 'vw', 'Exit3': 'y', 'Exit3Percent': '0.4', 'ExitReverse': 'r', 'MinimumEntryPrice': '0.50', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'account': 'Moo_Paper_Engine4_Puts', 'order_tag': '2'}
+2025-01-16 09:30:18,216 - logs - INFO - [-] forward_order1: starting a thread - thread_engin4_long
+2025-01-16 09:30:18,219 - logs - INFO - [-] thread_engin4_long: Starting live trading for O:SPXW250116P05960000
+2025-01-16 09:30:18,220 - logs - INFO - [-] forward_order1: starting a thread - thread_engin4_long
+2025-01-16 09:30:18,221 - logs - INFO - [-] fetch_latest_minute: url: https://api.polygon.io/v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16
+2025-01-16 09:30:18,222 - logs - INFO - [-] thread_engin4_long: Starting live trading for O:SPXW250116P05960000
+2025-01-16 09:30:18,227 - logs - INFO - [-] fetch_latest_minute: url: https://api.polygon.io/v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16
+2025-01-16 09:30:18,245 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-01-16 09:30:18,246 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-01-16 09:30:18,449 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 153
+2025-01-16 09:30:18,450 - logs - ERROR - [-] fetch_latest_minute: Error fetching data: list index out of range
+2025-01-16 09:30:18,723 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 152
+https://api.polygon.io/v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi
+2025-01-16 09:30:18,724 - logs - ERROR - [-] fetch_latest_minute: Error fetching data: list index out of range
+2025-01-16 09:30:20,905 - logs - INFO - request data: {'symbol': 'SPXW', 'date': '20250116', 'strikeprice': '5965', 'option': 'call', 'side': 'BUY', 'type': 'MARKET', 'quantity': '1', 'BarSize': '1m', 'MaxPositions': '1', 'EntryReverse': 'r', 'Restriction': 'vw', 'Exit3': 'y', 'Exit3Percent': '0.4', 'ExitReverse': 'r', 'MinimumEntryPrice': '0.50', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'account': 'Moo_Paper_Engine4_Calls', 'order_tag': '2'}
+2025-01-16 09:30:20,906 - logs - INFO - [-] forward_order1: starting a thread - thread_engin4_long
+2025-01-16 09:30:20,926 - logs - INFO - [-] forward_order1: starting a thread - thread_engin4_long
+2025-01-16 09:30:20,926 - logs - INFO - [-] thread_engin4_long: Starting live trading for O:SPXW250116C05965000
+2025-01-16 09:30:20,927 - logs - INFO - [-] thread_engin4_long: Starting live trading for O:SPXW250116C05965000
+2025-01-16 09:30:20,930 - logs - INFO - [-] fetch_latest_minute: url: https://api.polygon.io/v2/aggs/ticker/O:SPXW250116C05965000/range/1/minute/2025-01-16/2025-01-16
+2025-01-16 09:30:20,931 - logs - INFO - [-] fetch_latest_minute: url: https://api.polygon.io/v2/aggs/ticker/O:SPXW250116C05965000/range/1/minute/2025-01-16/2025-01-16
+2025-01-16 09:30:20,941 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-01-16 09:30:20,942 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-01-16 09:30:21,070 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPXW250116C05965000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 153
+2025-01-16 09:30:21,071 - logs - ERROR - [-] fetch_latest_minute: Error fetching data: list index out of range
+2025-01-16 09:30:32,588 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPXW250116C05965000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 153
+2025-01-16 09:30:32,590 - logs - ERROR - [-] fetch_latest_minute: Error fetching data: list index out of range
+2025-01-16 09:31:18,468 - logs - INFO - [-] thread_engin4_long: now: 2025-01-16 09:31:18.468297-05:00, next_bar_time: 2025-01-16 09:31:18.221037-05:00
+2025-01-16 09:31:18,470 - logs - INFO - [-] fetch_latest_minute: url: https://api.polygon.io/v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16
+2025-01-16 09:31:18,472 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-01-16 09:31:18,599 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 153
+2025-01-16 09:31:18,600 - logs - ERROR - [-] fetch_latest_minute: Error fetching data: list index out of range
+2025-01-16 09:31:18,601 - logs - ERROR - [-] thread_engin4_long: error: 'NoneType' object is not subscriptable
+2025-01-16 09:31:18,742 - logs - INFO - [-] thread_engin4_long: now: 2025-01-16 09:31:18.742237-05:00, next_bar_time: 2025-01-16 09:31:18.227755-05:00
+2025-01-16 09:31:18,743 - logs - INFO - [-] fetch_latest_minute: url: https://api.polygon.io/v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16
+2025-01-16 09:31:18,744 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-01-16 09:31:18,847 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPXW250116P05960000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 154
+2025-01-16 09:31:18,848 - logs - ERROR - [-] fetch_latest_minute: Error fetching data: list index out of range
+2025-01-16 09:31:18,849 - logs - ERROR - [-] thread_engin4_long: error: 'NoneType' object is not subscriptable
+2025-01-16 09:31:21,090 - logs - INFO - [-] thread_engin4_long: now: 2025-01-16 09:31:21.089938-05:00, next_bar_time: 2025-01-16 09:31:20.931160-05:00
+2025-01-16 09:31:21,090 - logs - INFO - [-] fetch_latest_minute: url: https://api.polygon.io/v2/aggs/ticker/O:SPXW250116C05965000/range/1/minute/2025-01-16/2025-01-16
+2025-01-16 09:31:21,092 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-01-16 09:31:21,196 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPXW250116C05965000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 153
+2025-01-16 09:31:21,197 - logs - ERROR - [-] fetch_latest_minute: Error fetching data: list index out of range
+2025-01-16 09:31:21,198 - logs - ERROR - [-] thread_engin4_long: error: 'NoneType' object is not subscriptable
+2025-01-16 09:31:21,605 - logs - INFO - [-] thread_engin4_long: now: 2025-01-16 09:31:21.604940-05:00, next_bar_time: 2025-01-16 09:31:20.930727-05:00
+2025-01-16 09:31:21,605 - logs - INFO - [-] fetch_latest_minute: url: https://api.polygon.io/v2/aggs/ticker/O:SPXW250116C05965000/range/1/minute/2025-01-16/2025-01-16
+2025-01-16 09:31:21,607 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-01-16 09:31:21,709 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPXW250116C05965000/range/1/minute/2025-01-16/2025-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 150
+2025-01-16 09:31:21,710 - logs - ERROR - [-] fetch_latest_minute: Error fetching data: list index out of range
+2025-01-16 09:31:21,711 - logs - ERROR - [-] thread_engin4_long: error: 'NoneType' object is not subscriptable
+2025-01-16 15:59:00,535 - logs - INFO - request data: {'symbol': 'SPXW', 'action': 'exit_puts', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'order_tag': '2'}
+2025-01-16 15:59:00,541 - logs - INFO - [-] exit_positions: data: {'symbol': 'SPXW', 'action': 'exit_puts', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'order_tag': '2'}, symbol: SPXW, action: exit_puts, api_key: a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429
+2025-01-16 15:59:00,542 - logs - INFO - [-] exit_positions: data: {'symbol': 'SPXW', 'action': 'exit_puts', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'order_tag': '2'}, symbol: SPXW, action: exit_puts, api_key: d45a6e79-927b-4f3e-889d-3c65a8f0738c
+2025-01-16 15:59:00,735 - logs - INFO - request data: {'symbol': 'SPXW', 'action': 'exit_calls', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'order_tag': '2'}
+2025-01-16 15:59:00,737 - logs - INFO - [-] exit_positions: data: {'symbol': 'SPXW', 'action': 'exit_calls', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'order_tag': '2'}, symbol: SPXW, action: exit_calls, api_key: a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429
+2025-01-16 15:59:00,738 - logs - INFO - [-] exit_positions: data: {'symbol': 'SPXW', 'action': 'exit_calls', 'api_key': 'a1b2c345-6def-789g-hijk-123456789lmn', 'order_tag': '2'}, symbol: SPXW, action: exit_calls, api_key: d45a6e79-927b-4f3e-889d-3c65a8f0738c

@@ -7,6 +7,8 @@ from ibapi.order import Order
 from logger import logger, LOGGING_CONFIG
 import time
 
+first_run_flag = True
+
 class TradeApp(EWrapper, EClient): 
     def __init__(self): 
         EClient.__init__(self, self)
@@ -59,7 +61,7 @@ class TradeApp(EWrapper, EClient):
                 return ""
             
             message = json_object["message"]
-            logger.info(f"message: {message}")
+            #logger.info(f"message: {message}")
 
             return message
         except requests.exceptions.RequestException as e:
@@ -67,6 +69,7 @@ class TradeApp(EWrapper, EClient):
             return ""
 
     def start(self):
+        global first_run_flag
         if self.started:
             return
 
@@ -75,14 +78,21 @@ class TradeApp(EWrapper, EClient):
         contract = self.create_contract()
         while True:
             message = self.request_message()
-            if message == "BUY":
-                order = self.create_market_order("BUY")
-                self.placeOrder(self.nextOrderId(), contract, order)
-            elif message == "SELL": 
-                order = self.create_market_order("SELL")
-                self.placeOrder(self.nextOrderId(), contract, order)
+            if first_run_flag:
+                first_run_flag = False
+                continue
             
-            time.sleep(1)
+            order_cmds = message.split(",")
+            for order_cmd in order_cmds:
+                if order_cmd == "BUY":
+                    order = self.create_market_order("BUY")
+                    self.placeOrder(self.nextOrderId(), contract, order)
+                    logger.info(f"BUY order placed")
+                elif order_cmd == "SELL": 
+                    order = self.create_market_order("SELL")
+                    self.placeOrder(self.nextOrderId(), contract, order)
+                    logger.info(f"SELL order placed")
+            time.sleep(2)
 
 app = TradeApp()      
 app.connect("127.0.0.1", 7497, clientId=1)

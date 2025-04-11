@@ -24,18 +24,20 @@ HOST = '127.0.0.1'
 PORT = 11111
 
 ACC_DETAILS = {
-    "ad8f8413-0978-4982-8a0b-41a45ed62e00": {
-        "acc_id": 283445328178805387,
+    "7d4f8a12-1b3c-45e9-9b1a-2a6e0fc2e975": {
+        "acc_id": 283445330963143138,
         "trd_env": TrdEnv.REAL,
     },
-    "1125436a-3fb7-5b65-87eb-11zYGrsUz333": {
-        "acc_id": 1022345,
+    "d45a6e79-927b-4f3e-889d-3c65a8f0738c": {
+        "acc_id": 978757,
         "trd_env": TrdEnv.SIMULATE,
     },
 }
 
 VALID_API_KEYS = ACC_DETAILS.keys()
-TRADING_PASSWORD = os.environ.get("TRADING_PASS")
+#TRADING_PASSWORD = os.environ.get("TRADING_PASS")
+#TRADING_PASSWORD = "120120" #ryanoakes, backend-opend-test-20241008-081306
+TRADING_PASSWORD = "772877" #enlixir, backend-opend-20241008-075506
 
 MODIFY_ORDER_OPERATIONS = {
     "NONE": ModifyOrderOp.NONE,
@@ -106,10 +108,9 @@ def api_key_validation(api_key: str = Header(...)):
         raise HTTPException(status_code=403, detail="Invalid API key")
     return api_key
 
-
 # Unlock trade
 def unlock_trade(trd_ctx):
-    ret, data = trd_ctx.unlock_trade(TRADING_PASSWORD)
+    ret, data = trd_ctx.unlock_trade(password=TRADING_PASSWORD)
     if ret != RET_OK:
         logger.critical(f"Unlock trade failed: {data}")
         raise ConnectionError(f"Unlock trade failed: {data}")
@@ -155,6 +156,25 @@ def place_order(order_info: dict, api_key: str = Depends(api_key_validation)):
         data_json = data.to_json(orient='records', lines=False)
         return data_json
 
+@app.post("/get_ask_price")
+def get_ask_price(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
+    logger.info('received get_ask_price request...')
+    ret, data = trade_context.get_market_snapshot([params["symbol"]])
+    if ret != RET_OK:
+        logger.critical(f"get_ask_price error: {data}")
+        return {'get_ask_price error: ', data}
+    data_json = {'ask_price': data['code'][0]['ask_price']}
+    return data_json
+
+@app.post("/get_bid_price")
+def get_bid_price(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
+    logger.info('received get_bid_price request...')
+    ret, data = trade_context.get_market_snapshot([params["symbol"]])
+    if ret != RET_OK:
+        logger.critical(f"get_bid_price error: {data}")
+        return {'get_bid_price error: ', data}
+    data_json = {'bid_price': data['code'][0]['bid_price']}
+    return data_json
 
 @app.get("/positions/")
 def get_positions(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
@@ -170,6 +190,18 @@ def get_positions(params: Optional[Dict] = None, api_key: str = Depends(api_key_
     data_json = data.to_json(orient='records', lines=False)
     return data_json
 
+@app.get("/accs/")
+def get_accounts(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
+    """Function returns all positions"""
+    logger.info('received accounts request...')
+    ret, data = trade_context.get_acc_list()
+    if ret == RET_OK:
+        logger.info(f"accounts: \n{data}")
+    else:
+        logger.critical(f"get_acc_list error: {data}")
+        return {'account_list_query error: ', data}
+    data_json = data.to_json(orient='records', lines=False)
+    return data_json
 
 @app.post("/order_list/")
 def order_list_query(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
@@ -235,8 +267,7 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=443,
-        ssl_keyfile="/etc/letsencrypt/live/inocybe.hyfa.io/privkey.pem",
-        ssl_certfile="/etc/letsencrypt/live/inocybe.hyfa.io/fullchain.pem",
+        port=80,
         log_config=LOGGING_CONFIG
     )
+

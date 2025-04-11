@@ -178,3 +178,92 @@ Let's start now.
 
 	so far, you have run the client.py file.
 
+Tradingview timezone: CT
+TWS timezone: CT.
+
+=======================================
+[How to set up TWS on EC2 instance]
+https://dev.to/kairatorozobekov/setting-up-tws-ibc-on-ec2-instance-88b
+We are going to use Ubuntu as our AMI and for the instance type we will choose t2.medium (cause if you choose a less powerful instance type, TWS will work a little bit slow)
+
+sudo apt update
+sudo apt -y upgrade
+
+XVFB - is an X server that can run on machines with no display hardware and no physical input devices.
+sudo apt install -y xvfb
+
+VNC - is basically a screen-sharing system that is used to remotely control another computer.
+sudo apt install -y x11vnc
+
+Then, run this command to start virtual frame buffer
+/usr/bin/Xvfb :0 -ac -screen 0 1024x768x24 &
+ID of the Xvfb background process: 2877
+
+/usr/bin/x11vnc -ncache 10 -ncache_cr -viewpasswd view_only_password -passwd full_access_password -display :0 -forever -shared -bg -noipv6
+/usr/bin/x11vnc -ncache 10 -ncache_cr -viewpasswd 1234qwer -passwd qwer1234 -display :0 -forever -shared -bg -noipv6
+The listening port of VNC server is 5900.
+
+To allow inbound traffic to port 5900 in GCP VM instance:
+
+1. Go to the Google Cloud Console
+2. Navigate to VPC network > Firewall
+3. Click "CREATE FIREWALL RULE"
+4. Configure the new rule:
+   - Name: allow-vnc
+   - Direction of traffic: Ingress
+   - Targets: All instances in the network
+   - Source IP ranges: Your IP address (for security) or 0.0.0.0/0 (allows all IPs)
+   - Protocols and ports: TCP: 5900
+
+5. Click "Create" to apply the firewall rule
+
+Note: For security, it's recommended to only allow your specific IP address rather than opening the port to all IPs (0.0.0.0/0).
+
+
+After connecting to our VNC server, let's make our life a little bit easier and install metacity - a lightweight window manager.
+sudo apt install -y metacity
+DISPLAY=:0 metacity &
+ID of the metacity background process: 11055
+
+
+
+If you're seeing a black screen after connecting via TightVNC, try these troubleshooting steps:
+
+1. Make sure Xvfb is running properly:
+ps aux | grep Xvfb
+If not running, restart it:
+/usr/bin/Xvfb :0 -ac -screen 0 1024x768x24 &
+
+2. Install and start a desktop environment:
+sudo apt install -y xfce4
+DISPLAY=:0 startxfce4 &
+
+3. Verify x11vnc is running:
+ps aux | grep x11vnc
+If not running, restart it with:
+x11vnc -display :0 -forever -shared -bg
+
+4. Check if your DISPLAY variable is set correctly:
+echo $DISPLAY
+Should show :0
+
+5. Try restarting the VNC connection:
+- Kill existing x11vnc processes:
+  killall x11vnc
+- Restart x11vnc with:
+  /usr/bin/x11vnc -ncache 10 -ncache_cr -viewpasswd view_only_password -passwd full_access_password -display :0 -forever -shared -bg -noipv6
+
+6. If still black screen, try:
+- Kill all existing window manager processes
+  killall metacity
+- Restart metacity:
+  DISPLAY=:0 metacity --replace &
+
+Common causes of black screen:
+- No window manager running
+- DISPLAY variable not set correctly
+- Xvfb not running
+- Desktop environment not started
+
+Make sure all processes (Xvfb, x11vnc, metacity/desktop environment) are running before connecting with TightVNC.
+

@@ -1,0 +1,217 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © pinescripter_maroc
+
+//@version=5
+strategy("Premarket Breakout",overlay=true,margin_long=1,margin_short=1,max_boxes_count = 500)
+
+i_LongOption = input.bool(true, " LONG", inline = "long-short", group = "Strategy SettingS")
+i_ShortOption = input.bool(true," SHORT", inline = "long-short", group = "Strategy SettingS")
+
+i_RefSession      = input.session(defval = "1800-0930",title = "Reference Session", group = "Strategy SettingS")
+i_TradingSession  = input.session(defval = "0930-1530",title = "Trading   Session", group = "Strategy SettingS")
+
+
+
+i_entryQty = input.float(defval = 3.0, title = "Entry Qty", group = "Strategy Settings")
+i_TakeProfitQty = i_entryQty/3
+i_1stTpQty = input(1,"TpQty1", group = "Strategy Settings",inline="QTY")
+i_2ndTpQty = input(1,"TpQty2", group = "Strategy Settings",inline="QTY")
+i_3rdTpQty = input(1,"TpQty3", group = "Strategy Settings",inline="QTY")
+i_1stTpPts   = input.float(3,"TP1",inline="Take Profit",group = "Profit Targets")
+i_2ndTpPts   = input.float(3,"TP2",inline="Take Profit",group = "Profit Targets")
+i_3rdTpPts   = input.float(7,"TP3",inline="Take Profit",group = "Profit Targets")
+i_StopLossPts    = input.float(defval=2,title = "Stop Loss Pts ", group ="Stop Loss")
+i_loss = i_StopLossPts/(syminfo.mintick)
+//                ------------------------[SESSION]-------------------------                 //{
+
+
+s_RefSessionSign  = math.sign(nz(time(timeframe.period,i_RefSession,"America/New_York")))
+
+inTradingSession = math.sign(nz(time(timeframe.period,i_TradingSession,"America/New_York")))
+
+
+s_TradingPeriod   = not na(time(timeframe.period,i_TradingSession,"America/New_York"))
+_color    = color.red
+_bg_color = color.gray
+_transp   = 75
+b = bar_index
+GetRange(sess,color,bg_c,trsp)=>
+    // var b = 0
+    var float max = high 
+    var float min = low 
+    var box   mybox = na 
+
+// the box should be called once everytime a new session starts 
+
+    if sess > sess[1]
+        max := high 
+        min := low
+        // b   := bar_index
+
+        mybox := box.new(b,max,b,min,color,1,line.style_dashed
+             ,bgcolor=color.new(bg_c,trsp))
+
+    if sess and sess==sess[1]
+        max:= math.max(high,max)
+        min:= math.min(low,min)
+
+        box.set_top(mybox,max)
+        box.set_rightbottom(mybox,b,min)
+
+    [max,min]
+
+GetRange(s_RefSessionSign,_color,_bg_color,_transp) 
+
+
+[highest,lowest] = GetRange(s_RefSessionSign,_color,_bg_color,_transp)
+
+FirstResLvl  = highest 
+SecondResLvl = highest*1.001
+
+FirstSupLvl  = lowest 
+SecondSupLvl = lowest*0.999
+
+
+firstresistence = plot(s_TradingPeriod ?FirstResLvl:na,style = plot.style_linebr,color=color.red)
+secondresistence = plot(s_TradingPeriod?SecondResLvl:na,style = plot.style_linebr,color=color.red)
+
+firstupport   = plot(s_TradingPeriod?FirstSupLvl:na,style = plot.style_linebr,color=color.blue)
+secondsupport = plot(s_TradingPeriod?SecondSupLvl:na,style = plot.style_linebr,color=color.blue)
+
+fill(firstresistence,secondresistence,color.new(color.orange,88))
+fill(firstupport,secondsupport,color.new(color.lime,88))
+
+//                ------------------------[SESSION]-------------------------                 //}
+
+//-------------------------------------[LASTBAR]-------------------------------------{
+
+IsLastBarSession(sessionTime) =>
+    var int lastBarHour   = na
+    var int lastBarMinute = na
+    var int lastBarSecond = na
+    inSess = not na(time(timeframe.period, sessionTime, "America/New_York"))
+
+    if not inSess and inSess[1]
+        lastBarHour   := hour[1]
+        lastBarMinute := minute[1]
+        lastBarSecond := second[1]
+    
+    hour == lastBarHour and minute == lastBarMinute and second == lastBarSecond
+
+
+
+// See if current bar is last of session
+lastSessionBar = inTradingSession==0 and inTradingSession[1]!=0
+lastRefSessBar = IsLastBarSession(i_RefSession)
+
+
+bgcolor(lastSessionBar ? color.new(color.fuchsia, 90) : na)
+bgcolor(lastRefSessBar ? color.new(color.red, 90) : na)
+
+//-------------------------------------[LASTBAR]-------------------------------------}
+
+//-------------------------------------//
+var float stoploss              = na
+var float o_FirstProfitTarget   = na
+var float o_SecondProfitTarget  = na 
+var float o_ThirdProfitTarget   = na 
+
+var float o_FirstProfitTarget_s   = na
+var float o_SecondProfitTarget_s  = na 
+var float o_ThirdProfitTarget_s   = na 
+
+var float o_EntryPriceLvl       = na 
+
+
+//---------------------------------------------------------------------------------------------//
+
+
+pos         = strategy.position_size
+previousPos = strategy.position_size[1]
+sav         = strategy.position_avg_price
+bsc         = barstate.isconfirmed
+sym         = syminfo.mintick
+
+
+//-------------------------------------//
+// ENTRY CONDITIONS // 
+longCondition   =  pos == 0 and  (s_TradingPeriod or lastRefSessBar) and i_LongOption  and close<SecondResLvl
+shortCondition  =  pos == 0 and  (s_TradingPeriod or lastRefSessBar) and i_ShortOption and close>SecondSupLvl
+//---------------------------------------------------------------------------------------------//
+
+
+//-------------------------------------//
+if (longCondition) 
+    o_EntryPriceLvl := SecondResLvl
+    strategy.entry("Long",strategy.long,qty = i_entryQty , stop = SecondResLvl)
+    stoploss                := SecondResLvl - (i_StopLossPts)
+    o_FirstProfitTarget     := SecondResLvl + i_1stTpPts
+    o_SecondProfitTarget    := SecondResLvl + i_2ndTpPts
+    o_ThirdProfitTarget     := SecondResLvl + i_3rdTpPts 
+
+    // Exit Conditions
+    strategy.exit("1st exit", "Long", qty=i_1stTpQty, loss=i_loss, stop=stoploss, limit=o_FirstProfitTarget, comment_loss="SL(L)", comment_profit="TP_1(L)")
+    strategy.exit("2nd exit", "Long", qty=i_2ndTpQty, loss=i_loss, stop=stoploss, limit=o_SecondProfitTarget, comment_loss="SL(L)", comment_profit="TP_2(L)")
+    strategy.exit("3rd exit", "Long", qty=i_3rdTpQty, loss=i_loss, stop=stoploss, limit=o_ThirdProfitTarget, comment_loss="SL(L)", comment_profit="TP_3(L)")
+
+//---------------------------------------------------------------------------------------------//
+
+//-------------------------------------//
+if (shortCondition) 
+    o_EntryPriceLvl := SecondSupLvl 
+    strategy.entry("Short",strategy.short,qty = i_entryQty, stop = SecondSupLvl)
+    stoploss                := SecondSupLvl + (i_StopLossPts)
+    o_FirstProfitTarget_s     := SecondSupLvl - i_1stTpPts
+    o_SecondProfitTarget_s    := SecondSupLvl - i_2ndTpPts
+    o_ThirdProfitTarget_s     := SecondSupLvl - i_3rdTpPts  
+
+    // Exit Conditions
+    strategy.exit("1st exit", "Short", qty=i_1stTpQty, loss=i_loss, stop=stoploss, limit=o_FirstProfitTarget_s, comment_loss="SL(S)", comment_profit="TP_1(S)")
+    strategy.exit("2nd exit", "Short", qty=i_2ndTpQty, loss=i_loss, stop=stoploss, limit=o_SecondProfitTarget_s, comment_loss="SL(S)", comment_profit="TP_2(S)")
+    strategy.exit("3rd exit", "Short", qty=i_3rdTpQty, loss=i_loss, stop=stoploss, limit=o_ThirdProfitTarget_s, comment_loss="SL(S)", comment_profit="TP_3(S)")
+
+//---------------------------------------------------------------------------------------------//
+
+// CLOSE ALL ORDERS OUTSIDE THE TRADING SESSION //
+if inTradingSession==0 and  pos!=0
+    strategy.close_all("exit by time",immediately = true)
+
+
+// CANCEL LIMIT ORDERS OUTSIDE THE TRADING SESSION //
+if inTradingSession==0 and not lastRefSessBar
+    strategy.cancel("Long")
+    strategy.cancel("Short")
+  
+
+if previousPos != pos
+    if pos == i_entryQty - i_1stTpQty
+        stoploss := sav 
+        strategy.exit("2nd exit","Long",qty =i_2ndTpQty,loss = 0,stop = sav,limit = o_SecondProfitTarget,comment_loss = "BE(L)" , comment_profit = "TP_2(L)")
+        strategy.exit("3rd exit","Long",qty =i_3rdTpQty,loss = 0,stop = sav,limit = o_ThirdProfitTarget,comment_loss = "BE(L)" , comment_profit = "TP_3(L)")
+    if pos == i_entryQty - (i_1stTpQty+i_2ndTpQty)
+        stoploss := sav 
+        strategy.exit("3rd exit","Long",qty =i_3rdTpQty,loss = 0,stop = sav,limit = o_ThirdProfitTarget,comment_loss = "BE(L)" , comment_profit = "TP_3(L)")
+    if pos == -(i_entryQty - i_1stTpQty)
+        stoploss := sav 
+        strategy.exit("2nd exit","Short",qty =i_2ndTpQty,loss = 0,stop = sav,limit = o_SecondProfitTarget_s,comment_loss = "BE(S)" , comment_profit = "TP_2(S)")
+        strategy.exit("3rd exit","Short",qty =i_3rdTpQty,loss = 0,stop = sav,limit = o_ThirdProfitTarget_s,comment_loss = "BE(S)" , comment_profit = "TP_3(S)")
+
+    if pos == -(i_entryQty - (i_1stTpQty+i_2ndTpQty))
+        stoploss := sav 
+        strategy.exit("3rd exit","Short",qty =i_3rdTpQty, loss = 0,stop = sav,limit = o_ThirdProfitTarget_s,comment_loss = "BE(S)" , comment_profit = "TP_3(S)")
+    
+
+//-------------------------------------//
+p0=plot(strategy.position_size>0 ? SecondResLvl - (i_StopLossPts)   :na ,title = "stoploss"   ,style=plot.style_linebr,color = color.orange)
+p1=plot(strategy.position_size>0 ? SecondResLvl                     :na ,title = "o_EntryPriceLvl",style=plot.style_linebr,color = color.blue)
+p2=plot(strategy.position_size>0 ? o_FirstProfitTarget              :na ,title = "o_FirstProfitTarget"   ,style=plot.style_linebr,color = color.green)
+p3=plot(strategy.position_size>0 ? o_SecondProfitTarget             :na ,title = "o_SecondProfitTarget"   ,style=plot.style_linebr,color = color.green)
+p4=plot(strategy.position_size>0 ? o_ThirdProfitTarget              :na ,title = "o_ThirdProfitTarget"   ,style=plot.style_linebr,color = color.green)
+//---------------------------------------------------------------------------------------------//
+//-------------------------------------//
+p01=plot(strategy.position_size<0 ? SecondSupLvl + (i_StopLossPts)   :na ,title = "stoploss"   ,style=plot.style_linebr,color = color.orange)
+p12=plot(strategy.position_size<0 ? SecondSupLvl                     :na ,title = "o_EntryPriceLvl",style=plot.style_linebr,color = color.blue)
+p23=plot(strategy.position_size<0 ? o_FirstProfitTarget_s            :na ,title = "o_FirstProfitTarget"   ,style=plot.style_linebr,color = color.green)
+p34=plot(strategy.position_size<0 ? o_SecondProfitTarget_s           :na ,title = "o_SecondProfitTarget"   ,style=plot.style_linebr,color = color.green)
+p45=plot(strategy.position_size<0 ? o_SecondProfitTarget_s           :na ,title = "o_ThirdProfitTarget"   ,style=plot.style_linebr,color = color.green)
+//---------------------------------------------------------------------------------------------//

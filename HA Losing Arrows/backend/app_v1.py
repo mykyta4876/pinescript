@@ -18,10 +18,10 @@ api_all_keys = {"a1b2c345-6def-789g-hijk-123456789lmn": "paper",    # execute th
                 "z9y8x765-4wvu-321t-rqpo-987654321abc": "real"}     # execute the order on all real accounts.
 
 api_keys = {
-    "fb7c1234-25ae-48b6-9f7f-9b3f98d76543": {"id":"ryanoakes-real", "opend-address":"34.16.63.166"}, 
-    "a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429": {"id":"ryanoakes-paper", "opend-address":"34.16.63.166"}, 
-    "7d4f8a12-1b3c-45e9-9b1a-2a6e0fc2e975": {"id":"enlixir-real", "opend-address":"34.123.142.4"}, 
-    "d45a6e79-927b-4f3e-889d-3c65a8f0738c": {"id":"enlixir-paper", "opend-address":"34.123.142.4"}
+    "fb7c1234-25ae-48b6-9f7f-9b3f98d76543": {"id":"ryanoakes-real", "opend-address":"34.69.232.70"}, 
+    "a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429": {"id":"ryanoakes-paper", "opend-address":"34.69.232.70"}, 
+    "7d4f8a12-1b3c-45e9-9b1a-2a6e0fc2e975": {"id":"enlixir-real", "opend-address":"34.172.46.17"}, 
+    "d45a6e79-927b-4f3e-889d-3c65a8f0738c": {"id":"enlixir-paper", "opend-address":"34.172.46.17"}
     }
 
 # In-memory store for orders

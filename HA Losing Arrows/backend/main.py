@@ -1,3 +1,4 @@
+import json
 import sys
 import os
 from typing import Optional, Dict
@@ -6,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Header, Depends
 import uvicorn
 from moomoo import (
     OpenSecTradeContext,
+    OpenQuoteContext,
     TrdMarket,
     SecurityFirm,
     TrdSide,
@@ -24,19 +26,32 @@ HOST = '127.0.0.1'
 PORT = 11111
 
 ACC_DETAILS = {
+    # ryanoakes
     "fb7c1234-25ae-48b6-9f7f-9b3f98d76543": {
         "acc_id": 283445328178805387,
         "trd_env": TrdEnv.REAL,
     },
     "a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429": {
-        "acc_id": 1022345,
+        "acc_option_id": 1022345,
+        "acc_stock_id": 1022340,
+        "trd_env": TrdEnv.SIMULATE,
+    },
+    # enlixir
+    "7d4f8a12-1b3c-45e9-9b1a-2a6e0fc2e975": {
+        "acc_id": 283445330963143138,
+        "trd_env": TrdEnv.REAL,
+    },
+    "d45a6e79-927b-4f3e-889d-3c65a8f0738c": {
+        "acc_option_id": 978757,
+        "acc_stock_id": 978753,
         "trd_env": TrdEnv.SIMULATE,
     }
 }
 
 VALID_API_KEYS = ACC_DETAILS.keys()
 #TRADING_PASSWORD = os.environ.get("TRADING_PASS")
-TRADING_PASSWORD = "120120"
+#TRADING_PASSWORD = "120120" #ryanoakes, backend-opend-test-20241008-081306
+TRADING_PASSWORD = "772877" #enlixir, backend-opend-20241008-075506
 
 MODIFY_ORDER_OPERATIONS = {
     "NONE": ModifyOrderOp.NONE,
@@ -90,7 +105,8 @@ class HiddenPrints:
         sys.stdout = self._original_stdout
 
 
-def create_trade_context():
+def create_contexts():
+    """Create both trade and quote contexts"""
     with HiddenPrints():
         trd_ctx = OpenSecTradeContext(
             filter_trdmarket=TrdMarket.US,
@@ -98,7 +114,11 @@ def create_trade_context():
             port=PORT,
             security_firm=SecurityFirm.FUTUINC
         )
-    return trd_ctx
+        quote_ctx = OpenQuoteContext(
+            host=HOST,
+            port=PORT
+        )
+    return trd_ctx, quote_ctx
 
 
 def api_key_validation(api_key: str = Header(...)):
@@ -116,15 +136,22 @@ def unlock_trade(trd_ctx):
     logger.critical('Unlock Trade success!')
 
 
-def add_acc_details(params: dict, api_key: str):
+def add_acc_details(params: dict, api_key: str, isFutures: bool):
     acc_details = ACC_DETAILS[api_key]
-    params["acc_id"] = acc_details["acc_id"]
+    if acc_details["trd_env"] == TrdEnv.SIMULATE:
+        if isFutures:
+            params["acc_id"] = acc_details["acc_stock_id"]
+        else:
+            params["acc_id"] = acc_details["acc_option_id"]
+    else:
+        params["acc_id"] = acc_details["acc_id"]
+        
     params["trd_env"] = acc_details["trd_env"]
 
 
 app = FastAPI()
-trade_context = create_trade_context()
-logger.info("Trade context has been initiated")
+trade_context, quote_context = create_contexts()
+logger.info("Trade and Quote contexts have been initiated")
 unlock_trade(trade_context)
 
 
@@ -144,7 +171,9 @@ def place_order(order_info: dict, api_key: str = Depends(api_key_validation)):
     params["code"] = order_info["symbol"]
     params["trd_side"] = TrdSide.BUY if order_info["side"] == 'BUY' else TrdSide.SELL
     params["order_type"] = ORDER_TYPE[order_info["type"]]
-    add_acc_details(params, api_key)
+    isFutures = order_info.get("account_type", "") == "futures"
+
+    add_acc_details(params, api_key, isFutures)
 
     ret, data = trade_context.place_order(**params)
     if ret != RET_OK:
@@ -154,6 +183,45 @@ def place_order(order_info: dict, api_key: str = Depends(api_key_validation)):
         logger.info("Order has been sent successfully")
         data_json = data.to_json(orient='records', lines=False)
         return data_json
+
+@app.post("/get_ask_price")
+def get_ask_price(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
+    logger.info('received get_ask_price request...')
+    ret, data = quote_context.get_market_snapshot([params["symbol"]])
+    if ret != RET_OK:
+        logger.critical(f"get_ask_price error: {data}")
+        return {'get_ask_price error: ', data}
+    data_json = {'ask_price': data['code'][0]['ask_price']}
+    return data_json
+
+@app.post("/get_bid_price")
+def get_bid_price(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
+    logger.info('received get_bid_price request...')
+    ret, data = quote_context.get_market_snapshot([params["symbol"]])
+    if ret != RET_OK:
+        logger.critical(f"get_bid_price error: {data}")
+        return {'get_bid_price error: ', data}
+    data_json = {'bid_price': data['code'][0]['bid_price']}
+    return data_json
+
+@app.post("/get_snapshot")
+def get_snapshot(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
+    try:
+        symbol_list = params["symbol_list"]
+        logger.info(f'received get_snapshot request for {symbol_list}')
+        ret, data = quote_context.get_market_snapshot(symbol_list)
+        logger.info(f"get_snapshot data: {data}, ret: {ret}")
+        if ret != RET_OK:
+            logger.error(f"get_snapshot error: {data}")
+            return {'error', data}
+        json_data = data.to_json(orient='records')
+        json_data = json.loads(json_data)
+        logger.info(f"json_data: {json_data}")
+        data_json = {'snapshot': json_data}
+        return data_json
+    except Exception as e:
+        logger.error(f"get_snapshot error: {e}")
+        return {'error', e}
 
 @app.get("/positions/")
 def get_positions(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
@@ -185,7 +253,8 @@ def get_accounts(params: Optional[Dict] = None, api_key: str = Depends(api_key_v
 @app.post("/order_list/")
 def order_list_query(params: Optional[Dict] = None, api_key: str = Depends(api_key_validation)):
     params = dict() if params is None else params
-    add_acc_details(params, api_key)
+    isFutures = params.get("account_type", "") == "futures"
+    add_acc_details(params, api_key, isFutures)
     ret, data = trade_context.order_list_query(**params)
     if ret != RET_OK:
         logger.critical(f"order_list_query error: {data}")
@@ -219,10 +288,11 @@ def modify_order(params: dict, api_key: str = Depends(api_key_validation)):
 
 
 @app.get("/exit/")
-def close_trade_context(api_key: str = Depends(api_key_validation)):
-    """Function closes trade_context object"""
-    logger.info("trade_context has been closed")
+def close_contexts(api_key: str = Depends(api_key_validation)):
+    """Function closes both trade and quote contexts"""
+    logger.info("Closing trade and quote contexts")
     trade_context.close()
+    quote_context.close()
     return {"message": "success"}
 
 

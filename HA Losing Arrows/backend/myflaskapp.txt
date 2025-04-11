@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name sapiogenics.com 34.66.169.234;
+    server_name kingcuck.com 34.57.198.34;
 
     location / {
         include proxy_params;

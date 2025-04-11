@@ -1,0 +1,24 @@
+server {
+    server_name kingcuck.com 34.57.198.34;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/elonmusk710628/myflaskapp/flaskapp.sock;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/kingcuck.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/kingcuck.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+server {
+    if ($host = kingcuck.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    server_name kingcuck.com 34.57.198.34;
+    return 404; # managed by Certbot
+}
