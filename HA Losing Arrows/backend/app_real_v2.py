@@ -808,7 +808,7 @@ def forward_order1(data, api_key):
     headers = {"Content-Type": "application/json", "api-key": api_key}
 
     # Naked Strategy
-    if ordertag > 1:
+    if ordertag > 0:
         code_name = buy_code_name
         order_data = {
             "symbol": code_name,

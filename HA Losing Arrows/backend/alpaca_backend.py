@@ -22,7 +22,7 @@ app = Flask(__name__)
 
 G_FIXED_MULTIPLE = 10
 
-api_all_keys = {"1125436a-3fb7-5b65-87eb-11zYGrsUz333": "paper",    # execute the order on all paper accounts. 
+api_all_keys = {"1125436a-3fb7-5b65-87eb-11zYGrsUz333": "simulate",    # execute the order on all paper accounts. 
                 "1125436a-3fb7-5b65-87eb-11zYGrsUz444": "real"}     # execute the order on all real accounts.
 
 ACC_DETAILS = {
@@ -795,6 +795,8 @@ def exit_positions(data, symbol, action, api_key):
     return jsonify({"success": "Exited positions"}), 200
 
 def forward_order1(data, api_key):
+    logger.info(f"forward_order1: data:{data}, api_key:{api_key}")
+
     if api_key not in ACC_DETAILS:
         logger.error(f"Invalid API key: {api_key}")
         return jsonify({"error": "Invalid API key"}), 403
@@ -906,8 +908,9 @@ def forward_order():
     logger.info(f"request data: {data}")
 
     if api_key in api_all_keys:
+        logger.info(f"api_all_keys[api_key]: {api_all_keys[api_key]}")
         for api_key_1, api_info in ACC_DETAILS.items():
-            if api_info["id"].find(api_all_keys[api_key]) != -1:
+            if api_all_keys[api_key] == api_info["trd_env"]:
                 forward_order1(data, api_key_1)
     else:
         return forward_order1(data, api_key)
