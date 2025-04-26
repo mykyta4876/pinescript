@@ -539,6 +539,8 @@ For it, I need to do follows:
 usually we get the order rejection when we try to buy the option on the entry.   when it happens then current program is:
 a) if call, step down 1 strike price interval closer to current price,  or
 b) if put, step up 1 strike price interval.
+
+When entry alert and exit alert happen same time or within 1 second of each other, then exit must complete IN FULL, before entry.  Exit always more important than entry
 =============================
 [alpaca backend]
 https://docs.alpaca.markets/docs/getting-started

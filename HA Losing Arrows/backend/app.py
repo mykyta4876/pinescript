@@ -36,10 +36,6 @@ exit_buy_todo_orders = {}
 exit_buy_pending_orders = {}
 order_pair_map = {}
 
-## Naked Strategy
-naked_pending_orders = {}
-naked_exit_todo_orders = {}
-
 executor = ThreadPoolExecutor(max_workers=1)
 
 def get_codename(symbol, datetmp, option_value, strikeprice, roundingprice, fixed_multiple):
@@ -59,8 +55,6 @@ def save_orders_into_jsonfile():
     global exit_sell_pending_orders
     global exit_buy_todo_orders
     global exit_buy_pending_orders
-    global naked_pending_orders
-    global naked_exit_todo_orders
     global order_pair_map
 
     total_orders = {}
@@ -71,10 +65,8 @@ def save_orders_into_jsonfile():
     total_orders['exit_sell_pending_orders'] = exit_sell_pending_orders
     total_orders['exit_buy_todo_orders'] = exit_buy_todo_orders
     total_orders['exit_buy_pending_orders'] = exit_buy_pending_orders
-    total_orders['naked_pending_orders'] = naked_pending_orders
-    total_orders['naked_exit_todo_orders'] = naked_exit_todo_orders
 
-    count = len(sell_todo_orders) + len(buy_pending_orders) + len(exit_sell_todo_orders) + len(exit_sell_pending_orders) + len(exit_buy_todo_orders) + len(exit_buy_pending_orders) + len(naked_pending_orders) + len(naked_exit_todo_orders)
+    count = len(sell_todo_orders) + len(buy_pending_orders) + len(exit_sell_todo_orders) + len(exit_sell_pending_orders) + len(exit_buy_todo_orders) + len(exit_buy_pending_orders)
     if count == 0:
         order_pair_map = {}
     total_orders['order_pair_map'] = order_pair_map
@@ -95,8 +87,6 @@ def load_orders_from_jsonfile():
     global exit_sell_pending_orders
     global exit_buy_todo_orders
     global exit_buy_pending_orders
-    global naked_pending_orders
-    global naked_exit_todo_orders
     global order_pair_map
 
     if not os.path.exists("orders.json"):
@@ -113,15 +103,13 @@ def load_orders_from_jsonfile():
     exit_sell_pending_orders = total_orders['exit_sell_pending_orders']
     exit_buy_todo_orders = total_orders['exit_buy_todo_orders']
     exit_buy_pending_orders = total_orders['exit_buy_pending_orders']
-    naked_pending_orders = total_orders['naked_pending_orders']
-    naked_exit_todo_orders = total_orders['naked_exit_todo_orders']
     order_pair_map = total_orders['order_pair_map']
     logger.info(f"[-] load_orders_from_jsonfile: Orders loaded")
 
 
 def merge_orders(input_data, max_quantity=5):
   # Step 1: Group and sum quantities by symbol, side, and type
-  grouped_data = defaultdict(lambda: {"symbol": None, "quantity": 0, "side": None, "type": None, "api_key": None, "multiple_exit_level": 0, "order_tag": None, "original_ids": []})
+  grouped_data = defaultdict(lambda: {"symbol": None, "quantity": 0, "side": None, "type": None, "api_key": None, "multiple_exit_level": 0, "original_ids": []})
 
   for key, value in input_data.items():
       # Use (symbol, side, type) as the grouping key
@@ -133,7 +121,6 @@ def merge_orders(input_data, max_quantity=5):
           grouped_data[group_key]["type"] = value["type"]
           grouped_data[group_key]["api_key"] = value["api_key"]
           grouped_data[group_key]["multiple_exit_level"] = value["multiple_exit_level"]
-          grouped_data[group_key]["order_tag"] = value["order_tag"]
           
       # Sum the quantity and keep track of the original IDs
       grouped_data[group_key]["quantity"] += int(value["quantity"])
@@ -165,8 +152,7 @@ def merge_orders(input_data, max_quantity=5):
                   "side": item["side"],
                   "type": item["type"],
                   "api_key": item["api_key"],
-                  "multiple_exit_level": item["multiple_exit_level"],
-                  "order_tag": item["order_tag"]
+                  "multiple_exit_level": item["multiple_exit_level"]
               }
               full_chunks -= 1
               id_counter += 1
@@ -184,8 +170,7 @@ def merge_orders(input_data, max_quantity=5):
                   "side": item["side"],
                   "type": item["type"],
                   "api_key": item["api_key"],
-                  "multiple_exit_level": item["multiple_exit_level"],
-                  "order_tag": item["order_tag"]
+                  "multiple_exit_level": item["multiple_exit_level"]
               }
               remainder = 0  # Set remainder to 0 after processing
               id_counter += 1
@@ -200,8 +185,6 @@ def thread_exit_orders():
     global exit_buy_todo_orders
     global exit_sell_pending_orders
     global exit_buy_pending_orders
-    global naked_pending_orders
-    global naked_exit_todo_orders
     global order_pair_map
     global orders
     symbol_list = []
@@ -276,18 +259,6 @@ def thread_exit_orders():
                 }
                 counts += len(sell_selected_items)
 
-                sell_selected_items = {
-                    order_id: order for order_id, order in naked_pending_orders.items()
-                    if order['api_key'] == api_key
-                }
-                counts += len(sell_selected_items)
-
-                sell_selected_items = {
-                    order_id: order for order_id, order in naked_exit_todo_orders.items()
-                    if order['api_key'] == api_key
-                }
-                counts += len(sell_selected_items)
-
                 if counts == 0:
                     logger.info(f"[-] thread_exit_orders: {api_info['id']} has no orders")
                     continue
@@ -315,71 +286,6 @@ def thread_exit_orders():
                 
                 logger.info(f"[-] thread_exit_orders: {api_info['id']} ### Finished the step - getting order list")
 
-                # confirm the pending naked orders
-                naked_todo_orders_copy = naked_pending_orders.copy()
-                
-                processed_list = []
-                for p_order_id, p_order in naked_todo_orders_copy.items():
-                    p_order_only_id = p_order_id.replace(api_keys[api_key]["id"], "")
-                    for l_order in json_object_order_list:
-                        if l_order['order_id'] == p_order_only_id and l_order['order_status'] == "FILLED_ALL":
-                            logger.info(f"[-] thread_exit_orders: NAKED: pending order {p_order_id} is FILLED_ALL")
-                            orders[p_order_id] = p_order
-                            processed_list.append(p_order_id)
-                            break
-
-                for order_id in processed_list:
-                    if order_id in naked_pending_orders:
-                        del naked_pending_orders[order_id]
-
-                # place the exit orders for naked orders
-                naked_exit_todo_orders_copy = naked_exit_todo_orders.copy()
-                naked_exit_todo_orders_copy_merged = merge_orders(naked_exit_todo_orders_copy, 10)
-                for order_id, order in naked_exit_todo_orders_copy.items():
-                    del naked_exit_todo_orders[order_id]
-                
-                for order_id, order in naked_exit_todo_orders_copy_merged.items():
-                    naked_exit_todo_orders[order_id] = order
-
-                naked_exit_todo_orders_copy = naked_exit_todo_orders.copy()
-                processed_list = []
-                for order_id, order in naked_exit_todo_orders_copy.items():
-                    if order["api_key"] != api_key:
-                        continue
-                    logger.info(f"[-] thread_exit_orders: NAKED: Exiting Order: ID: {order_id}, Details: {order}")
-                    if order["side"] == "BUY":
-                        order['side'] = "SELL"
-                    else:
-                        order['side'] = "BUY"
-
-                    try:
-                        response = requests.post(opend_address, json=order, headers=headers)
-                        response.raise_for_status()
-                        response_json = response.json()
-                        time.sleep(3)
-
-                        if "Open position failed" in str(response_json):
-                            logger.error(f"[-] thread_exit_orders: NAKED: Open position failed: {response_json}, acc:{api_info['id']}, order:{order}")
-                            continue
-
-                        try:
-                            json_object = json.loads(response_json)
-                        except Exception as e:
-                            logger.error(f"[-] thread_exit_orders: NAKED: error: {e}, acc:{api_info['id']}, order:{order}")
-                            continue
-
-                        if "order_id" in json_object[0]:
-                            logger.info(f"[-] thread_exit_orders: NAKED: Placed the pending exit order of {order_id} successfully. ID: {json_object[0]['order_id']}, acc:{api_info['id']}, order:{order}")
-                            processed_list.append(order_id)
-                        else:
-                            logger.error(f"[-] thread_exit_orders: NAKED: Order response missing 'order_id', acc:{api_info['id']}, order:{order}")
-
-                    except requests.exceptions.RequestException as e:
-                        logger.error(f"[-] thread_exit_orders: NAKED: FastAPI request failed: {e}, acc:{api_info['id']}, order:{order}")
-
-                for order_id in processed_list:
-                    del naked_exit_todo_orders[order_id]
-
                 if len(symbol_list) > 0:
                     symbol_last_time_after_lmin = symbol_last_time + timedelta(minutes=1)
                     if now_time > symbol_last_time_after_lmin:
@@ -396,7 +302,7 @@ def thread_exit_orders():
 
                         for order_id, order in sell_selected_items.items():
                             if order_id in orders:
-                                if order['symbol'] in symbol_last_price and 'entry_price' in order and 'multiple_exit_level' in order and order['multiple_exit_level'] > 0:
+                                if order['symbol'] in symbol_last_price and 'entry_price' in order and order['multiple_exit_level'] > 0:
                                     if symbol_last_price[order['symbol']] > order['multiple_exit_level'] * order['entry_price']:
                                         logger.info(f"[-] thread_exit_orders: SELL: {order_id} is {order['multiple_exit_level']}x entry price. symbol:{order['symbol']}")
                                         if not order_id in exit_sell_todo_orders:
@@ -702,50 +608,38 @@ def thread_exit_orders():
 
     logger.info("[-] thread_exit_orders: end")
 
-def exit_positions(data, symbol, action, api_key, ordertag):
+def exit_positions(data, symbol, action, api_key):
     option = "C" if action == "exit_calls" else "P" if action == "exit_puts" else None
     if not option:
         logger.error(f"[-] exit_positions: Invalid exit action: {data}")
         return jsonify({"error": "Invalid exit action"}), 403
 
     base_symbol = symbol
+
+    copy_orders = orders.copy()
+    sell_selected_items = {
+        order_id: order for order_id, order in copy_orders.items()
+        if order['symbol'].startswith(f'US.{base_symbol}') and order['symbol'][9 + len(base_symbol)] == option and order['side'] == "SELL" and order['api_key'] == api_key
+    }
+
+    if len(sell_selected_items) == 0:
+        return jsonify({"success": "Exited positions"}), 200
+
+    for order_id, order in sell_selected_items.items():
+        if order_id in orders:
+            del orders[order_id]
+        exit_sell_todo_orders[order_id] = order
     
-    if ordertag == 0:
-        copy_orders = orders.copy()
-        sell_selected_items = {
-            order_id: order for order_id, order in copy_orders.items()
-            if order['symbol'].startswith(f'US.{base_symbol}') and order['symbol'][9 + len(base_symbol)] == option and order['side'] == "SELL" and order['api_key'] == api_key
-        }
-
-        if len(sell_selected_items) == 0:
-            return jsonify({"success": "Exited positions"}), 200
-
-        for order_id, order in sell_selected_items.items():
-            if order_id in orders:
-                del orders[order_id]
-            exit_sell_todo_orders[order_id] = order
-        
-        copy_orders = orders.copy()
-        buy_to_exit_orders = {
-            order_id: order for order_id, order in copy_orders.items()
-            if order['symbol'].startswith(f'US.{base_symbol}') and order['symbol'][9 + len(base_symbol)] == option and order['side'] == "BUY" and order['api_key'] == api_key
-        }
-        
-        for order_id, order in buy_to_exit_orders.items():
-            if order_id in orders:
-                del orders[order_id]
-            exit_buy_todo_orders[order_id] = order
-    elif ordertag > 0:
-        copy_orders = orders.copy()
-        to_exit_orders = {
-            order_id: order for order_id, order in copy_orders.items()
-            if order['symbol'].startswith(f'US.{base_symbol}') and order['symbol'][9 + len(base_symbol)] == option and order['api_key'] == api_key and order['order_tag'] == ordertag
-        }
-        
-        for order_id, order in to_exit_orders.items():
-            if order_id in orders:
-                del orders[order_id]
-            naked_exit_todo_orders[order_id] = order
+    copy_orders = orders.copy()
+    buy_to_exit_orders = {
+        order_id: order for order_id, order in copy_orders.items()
+        if order['symbol'].startswith(f'US.{base_symbol}') and order['symbol'][9 + len(base_symbol)] == option and order['side'] == "BUY" and order['api_key'] == api_key
+    }
+    
+    for order_id, order in buy_to_exit_orders.items():
+        if order_id in orders:
+            del orders[order_id]
+        exit_buy_todo_orders[order_id] = order
     
     return jsonify({"success": "Exited positions"}), 200
 
@@ -756,10 +650,9 @@ def forward_order1(data, api_key):
 
     action = data.get("action")
     symbol = data.get("symbol", "")
-    ordertag = int(data.get("order_tag", -1))
 
     if action and symbol:
-        return exit_positions(data, symbol, action, api_key, ordertag)
+        return exit_positions(data, symbol, action, api_key)
 
     # Extract relevant order data
     datetmp = data.get('date', '')
@@ -773,18 +666,11 @@ def forward_order1(data, api_key):
     if stopLossLevel:
         multiple_value = stopLossLevel
     
-    if ordertag == -1:
-        logger.error("Missing order tag")
-        return jsonify({"error": "Missing order tag"}), 400
-    
-    if ordertag == 0 and (side != "SELL" or not all([datetmp, symbol, roundingprice])):
+
+    if side != "SELL" or not all([datetmp, symbol, roundingprice]):
         logger.error("Missing or invalid fields in request")
         return jsonify({"error": "Missing or invalid fields"}), 400
 
-    if ordertag > 0 and not all([datetmp, symbol]):
-        logger.error("Missing or invalid fields in request")
-        return jsonify({"error": "Missing or invalid fields"}), 400
-    
     try:
         strikeprice = int(data.get("strikeprice", ''))
     except ValueError:
@@ -803,50 +689,9 @@ def forward_order1(data, api_key):
         "type": data.get("type"),
         "api_key": api_key,
         "multiple_exit_level": multiple_exit_level,
-        "order_tag": ordertag,
     }
 
     headers = {"Content-Type": "application/json", "api-key": api_key}
-
-    # Naked Strategy
-    if ordertag > 0:
-        code_name = buy_code_name
-        order_data = {
-            "symbol": code_name,
-            "quantity": data.get("quantity"),
-            "side": side,
-            "type": data.get("type"),
-            "api_key": api_key,
-            "order_tag": ordertag,
-		}
-        
-        try:
-            fastapi_url = "http://" + api_keys[api_key]["opend-address"]
-            response = requests.post(fastapi_url, json=order_data, headers=headers)
-            response.raise_for_status()
-            response_json = response.json()
-            time.sleep(2)
-
-            
-            if "Open position failed" in str(response_json):
-                logger.error(f"forward_order: Naked: Open position failed: {response_json} : {code_name}")
-                return jsonify({"error": "Open position failed"}), 500
-
-            try:
-                json_object = json.loads(response_json)
-            except Exception as e:
-                logger.error(f"[-] forward_order: Naked: error {e} : {code_name}")
-                return jsonify({"error": str(e)}), 500
-
-            order_id = json_object[0]["order_id"] + api_keys[api_key]["id"]
-            naked_pending_orders[order_id] = order_data
-
-            logger.info(f"[-] forward_order: Naked: Buy pending order placed. Order ID: {order_id} : {code_name}")
-
-            return response_json, response.status_code
-        except Exception as e:
-            logger.error(f"[-] forward_order: Naked: error {e} : {code_name}")
-            return jsonify({"error": str(e)}), 500
 
     # Function to retry buy order with reduced multiple
     def retry_buy_order(fixed_multiple):
@@ -982,14 +827,11 @@ def list_orders():
 @app.route("/list_memory_orders", methods=["GET"])
 def list_memory_orders():
     memory_orders = {}
-    memory_orders['orders'] = orders
     memory_orders['buy_pending_orders'] = buy_pending_orders
     memory_orders['exit_sell_todo_orders'] = exit_sell_todo_orders
     memory_orders['exit_sell_pending_orders'] = exit_sell_pending_orders
     memory_orders['exit_buy_todo_orders'] = exit_buy_todo_orders
     memory_orders['exit_buy_pending_orders'] = exit_buy_pending_orders
-    memory_orders['naked_pending_orders'] = naked_pending_orders
-    memory_orders['naked_exit_todo_orders'] = naked_exit_todo_orders
 
     return jsonify(memory_orders), 200
     
