@@ -120,77 +120,77 @@ def load_orders_from_jsonfile():
 
 
 def merge_orders(input_data, max_quantity=5):
-  # Step 1: Group and sum quantities by symbol, side, and type
-  grouped_data = defaultdict(lambda: {"symbol": None, "quantity": 0, "side": None, "type": None, "api_key": None, "multiple_exit_level": 0, "order_tag": None, "original_ids": []})
+    # Step 1: Group and sum quantities by symbol, side, and type
+    grouped_data = defaultdict(lambda: {"symbol": None, "quantity": 0, "side": None, "type": None, "api_key": None, "multiple_exit_level": 0, "order_tag": None, "original_ids": []})
 
-  for key, value in input_data.items():
-      # Use (symbol, side, type) as the grouping key
-      group_key = (value["symbol"], value["side"], value["type"])
-      
-      if grouped_data[group_key]["symbol"] is None:
-          grouped_data[group_key]["symbol"] = value["symbol"]
-          grouped_data[group_key]["side"] = value["side"]
-          grouped_data[group_key]["type"] = value["type"]
-          grouped_data[group_key]["api_key"] = value["api_key"]
-          grouped_data[group_key]["multiple_exit_level"] = value["multiple_exit_level"]
-          grouped_data[group_key]["order_tag"] = value["order_tag"]
-          
-      # Sum the quantity and keep track of the original IDs
-      grouped_data[group_key]["quantity"] += int(value["quantity"])
-      grouped_data[group_key]["original_ids"].append(key)
+    for key, value in input_data.items():
+        # Use (symbol, side, type) as the grouping key
+        group_key = (value["symbol"], value["side"], value["type"])
+        
+        if grouped_data[group_key]["symbol"] is None:
+            grouped_data[group_key]["symbol"] = value["symbol"]
+            grouped_data[group_key]["side"] = value["side"]
+            grouped_data[group_key]["type"] = value["type"]
+            grouped_data[group_key]["api_key"] = value["api_key"]
+            grouped_data[group_key]["multiple_exit_level"] = value["multiple_exit_level"]
+            grouped_data[group_key]["order_tag"] = value["order_tag"]
+            
+        # Sum the quantity and keep track of the original IDs
+        grouped_data[group_key]["quantity"] += int(value["quantity"])
+        grouped_data[group_key]["original_ids"].append(key)
 
-  # Step 2: Split any entries with quantity > 5 and retain unique IDs
-  result = {}
-  for item in grouped_data.values():
-      quantity = item["quantity"]
-      original_ids = item["original_ids"]
-      
-      # Calculate the number of full chunks of 5 and the remainder
-      full_chunks = quantity // max_quantity
-      remainder = quantity % max_quantity
-      
-      # Process each original ID separately
-      id_counter = 0  # Counter to generate unique IDs based on original IDs
-      
-      for original_id in original_ids:
-          # Assign chunks of 5 to the original ID, creating unique IDs for each chunk
-          while full_chunks > 0:
-              if id_counter == 0:
-                  chunk_id = original_id
-              else:
-                  chunk_id = f"{original_id}-{id_counter}"
-              result[chunk_id] = {
-                  "symbol": item["symbol"],
-                  "quantity": max_quantity,
-                  "side": item["side"],
-                  "type": item["type"],
-                  "api_key": item["api_key"],
-                  "multiple_exit_level": item["multiple_exit_level"],
-                  "order_tag": item["order_tag"]
-              }
-              full_chunks -= 1
-              id_counter += 1
-          
-          # If there is a remainder, add it to the final chunk of this original ID
-          if remainder > 0:
-              if id_counter == 0:
-                  remainder_id = original_id
-              else:
-                  remainder_id = f"{original_id}-{id_counter}"
+    # Step 2: Split any entries with quantity > 5 and retain unique IDs
+    result = {}
+    for item in grouped_data.values():
+        quantity = item["quantity"]
+        original_ids = item["original_ids"]
+        
+        # Calculate the number of full chunks of 5 and the remainder
+        full_chunks = quantity // max_quantity
+        remainder = quantity % max_quantity
+        
+        # Process each original ID separately
+        id_counter = 0  # Counter to generate unique IDs based on original IDs
+        
+        for original_id in original_ids:
+            # Assign chunks of 5 to the original ID, creating unique IDs for each chunk
+            while full_chunks > 0:
+                if id_counter == 0:
+                    chunk_id = original_id
+                else:
+                    chunk_id = f"{original_id}-{id_counter}"
+                result[chunk_id] = {
+                    "symbol": item["symbol"],
+                    "quantity": max_quantity,
+                    "side": item["side"],
+                    "type": item["type"],
+                    "api_key": item["api_key"],
+                    "multiple_exit_level": item["multiple_exit_level"],
+                    "order_tag": item["order_tag"]
+                }
+                full_chunks -= 1
+                id_counter += 1
+            
+            # If there is a remainder, add it to the final chunk of this original ID
+            if remainder > 0:
+                if id_counter == 0:
+                    remainder_id = original_id
+                else:
+                    remainder_id = f"{original_id}-{id_counter}"
 
-              result[remainder_id] = {
-                  "symbol": item["symbol"],
-                  "quantity": remainder,
-                  "side": item["side"],
-                  "type": item["type"],
-                  "api_key": item["api_key"],
-                  "multiple_exit_level": item["multiple_exit_level"],
-                  "order_tag": item["order_tag"]
-              }
-              remainder = 0  # Set remainder to 0 after processing
-              id_counter += 1
+                result[remainder_id] = {
+                    "symbol": item["symbol"],
+                    "quantity": remainder,
+                    "side": item["side"],
+                    "type": item["type"],
+                    "api_key": item["api_key"],
+                    "multiple_exit_level": item["multiple_exit_level"],
+                    "order_tag": item["order_tag"]
+                }
+                remainder = 0  # Set remainder to 0 after processing
+                id_counter += 1
 
-  return result
+    return result
 
 def thread_exit_orders():
     global buy_pending_orders

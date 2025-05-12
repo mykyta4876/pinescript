@@ -558,3 +558,29 @@ https://paper-api.alpaca.markets/v2
 id: PA38U6AXWCV5
 api_key: PKU32CO7FB5929T1AMPC
 secret_key: W2G1EOVgmr04xqO8FeCrmdllp95DOlOzT9izgePk
+
+=============================
+This week I would like to focus on the naked strategy.  There are several points that need fixing and adjusting:
+ 
+1) Right now when running the naked strategy the strike price is not following the strike price in the alert.  It is using the strike price for the stop loss position.  So seems when you made naked strategy you kept the stop loss position and blocked the strategy position.  But actually it should be the other way around, disable the stop loss position and keep the strategy position.  Then it will function properly.
+2) The multiplier exit for the naked strategy is going to be opposite what it is for credit spread.  for the credit spread, if current option price gets greater than (multiplier x original entry price), then we exit.  for naked strategy, it should be opposite if current price gets lesser than (multiplier x original entry price), then we exit.
+3) Final point we can work on for naked strategy is the iceberg (iceberg means putting in a large order in smaller pieces like we do for exit for example).  For naked strategy iceberg is easy on entry just take quantity and break it into smaller parts for example if quantity says 30, then enter 5 at a time.
+
+Only difference between naked and credit spread strategy in the alert will be "Ordertag: 1" for naked and "Ordertag: 0" for credit spread.
+ 
+That's all for the naked strategy and I can pay you the $200 I already agreed plus another $200 if you can get it done this week.    
+
+Also if you want to test on paper trade but can't change only paper trade without changing live strategy, then change Ryan Oakes paper and live, because we not currently using Ryan Oakes live.  
+
+Also one other item please add.  I will add another $200 for it:
+Make sure exit happens before entry if two alerts come in together within 2 seconds of each other, process exit first.
+ 
+So total for all these points will be $600:
+1) Fix the naked strategy strike price
+2) Make sure multiplier function for naked is opposite the multiplier function for credit strategy.  (exit if price < entry price * multiplier.  Also Note:  multiplier will be decimal like 0,7)
+3) If exit and entry alert happen within 2 seconds, process exit alarm first.
+4) Add the iceberg function for naked strategy only (if entry quantity is >5 then break order into pieces of 5, delay 5 seconds between orders.)
+ 
+Thanks.  
+
+Iceberg function will be least important of the above actions.   If you can do everything but iceberg, I can pay you $400 this week.  
