@@ -579,7 +579,20 @@ def thread_exit_orders():
                 for order_id, order in exit_sell_todo_orders_copy.items():
                     if order["api_key"] != api_key:
                         continue
+
                     logger.info(f"Exiting Order: ID: {order_id}, Details: {order}")
+
+                    p_order_only_id = order_id.replace(api_keys[api_key]["id"], "")
+                    bFilled = False
+                    for l_order in json_object_order_list:
+                        if l_order['order_id'] == p_order_only_id and l_order['order_status'] == "FILLED_ALL":
+                            bFilled = True
+                            break
+                    
+                    if not bFilled:
+                        logger.info(f"[-] thread_exit_orders: SELL: {order_id} is not FILLED_ALL")
+                        continue
+
                     order['side'] = "BUY"
 
                     try:
@@ -877,6 +890,7 @@ def retry_buy_order(fixed_multiple, symbol, datetmp, option_value, strikeprice, 
             "type": type,
             "api_key": api_key,
             "multiple_exit_level": multiple_exit_level,
+            "order_tag": ordertag,
         }
 
         sell_todo_orders[order_id] = sell_order_data
@@ -1000,6 +1014,7 @@ def forward_order1(data, api_key):
             "type": data.get("type"),
             "api_key": api_key,
             "order_tag": ordertag,
+            'multiple_exit_level': multiple_exit_level,
 		}
         
         if flag_in_exiting == True:
