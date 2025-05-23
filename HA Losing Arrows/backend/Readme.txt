@@ -584,3 +584,19 @@ So total for all these points will be $600:
 Thanks.  
 
 Iceberg function will be least important of the above actions.   If you can do everything but iceberg, I can pay you $400 this week.  
+
+=============================
+app_test_v4
+Hmm I think it's the point I think about market orders and this is the update I want to make
+Moomoo has problem with market orders.   Lots of time they reject the order
+so now we need to make a new update on the naked strategy.  when any alert received, needs to check the price of the specific option in the alert.
+
+if naked "BUY" then we need to check the ASK price.
+if naked "SELL" we need to check the BID price.
+
+Then once you have the best price.  then must put order in as a limit order:
+If naked BUY then limit order 10 cents >  ask price.  
+If naked SELL then limit order 10 cents < bid price.
+
+If you get an order rejection on the limit order then must check price again and do again until filled.
+limit order when done this way should fill right away.  so if it didn't fill after 10 secs, then must cancel the first limit order, check the price again, and then execute the new limit order at new price.
