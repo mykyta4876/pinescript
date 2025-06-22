@@ -342,3 +342,29 @@ exit time = timestamp same line as high price > 2 x open price.
 If results of engine11 same or better than engine9, then we just make a stoploss order 2*entry price and enter it same time as sell position entry--then no checking needed.
 
 =============================================
+[engine12]
+Let's say for example Phase Index setting = 0.05 (means 5%), then from open price at start time, if option price any close price increase or decrease by at least 0.05 then phase index will change up +1 or down -1.  then from that close price if any change 0.05 up or down then phase index will again chance +1 if up or -1 if down.  
+For example option price at start time = 10.  (Phase Index setting = 0.05 and Phase Index initial value always = 0)
+The later some close price 10.60,  Now phase Index value = +1 because price close > 10 + (10 * 0.05)
+Now price drop to 10.05, Now Phase Index value = -1 because price drop from 10.60 more than 5%.  
+So we just add this = +1 and -1 values to the engine data only.  
+Only additional point is that at end of day Phase Index reset to 0.  Means each row of Input sheet start with Phase Index = 0 and calculate from first bar open price.
+
+also you can keep engine_only_data.py the same but make a new version.  engine12.py with the phase index value.
+
+
+=============================================
+[engine12_v1]
+Ok for final step of engine12 calculation, needs 3 new columns (all columns added after current output columns):
+
+1) New Column 1:  For each input sheet line, calculate first time phase index =-1 and note down the close price of that in a new column.  Only do note the 1st phase index = -1 for each input line.  You can think of this like opening a short position.
+
+2) New Column 2:  For each input line, after the first time phase index = -1, if any increase in phase index AND close price > close price noted in step 1 above, then note the higher close price in the second new column.   You can think of this like close or stop loss the short position opened in step 1.
+Please note:  this rule applies *only* for timestamp when phase index actually increase, so for example:
+a) Phase index -1 first time with option closing price = 10.  
+b)  Then later phase index increases value to +1 with close price = 9.5.  
+c) Now phase index value stays +1 for several rows and even has some rows close price > 10 with phase index = +1, BUT still we don't note down the close price in column 2 because close price was not > step 1 close price *when the phase index increased the value*.   We only looking at timestamps when phase index increase the value.  Only note down in column 2 if phase index increase the value and close price > step 1 close price.
+After any exit above, then if there is a new phase index -1 again before end time, then note down the close price in column 1 again.  And then do the same thing for any new column 2 value.  Continue doing step 1 and step 2 until end time for each input row.
+
+3) New Column 3:  At each step 2 above also note down in a new column 3 the difference of:   Close price of Step 2 minus Close Price of Step 1.
+ And finally if any open position in column 1 and makes it all the way to end time without any column 2 greater close price, then note this final value in Column 3:   Close price of Step 1 minus Final close price at end time.

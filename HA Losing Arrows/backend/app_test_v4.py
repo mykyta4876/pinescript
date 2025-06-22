@@ -359,6 +359,7 @@ def thread_exit_orders():
                         order['side'] = "SELL"
                     else:
                         order['side'] = "BUY"
+                    order['type'] = "MARKET"
 
                     try:
                         response = requests.post(opend_address, json=order, headers=headers)
@@ -906,11 +907,21 @@ def send_naked_order_limit(order_data, api_key):
     headers = {"Content-Type": "application/json", "api-key": api_key}
 
     if order_data['side'] == "BUY":
-        order_data['price'] = get_ask_price([order_data['symbol']], api_key) + 0.1
+        ask_price_list = get_ask_price([order_data['symbol']], api_key)
+        if order_data['symbol'] in ask_price_list:
+            order_data['price'] = ask_price_list[order_data['symbol']] + 0.1
+        else:
+            logger.error(f"[-] send_naked_order_limit: ask price of {order_data['symbol']} is not in ask_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
+            return False
     else:
-        order_data['price'] = get_bid_price([order_data['symbol']], api_key) - 0.1
+        bid_price_list = get_bid_price([order_data['symbol']], api_key)
+        if order_data['symbol'] in bid_price_list:
+            order_data['price'] = bid_price_list[order_data['symbol']] - 0.1
+        else:
+            logger.error(f"[-] send_naked_order_limit: bid price of {order_data['symbol']} is not in bid_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
+            return False
 
-    order_data['type'] = "LIMIT"
+    order_data['type'] = "NORMAL"
 
     try:
         fastapi_url = "http://" + api_keys[api_key]["opend-address"]
@@ -1022,7 +1033,7 @@ def forward_order1(data, api_key):
             "type": data.get("type"),
             "api_key": api_key,
             "order_tag": ordertag,
-            'multiple_exit_level': multiple_exit_level,
+            "multiple_exit_level": multiple_exit_level,
 		}
         
         if flag_in_exiting == True:

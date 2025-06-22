@@ -50,8 +50,8 @@ ACC_DETAILS = {
 
 VALID_API_KEYS = ACC_DETAILS.keys()
 #TRADING_PASSWORD = os.environ.get("TRADING_PASS")
-#TRADING_PASSWORD = "120120" #ryanoakes, backend-opend-test-20241008-081306
-TRADING_PASSWORD = "772877" #enlixir, backend-opend-20241008-075506
+TRADING_PASSWORD = "120120" #ryanoakes, backend-opend-test-20241008-081306
+#TRADING_PASSWORD = "772877" #enlixir, backend-opend-20241008-075506
 
 MODIFY_ORDER_OPERATIONS = {
     "NONE": ModifyOrderOp.NONE,
@@ -172,6 +172,9 @@ def place_order(order_info: dict, api_key: str = Depends(api_key_validation)):
     params["trd_side"] = TrdSide.BUY if order_info["side"] == 'BUY' else TrdSide.SELL
     params["order_type"] = ORDER_TYPE[order_info["type"]]
     isFutures = order_info.get("account_type", "") == "futures"
+
+    if params["order_type"] == OrderType.ABSOLUTE_LIMIT:
+        params["price"] = order_info["price"]
 
     add_acc_details(params, api_key, isFutures)
 

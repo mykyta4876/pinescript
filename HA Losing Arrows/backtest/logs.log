@@ -1,992 +1,673 @@
-2025-02-08 08:39:55,568 - logs - INFO - Processing 99 rows...
-2025-02-08 08:39:55,572 - logs - INFO - Processing row 1 of 99 (1.0%)
-2025-02-08 08:39:55,573 - logs - INFO - Fetching new data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:55,575 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:39:57,148 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:39:57,674 - logs - INFO - Cached 818 bars of data
-2025-02-08 08:39:57,675 - logs - INFO - Processing row 2 of 99 (2.0%)
-2025-02-08 08:39:57,677 - logs - INFO - Fetching new data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:57,683 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:39:58,573 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:39:59,110 - logs - INFO - Cached 1169 bars of data
-2025-02-08 08:39:59,111 - logs - INFO - Processing row 3 of 99 (3.0%)
-2025-02-08 08:39:59,112 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:59,114 - logs - INFO - Processing row 4 of 99 (4.0%)
-2025-02-08 08:39:59,115 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:59,116 - logs - INFO - Processing row 5 of 99 (5.1%)
-2025-02-08 08:39:59,116 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:59,117 - logs - INFO - Processing row 6 of 99 (6.1%)
-2025-02-08 08:39:59,118 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:59,119 - logs - INFO - Processing row 7 of 99 (7.1%)
-2025-02-08 08:39:59,119 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:59,120 - logs - INFO - Processing row 8 of 99 (8.1%)
-2025-02-08 08:39:59,120 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:59,121 - logs - INFO - Processing row 9 of 99 (9.1%)
-2025-02-08 08:39:59,121 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:59,123 - logs - INFO - Processing row 10 of 99 (10.1%)
-2025-02-08 08:39:59,124 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 08:39:59,125 - logs - INFO - Processing row 11 of 99 (11.1%)
-2025-02-08 08:39:59,125 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:59,126 - logs - INFO - Processing row 12 of 99 (12.1%)
-2025-02-08 08:39:59,126 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:59,128 - logs - INFO - Processing row 13 of 99 (13.1%)
-2025-02-08 08:39:59,128 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:59,129 - logs - INFO - Processing row 14 of 99 (14.1%)
-2025-02-08 08:39:59,129 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:59,130 - logs - INFO - Processing row 15 of 99 (15.2%)
-2025-02-08 08:39:59,130 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:59,132 - logs - INFO - Processing row 16 of 99 (16.2%)
-2025-02-08 08:39:59,132 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:59,133 - logs - INFO - Processing row 17 of 99 (17.2%)
-2025-02-08 08:39:59,134 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:59,135 - logs - INFO - Processing row 18 of 99 (18.2%)
-2025-02-08 08:39:59,135 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 08:39:59,136 - logs - INFO - Processing row 19 of 99 (19.2%)
-2025-02-08 08:39:59,136 - logs - INFO - Fetching new data for strike 170, expiry 2022-01-14
-2025-02-08 08:39:59,137 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:00,036 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-07/2022-01-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:00,554 - logs - INFO - Cached 707 bars of data
-2025-02-08 08:40:00,557 - logs - INFO - Processing row 20 of 99 (20.2%)
-2025-02-08 08:40:00,557 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:00,558 - logs - INFO - Processing row 21 of 99 (21.2%)
-2025-02-08 08:40:00,559 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:00,560 - logs - INFO - Processing row 22 of 99 (22.2%)
-2025-02-08 08:40:00,560 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:00,561 - logs - INFO - Processing row 23 of 99 (23.2%)
-2025-02-08 08:40:00,561 - logs - INFO - Fetching new data for strike 165, expiry 2022-01-14
-2025-02-08 08:40:00,562 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:01,432 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00165000/range/1/minute/2022-01-10/2022-01-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:01,945 - logs - INFO - Cached 491 bars of data
-2025-02-08 08:40:01,948 - logs - INFO - Processing row 24 of 99 (24.2%)
-2025-02-08 08:40:01,948 - logs - INFO - Using cached data for strike 165, expiry 2022-01-14
-2025-02-08 08:40:01,950 - logs - INFO - Processing row 25 of 99 (25.3%)
-2025-02-08 08:40:01,950 - logs - INFO - Using cached data for strike 165, expiry 2022-01-14
-2025-02-08 08:40:01,951 - logs - INFO - Processing row 26 of 99 (26.3%)
-2025-02-08 08:40:01,951 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:01,952 - logs - INFO - Processing row 27 of 99 (27.3%)
-2025-02-08 08:40:01,953 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:01,954 - logs - INFO - Processing row 28 of 99 (28.3%)
-2025-02-08 08:40:01,954 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:01,955 - logs - INFO - Processing row 29 of 99 (29.3%)
-2025-02-08 08:40:01,955 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:01,957 - logs - INFO - Processing row 30 of 99 (30.3%)
-2025-02-08 08:40:01,957 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:01,958 - logs - INFO - Processing row 31 of 99 (31.3%)
-2025-02-08 08:40:01,959 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:01,960 - logs - INFO - Processing row 32 of 99 (32.3%)
-2025-02-08 08:40:01,960 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 08:40:01,961 - logs - INFO - Processing row 33 of 99 (33.3%)
-2025-02-08 08:40:01,961 - logs - INFO - Fetching new data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:01,962 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:02,870 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00170000/range/1/minute/2022-01-14/2022-01-18?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:03,393 - logs - INFO - Cached 741 bars of data
-2025-02-08 08:40:03,394 - logs - INFO - Processing row 34 of 99 (34.3%)
-2025-02-08 08:40:03,395 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,396 - logs - INFO - Processing row 35 of 99 (35.4%)
-2025-02-08 08:40:03,396 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,398 - logs - INFO - Processing row 36 of 99 (36.4%)
-2025-02-08 08:40:03,399 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,400 - logs - INFO - Processing row 37 of 99 (37.4%)
-2025-02-08 08:40:03,400 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,402 - logs - INFO - Processing row 38 of 99 (38.4%)
-2025-02-08 08:40:03,402 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,404 - logs - INFO - Processing row 39 of 99 (39.4%)
-2025-02-08 08:40:03,404 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,405 - logs - INFO - Processing row 40 of 99 (40.4%)
-2025-02-08 08:40:03,405 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,407 - logs - INFO - Processing row 41 of 99 (41.4%)
-2025-02-08 08:40:03,407 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,408 - logs - INFO - Processing row 42 of 99 (42.4%)
-2025-02-08 08:40:03,408 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,409 - logs - INFO - Processing row 43 of 99 (43.4%)
-2025-02-08 08:40:03,409 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,409 - logs - INFO - No data found for this start time
-2025-02-08 08:40:03,410 - logs - INFO - Processing row 44 of 99 (44.4%)
-2025-02-08 08:40:03,410 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 08:40:03,410 - logs - INFO - No data found for this start time
-2025-02-08 08:40:03,411 - logs - INFO - Processing row 45 of 99 (45.5%)
-2025-02-08 08:40:03,411 - logs - INFO - Fetching new data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:03,412 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:04,309 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00165000/range/1/minute/2022-01-19/2022-01-19?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:04,815 - logs - INFO - Cached 280 bars of data
-2025-02-08 08:40:04,817 - logs - INFO - Processing row 46 of 99 (46.5%)
-2025-02-08 08:40:04,818 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,819 - logs - INFO - Processing row 47 of 99 (47.5%)
-2025-02-08 08:40:04,819 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,820 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,820 - logs - INFO - Processing row 48 of 99 (48.5%)
-2025-02-08 08:40:04,820 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,821 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,821 - logs - INFO - Processing row 49 of 99 (49.5%)
-2025-02-08 08:40:04,821 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,822 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,822 - logs - INFO - Processing row 50 of 99 (50.5%)
-2025-02-08 08:40:04,822 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,822 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,824 - logs - INFO - Processing row 51 of 99 (51.5%)
-2025-02-08 08:40:04,824 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,824 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,825 - logs - INFO - Processing row 52 of 99 (52.5%)
-2025-02-08 08:40:04,825 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,825 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,826 - logs - INFO - Processing row 53 of 99 (53.5%)
-2025-02-08 08:40:04,826 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,826 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,826 - logs - INFO - Processing row 54 of 99 (54.5%)
-2025-02-08 08:40:04,827 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,827 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,827 - logs - INFO - Processing row 55 of 99 (55.6%)
-2025-02-08 08:40:04,828 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,828 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,828 - logs - INFO - Processing row 56 of 99 (56.6%)
-2025-02-08 08:40:04,828 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 08:40:04,828 - logs - INFO - No data found for this start time
-2025-02-08 08:40:04,829 - logs - INFO - Processing row 57 of 99 (57.6%)
-2025-02-08 08:40:04,829 - logs - INFO - Fetching new data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:04,830 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:05,696 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00155000/range/1/minute/2022-01-24/2022-01-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:06,207 - logs - INFO - Cached 546 bars of data
-2025-02-08 08:40:06,209 - logs - INFO - Processing row 58 of 99 (58.6%)
-2025-02-08 08:40:06,209 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:06,211 - logs - INFO - Processing row 59 of 99 (59.6%)
-2025-02-08 08:40:06,211 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:06,213 - logs - INFO - Processing row 60 of 99 (60.6%)
-2025-02-08 08:40:06,213 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:06,214 - logs - INFO - Processing row 61 of 99 (61.6%)
-2025-02-08 08:40:06,214 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:06,215 - logs - INFO - Processing row 62 of 99 (62.6%)
-2025-02-08 08:40:06,215 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:06,216 - logs - INFO - Processing row 63 of 99 (63.6%)
-2025-02-08 08:40:06,216 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:06,218 - logs - INFO - Processing row 64 of 99 (64.6%)
-2025-02-08 08:40:06,218 - logs - INFO - Fetching new data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:06,218 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:07,123 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00160000/range/1/minute/2022-01-24/2022-01-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:07,639 - logs - INFO - Cached 780 bars of data
-2025-02-08 08:40:07,641 - logs - INFO - Processing row 65 of 99 (65.7%)
-2025-02-08 08:40:07,641 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:07,643 - logs - INFO - Processing row 66 of 99 (66.7%)
-2025-02-08 08:40:07,643 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,644 - logs - INFO - Processing row 67 of 99 (67.7%)
-2025-02-08 08:40:07,645 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,646 - logs - INFO - Processing row 68 of 99 (68.7%)
-2025-02-08 08:40:07,646 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,647 - logs - INFO - Processing row 69 of 99 (69.7%)
-2025-02-08 08:40:07,648 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,648 - logs - INFO - Processing row 70 of 99 (70.7%)
-2025-02-08 08:40:07,648 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,650 - logs - INFO - Processing row 71 of 99 (71.7%)
-2025-02-08 08:40:07,650 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,652 - logs - INFO - Processing row 72 of 99 (72.7%)
-2025-02-08 08:40:07,652 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,653 - logs - INFO - Processing row 73 of 99 (73.7%)
-2025-02-08 08:40:07,654 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,655 - logs - INFO - Processing row 74 of 99 (74.7%)
-2025-02-08 08:40:07,655 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,656 - logs - INFO - Processing row 75 of 99 (75.8%)
-2025-02-08 08:40:07,656 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 08:40:07,658 - logs - INFO - Processing row 76 of 99 (76.8%)
-2025-02-08 08:40:07,658 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:07,659 - logs - INFO - No data found for this start time
-2025-02-08 08:40:07,659 - logs - INFO - Processing row 77 of 99 (77.8%)
-2025-02-08 08:40:07,659 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:07,659 - logs - INFO - No data found for this start time
-2025-02-08 08:40:07,660 - logs - INFO - Processing row 78 of 99 (78.8%)
-2025-02-08 08:40:07,660 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:07,661 - logs - INFO - No data found for this start time
-2025-02-08 08:40:07,661 - logs - INFO - Processing row 79 of 99 (79.8%)
-2025-02-08 08:40:07,661 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:07,661 - logs - INFO - No data found for this start time
-2025-02-08 08:40:07,662 - logs - INFO - Processing row 80 of 99 (80.8%)
-2025-02-08 08:40:07,662 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:07,662 - logs - INFO - No data found for this start time
-2025-02-08 08:40:07,662 - logs - INFO - Processing row 81 of 99 (81.8%)
-2025-02-08 08:40:07,663 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:07,663 - logs - INFO - No data found for this start time
-2025-02-08 08:40:07,663 - logs - INFO - Processing row 82 of 99 (82.8%)
-2025-02-08 08:40:07,663 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 08:40:07,663 - logs - INFO - No data found for this start time
-2025-02-08 08:40:07,665 - logs - INFO - Processing row 83 of 99 (83.8%)
-2025-02-08 08:40:07,666 - logs - INFO - Fetching new data for strike 160, expiry 2022-02-04
-2025-02-08 08:40:07,666 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:08,542 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220204C00160000/range/1/minute/2022-01-28/2022-02-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:09,062 - logs - INFO - Cached 860 bars of data
-2025-02-08 08:40:09,065 - logs - INFO - Processing row 84 of 99 (84.8%)
-2025-02-08 08:40:09,066 - logs - INFO - Fetching new data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:09,067 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:09,982 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220204C00165000/range/1/minute/2022-01-28/2022-02-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:10,514 - logs - INFO - Cached 1296 bars of data
-2025-02-08 08:40:10,517 - logs - INFO - Processing row 85 of 99 (85.9%)
-2025-02-08 08:40:10,517 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:10,518 - logs - INFO - Processing row 86 of 99 (86.9%)
-2025-02-08 08:40:10,519 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:10,521 - logs - INFO - Processing row 87 of 99 (87.9%)
-2025-02-08 08:40:10,521 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:10,522 - logs - INFO - Processing row 88 of 99 (88.9%)
-2025-02-08 08:40:10,522 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:10,523 - logs - INFO - Processing row 89 of 99 (89.9%)
-2025-02-08 08:40:10,523 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:10,524 - logs - INFO - Processing row 90 of 99 (90.9%)
-2025-02-08 08:40:10,525 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:10,526 - logs - INFO - Processing row 91 of 99 (91.9%)
-2025-02-08 08:40:10,527 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:10,529 - logs - INFO - Processing row 92 of 99 (92.9%)
-2025-02-08 08:40:10,529 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 08:40:10,530 - logs - INFO - Processing row 93 of 99 (93.9%)
-2025-02-08 08:40:10,530 - logs - INFO - Fetching new data for strike 170, expiry 2022-02-11
-2025-02-08 08:40:10,531 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 08:40:11,422 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220211C00170000/range/1/minute/2022-02-04/2022-02-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 08:40:11,957 - logs - INFO - Cached 1451 bars of data
-2025-02-08 08:40:11,960 - logs - INFO - Processing row 94 of 99 (94.9%)
-2025-02-08 08:40:11,960 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 08:40:11,961 - logs - INFO - Processing row 95 of 99 (96.0%)
-2025-02-08 08:40:11,961 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 08:40:11,963 - logs - INFO - Processing row 96 of 99 (97.0%)
-2025-02-08 08:40:11,964 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 08:40:11,965 - logs - INFO - Processing row 97 of 99 (98.0%)
-2025-02-08 08:40:11,965 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 08:40:11,966 - logs - INFO - Processing row 98 of 99 (99.0%)
-2025-02-08 08:40:11,966 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 08:40:11,968 - logs - INFO - Processing row 99 of 99 (100.0%)
-2025-02-08 08:40:11,968 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 08:40:11,972 - logs - ERROR - Error processing data: [Errno 13] Permission denied: 'AAPL P test_1mC2.0_e9.xlsx'
-2025-02-08 09:03:05,593 - logs - INFO - Processing 99 rows...
-2025-02-08 09:03:05,602 - logs - INFO - Processing row 1 of 99 (1.0%)
-2025-02-08 09:03:05,604 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:05,607 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:09,877 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:03:10,405 - logs - INFO - Cached 818 bars of data
-2025-02-08 09:03:10,408 - logs - INFO - Processing row 2 of 99 (2.0%)
-2025-02-08 09:03:10,408 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:10,409 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:14,483 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:14,986 - logs - INFO - No data found from polygon
-2025-02-08 09:03:14,987 - logs - INFO - Processing row 3 of 99 (3.0%)
-2025-02-08 09:03:14,987 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:14,990 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:19,340 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:19,842 - logs - INFO - No data found from polygon
-2025-02-08 09:03:19,842 - logs - INFO - Processing row 4 of 99 (4.0%)
-2025-02-08 09:03:19,843 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:19,844 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:24,186 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:24,688 - logs - INFO - No data found from polygon
-2025-02-08 09:03:24,688 - logs - INFO - Processing row 5 of 99 (5.1%)
-2025-02-08 09:03:24,689 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:24,690 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:29,000 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:29,501 - logs - INFO - No data found from polygon
-2025-02-08 09:03:29,502 - logs - INFO - Processing row 6 of 99 (6.1%)
-2025-02-08 09:03:29,502 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:29,504 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:33,458 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:33,961 - logs - INFO - No data found from polygon
-2025-02-08 09:03:33,961 - logs - INFO - Processing row 7 of 99 (7.1%)
-2025-02-08 09:03:33,961 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:33,964 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:37,828 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:38,330 - logs - INFO - No data found from polygon
-2025-02-08 09:03:38,330 - logs - INFO - Processing row 8 of 99 (8.1%)
-2025-02-08 09:03:38,331 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:38,332 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:42,199 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:42,702 - logs - INFO - No data found from polygon
-2025-02-08 09:03:42,703 - logs - INFO - Processing row 9 of 99 (9.1%)
-2025-02-08 09:03:42,703 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:42,706 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:46,595 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:47,098 - logs - INFO - No data found from polygon
-2025-02-08 09:03:47,098 - logs - INFO - Processing row 10 of 99 (10.1%)
-2025-02-08 09:03:47,100 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:03:47,101 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:50,987 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:51,490 - logs - INFO - No data found from polygon
-2025-02-08 09:03:51,490 - logs - INFO - Processing row 11 of 99 (11.1%)
-2025-02-08 09:03:51,491 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:03:51,492 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:55,377 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:03:55,879 - logs - INFO - No data found from polygon
-2025-02-08 09:03:55,880 - logs - INFO - Processing row 12 of 99 (12.1%)
-2025-02-08 09:03:55,881 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:03:55,883 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:03:59,837 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:00,339 - logs - INFO - No data found from polygon
-2025-02-08 09:04:00,339 - logs - INFO - Processing row 13 of 99 (13.1%)
-2025-02-08 09:04:00,340 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:04:00,341 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:04,214 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:04,716 - logs - INFO - No data found from polygon
-2025-02-08 09:04:04,716 - logs - INFO - Processing row 14 of 99 (14.1%)
-2025-02-08 09:04:04,717 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:04:04,718 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:08,582 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:09,085 - logs - INFO - No data found from polygon
-2025-02-08 09:04:09,085 - logs - INFO - Processing row 15 of 99 (15.2%)
-2025-02-08 09:04:09,086 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:04:09,088 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:13,426 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:13,929 - logs - INFO - No data found from polygon
-2025-02-08 09:04:13,931 - logs - INFO - Processing row 16 of 99 (16.2%)
-2025-02-08 09:04:13,932 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:04:13,935 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:18,107 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:18,609 - logs - INFO - No data found from polygon
-2025-02-08 09:04:18,610 - logs - INFO - Processing row 17 of 99 (17.2%)
-2025-02-08 09:04:18,611 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:04:18,613 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:23,382 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:23,885 - logs - INFO - No data found from polygon
-2025-02-08 09:04:23,885 - logs - INFO - Processing row 18 of 99 (18.2%)
-2025-02-08 09:04:23,885 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:04:23,886 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:27,896 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:28,398 - logs - INFO - No data found from polygon
-2025-02-08 09:04:28,398 - logs - INFO - Processing row 19 of 99 (19.2%)
-2025-02-08 09:04:28,399 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-14, start: 2022-01-07, end: 2022-01-10
-2025-02-08 09:04:28,400 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:32,336 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-07/2022-01-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:32,838 - logs - INFO - No data found from polygon
-2025-02-08 09:04:32,839 - logs - INFO - Processing row 20 of 99 (20.2%)
-2025-02-08 09:04:32,840 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-14, start: 2022-01-07, end: 2022-01-10
-2025-02-08 09:04:32,840 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:36,711 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-07/2022-01-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:37,213 - logs - INFO - No data found from polygon
-2025-02-08 09:04:37,214 - logs - INFO - Processing row 21 of 99 (21.2%)
-2025-02-08 09:04:37,214 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-14, start: 2022-01-10, end: 2022-01-10
-2025-02-08 09:04:37,215 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:41,206 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-10/2022-01-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:41,708 - logs - INFO - No data found from polygon
-2025-02-08 09:04:41,708 - logs - INFO - Processing row 22 of 99 (22.2%)
-2025-02-08 09:04:41,710 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-14, start: 2022-01-10, end: 2022-01-10
-2025-02-08 09:04:41,712 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:45,910 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-10/2022-01-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:46,413 - logs - INFO - No data found from polygon
-2025-02-08 09:04:46,413 - logs - INFO - Processing row 23 of 99 (23.2%)
-2025-02-08 09:04:46,414 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-01-14, start: 2022-01-10, end: 2022-01-13
-2025-02-08 09:04:46,415 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:50,414 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00165000/range/1/minute/2022-01-10/2022-01-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 502 0
-2025-02-08 09:04:50,917 - logs - INFO - No data found from polygon
-2025-02-08 09:04:50,918 - logs - INFO - Processing row 24 of 99 (24.2%)
-2025-02-08 09:04:50,918 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-01-14, start: 2022-01-10, end: 2022-01-13
-2025-02-08 09:04:50,919 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:52,157 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00165000/range/1/minute/2022-01-10/2022-01-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:04:52,669 - logs - INFO - Cached 491 bars of data
-2025-02-08 09:04:52,670 - logs - INFO - Processing row 25 of 99 (25.3%)
-2025-02-08 09:04:52,671 - logs - INFO - Using cached data for strike 165, expiry 2022-01-14
-2025-02-08 09:04:52,672 - logs - INFO - Processing row 26 of 99 (26.3%)
-2025-02-08 09:04:52,672 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-14, start: 2022-01-10, end: 2022-01-13
-2025-02-08 09:04:52,674 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:53,920 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-10/2022-01-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:04:54,482 - logs - INFO - Cached 1225 bars of data
-2025-02-08 09:04:54,485 - logs - INFO - Processing row 27 of 99 (27.3%)
-2025-02-08 09:04:54,486 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:04:54,490 - logs - INFO - Processing row 28 of 99 (28.3%)
-2025-02-08 09:04:54,491 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:04:54,493 - logs - INFO - Processing row 29 of 99 (29.3%)
-2025-02-08 09:04:54,493 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:04:54,494 - logs - INFO - Processing row 30 of 99 (30.3%)
-2025-02-08 09:04:54,494 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:04:54,496 - logs - INFO - Processing row 31 of 99 (31.3%)
-2025-02-08 09:04:54,496 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:04:54,497 - logs - INFO - Processing row 32 of 99 (32.3%)
-2025-02-08 09:04:54,498 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:04:54,500 - logs - INFO - Processing row 33 of 99 (33.3%)
-2025-02-08 09:04:54,500 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-21, start: 2022-01-14, end: 2022-01-18
-2025-02-08 09:04:54,501 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:55,560 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00170000/range/1/minute/2022-01-14/2022-01-18?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:04:56,215 - logs - INFO - Cached 741 bars of data
-2025-02-08 09:04:56,217 - logs - INFO - Processing row 34 of 99 (34.3%)
-2025-02-08 09:04:56,217 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,218 - logs - INFO - Processing row 35 of 99 (35.4%)
-2025-02-08 09:04:56,218 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,221 - logs - INFO - Processing row 36 of 99 (36.4%)
-2025-02-08 09:04:56,221 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,222 - logs - INFO - Processing row 37 of 99 (37.4%)
-2025-02-08 09:04:56,222 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,224 - logs - INFO - Processing row 38 of 99 (38.4%)
-2025-02-08 09:04:56,224 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,225 - logs - INFO - Processing row 39 of 99 (39.4%)
-2025-02-08 09:04:56,225 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,227 - logs - INFO - Processing row 40 of 99 (40.4%)
-2025-02-08 09:04:56,227 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,229 - logs - INFO - Processing row 41 of 99 (41.4%)
-2025-02-08 09:04:56,229 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,230 - logs - INFO - Processing row 42 of 99 (42.4%)
-2025-02-08 09:04:56,231 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:56,232 - logs - INFO - Processing row 43 of 99 (43.4%)
-2025-02-08 09:04:56,233 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-21, start: 2022-01-19, end: 2022-01-19
-2025-02-08 09:04:56,235 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:57,092 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00170000/range/1/minute/2022-01-19/2022-01-19?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:04:57,606 - logs - INFO - Cached 390 bars of data
-2025-02-08 09:04:57,608 - logs - INFO - Processing row 44 of 99 (44.4%)
-2025-02-08 09:04:57,609 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:04:57,610 - logs - INFO - Processing row 45 of 99 (45.5%)
-2025-02-08 09:04:57,610 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-01-21, start: 2022-01-19, end: 2022-01-19
-2025-02-08 09:04:57,612 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:04:58,495 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00165000/range/1/minute/2022-01-19/2022-01-19?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:04:59,008 - logs - INFO - Cached 280 bars of data
-2025-02-08 09:04:59,010 - logs - INFO - Processing row 46 of 99 (46.5%)
-2025-02-08 09:04:59,010 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:04:59,011 - logs - INFO - Processing row 47 of 99 (47.5%)
-2025-02-08 09:04:59,011 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-01-21, start: 2022-01-20, end: 2022-01-20
-2025-02-08 09:04:59,012 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:05:00,200 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00165000/range/1/minute/2022-01-20/2022-01-20?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:05:00,713 - logs - INFO - Cached 336 bars of data
-2025-02-08 09:05:00,718 - logs - INFO - Processing row 48 of 99 (48.5%)
-2025-02-08 09:05:00,718 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,721 - logs - INFO - Processing row 49 of 99 (49.5%)
-2025-02-08 09:05:00,721 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,723 - logs - INFO - Processing row 50 of 99 (50.5%)
-2025-02-08 09:05:00,723 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,725 - logs - INFO - Processing row 51 of 99 (51.5%)
-2025-02-08 09:05:00,726 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,727 - logs - INFO - Processing row 52 of 99 (52.5%)
-2025-02-08 09:05:00,727 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,729 - logs - INFO - Processing row 53 of 99 (53.5%)
-2025-02-08 09:05:00,729 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,730 - logs - INFO - Processing row 54 of 99 (54.5%)
-2025-02-08 09:05:00,730 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,732 - logs - INFO - Processing row 55 of 99 (55.6%)
-2025-02-08 09:05:00,732 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,733 - logs - INFO - Processing row 56 of 99 (56.6%)
-2025-02-08 09:05:00,733 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:05:00,734 - logs - INFO - Processing row 57 of 99 (57.6%)
-2025-02-08 09:05:00,734 - logs - INFO - Fetching new data for strike: 155, expiry: 2022-01-28, start: 2022-01-24, end: 2022-01-25
-2025-02-08 09:05:00,735 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:05:01,683 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00155000/range/1/minute/2022-01-24/2022-01-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:05:02,200 - logs - INFO - Cached 546 bars of data
-2025-02-08 09:05:02,202 - logs - INFO - Processing row 58 of 99 (58.6%)
-2025-02-08 09:05:02,203 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:02,204 - logs - INFO - Processing row 59 of 99 (59.6%)
-2025-02-08 09:05:02,204 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:02,206 - logs - INFO - Processing row 60 of 99 (60.6%)
-2025-02-08 09:05:02,206 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:02,207 - logs - INFO - Processing row 61 of 99 (61.6%)
-2025-02-08 09:05:02,208 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:02,209 - logs - INFO - Processing row 62 of 99 (62.6%)
-2025-02-08 09:05:02,209 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:02,211 - logs - INFO - Processing row 63 of 99 (63.6%)
-2025-02-08 09:05:02,211 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:02,212 - logs - INFO - Processing row 64 of 99 (64.6%)
-2025-02-08 09:05:02,212 - logs - INFO - Fetching new data for strike: 160, expiry: 2022-01-28, start: 2022-01-24, end: 2022-01-25
-2025-02-08 09:05:02,213 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:05:03,250 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00160000/range/1/minute/2022-01-24/2022-01-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:05:03,775 - logs - INFO - Cached 780 bars of data
-2025-02-08 09:05:03,776 - logs - INFO - Processing row 65 of 99 (65.7%)
-2025-02-08 09:05:03,778 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:05:03,779 - logs - INFO - Processing row 66 of 99 (66.7%)
-2025-02-08 09:05:03,779 - logs - INFO - Fetching new data for strike: 155, expiry: 2022-01-28, start: 2022-01-25, end: 2022-01-26
-2025-02-08 09:05:03,780 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:05:05,033 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00155000/range/1/minute/2022-01-25/2022-01-26?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:05:05,543 - logs - INFO - Cached 394 bars of data
-2025-02-08 09:05:05,544 - logs - INFO - Processing row 67 of 99 (67.7%)
-2025-02-08 09:05:05,545 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,546 - logs - INFO - Processing row 68 of 99 (68.7%)
-2025-02-08 09:05:05,546 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,547 - logs - INFO - Processing row 69 of 99 (69.7%)
-2025-02-08 09:05:05,548 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,549 - logs - INFO - Processing row 70 of 99 (70.7%)
-2025-02-08 09:05:05,550 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,551 - logs - INFO - Processing row 71 of 99 (71.7%)
-2025-02-08 09:05:05,551 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,553 - logs - INFO - Processing row 72 of 99 (72.7%)
-2025-02-08 09:05:05,553 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,554 - logs - INFO - Processing row 73 of 99 (73.7%)
-2025-02-08 09:05:05,555 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,556 - logs - INFO - Processing row 74 of 99 (74.7%)
-2025-02-08 09:05:05,556 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,556 - logs - INFO - Processing row 75 of 99 (75.8%)
-2025-02-08 09:05:05,558 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:05:05,559 - logs - INFO - Processing row 76 of 99 (76.8%)
-2025-02-08 09:05:05,559 - logs - INFO - Fetching new data for strike: 160, expiry: 2022-01-28, start: 2022-01-27, end: 2022-01-27
-2025-02-08 09:05:05,560 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:05:06,445 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00160000/range/1/minute/2022-01-27/2022-01-27?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:05:06,955 - logs - INFO - Cached 387 bars of data
-2025-02-08 09:05:06,956 - logs - INFO - Processing row 77 of 99 (77.8%)
-2025-02-08 09:05:06,957 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:05:06,958 - logs - INFO - Processing row 78 of 99 (78.8%)
-2025-02-08 09:05:06,958 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:05:06,961 - logs - INFO - Processing row 79 of 99 (79.8%)
-2025-02-08 09:05:06,962 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:05:06,964 - logs - INFO - Processing row 80 of 99 (80.8%)
-2025-02-08 09:05:06,964 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:05:06,966 - logs - INFO - Processing row 81 of 99 (81.8%)
-2025-02-08 09:05:06,966 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:05:06,967 - logs - INFO - Processing row 82 of 99 (82.8%)
-2025-02-08 09:05:06,967 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:05:06,968 - logs - INFO - Processing row 83 of 99 (83.8%)
-2025-02-08 09:05:06,968 - logs - INFO - Fetching new data for strike: 160, expiry: 2022-02-04, start: 2022-01-28, end: 2022-02-04
-2025-02-08 09:05:06,970 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:05:07,921 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220204C00160000/range/1/minute/2022-01-28/2022-02-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:05:08,440 - logs - INFO - Cached 860 bars of data
-2025-02-08 09:05:08,443 - logs - INFO - Processing row 84 of 99 (84.8%)
-2025-02-08 09:05:08,443 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-02-04, start: 2022-01-28, end: 2022-02-04
-2025-02-08 09:05:08,444 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:05:09,316 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220204C00165000/range/1/minute/2022-01-28/2022-02-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:05:09,875 - logs - INFO - Cached 1296 bars of data
-2025-02-08 09:05:09,879 - logs - INFO - Processing row 85 of 99 (85.9%)
-2025-02-08 09:05:09,879 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:05:09,882 - logs - INFO - Processing row 86 of 99 (86.9%)
-2025-02-08 09:05:09,883 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:05:09,887 - logs - INFO - Processing row 87 of 99 (87.9%)
-2025-02-08 09:05:09,888 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:05:09,890 - logs - INFO - Processing row 88 of 99 (88.9%)
-2025-02-08 09:05:09,890 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:05:09,891 - logs - INFO - Processing row 89 of 99 (89.9%)
-2025-02-08 09:05:09,891 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:05:09,893 - logs - INFO - Processing row 90 of 99 (90.9%)
-2025-02-08 09:05:09,894 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:05:09,895 - logs - INFO - Processing row 91 of 99 (91.9%)
-2025-02-08 09:05:09,895 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:05:09,896 - logs - INFO - Processing row 92 of 99 (92.9%)
-2025-02-08 09:05:09,896 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:05:09,897 - logs - INFO - Processing row 93 of 99 (93.9%)
-2025-02-08 09:05:09,899 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-02-11, start: 2022-02-04, end: 2022-02-10
-2025-02-08 09:05:09,900 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:05:10,764 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220211C00170000/range/1/minute/2022-02-04/2022-02-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:05:11,318 - logs - INFO - Cached 1451 bars of data
-2025-02-08 09:05:11,320 - logs - INFO - Processing row 94 of 99 (94.9%)
-2025-02-08 09:05:11,321 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:05:11,322 - logs - INFO - Processing row 95 of 99 (96.0%)
-2025-02-08 09:05:11,322 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:05:11,323 - logs - INFO - Processing row 96 of 99 (97.0%)
-2025-02-08 09:05:11,324 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:05:11,324 - logs - INFO - Processing row 97 of 99 (98.0%)
-2025-02-08 09:05:11,326 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:05:11,327 - logs - INFO - Processing row 98 of 99 (99.0%)
-2025-02-08 09:05:11,327 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:05:11,328 - logs - INFO - Processing row 99 of 99 (100.0%)
-2025-02-08 09:05:11,328 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:05:11,373 - logs - INFO - Results saved to AAPL P test_1mC2.0_e9.xlsx
-2025-02-08 09:06:04,130 - logs - INFO - Processing 99 rows...
-2025-02-08 09:06:04,134 - logs - INFO - Processing row 1 of 99 (1.0%)
-2025-02-08 09:06:04,134 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:06:04,136 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:05,357 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:05,877 - logs - INFO - Cached 818 bars of data
-2025-02-08 09:06:05,878 - logs - INFO - Processing row 2 of 99 (2.0%)
-2025-02-08 09:06:05,878 - logs - INFO - Fetching new data for strike: 180, expiry: 2022-01-07, start: 2022-01-03, end: 2022-01-05
-2025-02-08 09:06:05,880 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:07,518 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00180000/range/1/minute/2022-01-03/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:08,066 - logs - INFO - Cached 1169 bars of data
-2025-02-08 09:06:08,069 - logs - INFO - Processing row 3 of 99 (3.0%)
-2025-02-08 09:06:08,069 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 09:06:08,070 - logs - INFO - Processing row 4 of 99 (4.0%)
-2025-02-08 09:06:08,071 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 09:06:08,072 - logs - INFO - Processing row 5 of 99 (5.1%)
-2025-02-08 09:06:08,072 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 09:06:08,074 - logs - INFO - Processing row 6 of 99 (6.1%)
-2025-02-08 09:06:08,074 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 09:06:08,075 - logs - INFO - Processing row 7 of 99 (7.1%)
-2025-02-08 09:06:08,075 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 09:06:08,077 - logs - INFO - Processing row 8 of 99 (8.1%)
-2025-02-08 09:06:08,077 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 09:06:08,078 - logs - INFO - Processing row 9 of 99 (9.1%)
-2025-02-08 09:06:08,078 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 09:06:08,080 - logs - INFO - Processing row 10 of 99 (10.1%)
-2025-02-08 09:06:08,080 - logs - INFO - Using cached data for strike 180, expiry 2022-01-07
-2025-02-08 09:06:08,081 - logs - INFO - Processing row 11 of 99 (11.1%)
-2025-02-08 09:06:08,082 - logs - INFO - Fetching new data for strike: 175, expiry: 2022-01-07, start: 2022-01-05, end: 2022-01-05
-2025-02-08 09:06:08,083 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:08,931 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220107C00175000/range/1/minute/2022-01-05/2022-01-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:09,438 - logs - INFO - Cached 287 bars of data
-2025-02-08 09:06:09,441 - logs - INFO - Processing row 12 of 99 (12.1%)
-2025-02-08 09:06:09,441 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 09:06:09,443 - logs - INFO - Processing row 13 of 99 (13.1%)
-2025-02-08 09:06:09,443 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 09:06:09,445 - logs - INFO - Processing row 14 of 99 (14.1%)
-2025-02-08 09:06:09,445 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 09:06:09,446 - logs - INFO - Processing row 15 of 99 (15.2%)
-2025-02-08 09:06:09,447 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 09:06:09,447 - logs - INFO - Processing row 16 of 99 (16.2%)
-2025-02-08 09:06:09,448 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 09:06:09,448 - logs - INFO - Processing row 17 of 99 (17.2%)
-2025-02-08 09:06:09,450 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 09:06:09,451 - logs - INFO - Processing row 18 of 99 (18.2%)
-2025-02-08 09:06:09,451 - logs - INFO - Using cached data for strike 175, expiry 2022-01-07
-2025-02-08 09:06:09,452 - logs - INFO - Processing row 19 of 99 (19.2%)
-2025-02-08 09:06:09,453 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-14, start: 2022-01-07, end: 2022-01-10
-2025-02-08 09:06:09,453 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:10,631 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-07/2022-01-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:11,149 - logs - INFO - Cached 707 bars of data
-2025-02-08 09:06:11,152 - logs - INFO - Processing row 20 of 99 (20.2%)
-2025-02-08 09:06:11,152 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:06:11,153 - logs - INFO - Processing row 21 of 99 (21.2%)
-2025-02-08 09:06:11,154 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-14, start: 2022-01-10, end: 2022-01-10
-2025-02-08 09:06:11,155 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:12,014 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-10/2022-01-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:12,526 - logs - INFO - Cached 389 bars of data
-2025-02-08 09:06:12,528 - logs - INFO - Processing row 22 of 99 (22.2%)
-2025-02-08 09:06:12,528 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:06:12,529 - logs - INFO - Processing row 23 of 99 (23.2%)
-2025-02-08 09:06:12,529 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-01-14, start: 2022-01-10, end: 2022-01-13
-2025-02-08 09:06:12,531 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:13,393 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00165000/range/1/minute/2022-01-10/2022-01-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:13,903 - logs - INFO - Cached 491 bars of data
-2025-02-08 09:06:13,904 - logs - INFO - Processing row 24 of 99 (24.2%)
-2025-02-08 09:06:13,906 - logs - INFO - Using cached data for strike 165, expiry 2022-01-14
-2025-02-08 09:06:13,907 - logs - INFO - Processing row 25 of 99 (25.3%)
-2025-02-08 09:06:13,907 - logs - INFO - Using cached data for strike 165, expiry 2022-01-14
-2025-02-08 09:06:13,909 - logs - INFO - Processing row 26 of 99 (26.3%)
-2025-02-08 09:06:13,909 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-14, start: 2022-01-10, end: 2022-01-13
-2025-02-08 09:06:13,910 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:14,758 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220114C00170000/range/1/minute/2022-01-10/2022-01-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:15,288 - logs - INFO - Cached 1225 bars of data
-2025-02-08 09:06:15,291 - logs - INFO - Processing row 27 of 99 (27.3%)
-2025-02-08 09:06:15,291 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:06:15,293 - logs - INFO - Processing row 28 of 99 (28.3%)
-2025-02-08 09:06:15,294 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:06:15,295 - logs - INFO - Processing row 29 of 99 (29.3%)
-2025-02-08 09:06:15,295 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:06:15,296 - logs - INFO - Processing row 30 of 99 (30.3%)
-2025-02-08 09:06:15,297 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:06:15,297 - logs - INFO - Processing row 31 of 99 (31.3%)
-2025-02-08 09:06:15,298 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:06:15,299 - logs - INFO - Processing row 32 of 99 (32.3%)
-2025-02-08 09:06:15,299 - logs - INFO - Using cached data for strike 170, expiry 2022-01-14
-2025-02-08 09:06:15,300 - logs - INFO - Processing row 33 of 99 (33.3%)
-2025-02-08 09:06:15,301 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-21, start: 2022-01-14, end: 2022-01-18
-2025-02-08 09:06:15,302 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:16,461 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00170000/range/1/minute/2022-01-14/2022-01-18?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:17,016 - logs - INFO - Cached 741 bars of data
-2025-02-08 09:06:17,018 - logs - INFO - Processing row 34 of 99 (34.3%)
-2025-02-08 09:06:17,018 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,020 - logs - INFO - Processing row 35 of 99 (35.4%)
-2025-02-08 09:06:17,020 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,022 - logs - INFO - Processing row 36 of 99 (36.4%)
-2025-02-08 09:06:17,022 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,023 - logs - INFO - Processing row 37 of 99 (37.4%)
-2025-02-08 09:06:17,023 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,025 - logs - INFO - Processing row 38 of 99 (38.4%)
-2025-02-08 09:06:17,025 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,025 - logs - INFO - Processing row 39 of 99 (39.4%)
-2025-02-08 09:06:17,025 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,028 - logs - INFO - Processing row 40 of 99 (40.4%)
-2025-02-08 09:06:17,028 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,028 - logs - INFO - Processing row 41 of 99 (41.4%)
-2025-02-08 09:06:17,029 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,030 - logs - INFO - Processing row 42 of 99 (42.4%)
-2025-02-08 09:06:17,030 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:17,032 - logs - INFO - Processing row 43 of 99 (43.4%)
-2025-02-08 09:06:17,032 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-01-21, start: 2022-01-19, end: 2022-01-19
-2025-02-08 09:06:17,033 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:17,916 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00170000/range/1/minute/2022-01-19/2022-01-19?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:18,426 - logs - INFO - Cached 390 bars of data
-2025-02-08 09:06:18,428 - logs - INFO - Processing row 44 of 99 (44.4%)
-2025-02-08 09:06:18,428 - logs - INFO - Using cached data for strike 170, expiry 2022-01-21
-2025-02-08 09:06:18,429 - logs - INFO - Processing row 45 of 99 (45.5%)
-2025-02-08 09:06:18,429 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-01-21, start: 2022-01-19, end: 2022-01-19
-2025-02-08 09:06:18,431 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:19,282 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00165000/range/1/minute/2022-01-19/2022-01-19?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:19,789 - logs - INFO - Cached 280 bars of data
-2025-02-08 09:06:19,790 - logs - INFO - Processing row 46 of 99 (46.5%)
-2025-02-08 09:06:19,791 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:19,792 - logs - INFO - Processing row 47 of 99 (47.5%)
-2025-02-08 09:06:19,792 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-01-21, start: 2022-01-20, end: 2022-01-20
-2025-02-08 09:06:19,793 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:20,683 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220121C00165000/range/1/minute/2022-01-20/2022-01-20?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:21,190 - logs - INFO - Cached 336 bars of data
-2025-02-08 09:06:21,192 - logs - INFO - Processing row 48 of 99 (48.5%)
-2025-02-08 09:06:21,192 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,193 - logs - INFO - Processing row 49 of 99 (49.5%)
-2025-02-08 09:06:21,194 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,195 - logs - INFO - Processing row 50 of 99 (50.5%)
-2025-02-08 09:06:21,195 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,196 - logs - INFO - Processing row 51 of 99 (51.5%)
-2025-02-08 09:06:21,197 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,198 - logs - INFO - Processing row 52 of 99 (52.5%)
-2025-02-08 09:06:21,198 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,200 - logs - INFO - Processing row 53 of 99 (53.5%)
-2025-02-08 09:06:21,200 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,202 - logs - INFO - Processing row 54 of 99 (54.5%)
-2025-02-08 09:06:21,202 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,203 - logs - INFO - Processing row 55 of 99 (55.6%)
-2025-02-08 09:06:21,203 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,205 - logs - INFO - Processing row 56 of 99 (56.6%)
-2025-02-08 09:06:21,205 - logs - INFO - Using cached data for strike 165, expiry 2022-01-21
-2025-02-08 09:06:21,206 - logs - INFO - Processing row 57 of 99 (57.6%)
-2025-02-08 09:06:21,206 - logs - INFO - Fetching new data for strike: 155, expiry: 2022-01-28, start: 2022-01-24, end: 2022-01-25
-2025-02-08 09:06:21,207 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:22,058 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00155000/range/1/minute/2022-01-24/2022-01-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:22,573 - logs - INFO - Cached 546 bars of data
-2025-02-08 09:06:22,574 - logs - INFO - Processing row 58 of 99 (58.6%)
-2025-02-08 09:06:22,575 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:22,576 - logs - INFO - Processing row 59 of 99 (59.6%)
-2025-02-08 09:06:22,576 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:22,578 - logs - INFO - Processing row 60 of 99 (60.6%)
-2025-02-08 09:06:22,578 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:22,579 - logs - INFO - Processing row 61 of 99 (61.6%)
-2025-02-08 09:06:22,580 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:22,580 - logs - INFO - Processing row 62 of 99 (62.6%)
-2025-02-08 09:06:22,581 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:22,583 - logs - INFO - Processing row 63 of 99 (63.6%)
-2025-02-08 09:06:22,583 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:22,584 - logs - INFO - Processing row 64 of 99 (64.6%)
-2025-02-08 09:06:22,584 - logs - INFO - Fetching new data for strike: 160, expiry: 2022-01-28, start: 2022-01-24, end: 2022-01-25
-2025-02-08 09:06:22,585 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:23,463 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00160000/range/1/minute/2022-01-24/2022-01-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:23,980 - logs - INFO - Cached 780 bars of data
-2025-02-08 09:06:23,983 - logs - INFO - Processing row 65 of 99 (65.7%)
-2025-02-08 09:06:23,983 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:06:23,985 - logs - INFO - Processing row 66 of 99 (66.7%)
-2025-02-08 09:06:23,986 - logs - INFO - Fetching new data for strike: 155, expiry: 2022-01-28, start: 2022-01-25, end: 2022-01-26
-2025-02-08 09:06:23,987 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:24,838 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00155000/range/1/minute/2022-01-25/2022-01-26?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:25,348 - logs - INFO - Cached 394 bars of data
-2025-02-08 09:06:25,350 - logs - INFO - Processing row 67 of 99 (67.7%)
-2025-02-08 09:06:25,350 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,352 - logs - INFO - Processing row 68 of 99 (68.7%)
-2025-02-08 09:06:25,352 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,354 - logs - INFO - Processing row 69 of 99 (69.7%)
-2025-02-08 09:06:25,354 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,356 - logs - INFO - Processing row 70 of 99 (70.7%)
-2025-02-08 09:06:25,356 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,357 - logs - INFO - Processing row 71 of 99 (71.7%)
-2025-02-08 09:06:25,357 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,358 - logs - INFO - Processing row 72 of 99 (72.7%)
-2025-02-08 09:06:25,358 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,360 - logs - INFO - Processing row 73 of 99 (73.7%)
-2025-02-08 09:06:25,360 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,361 - logs - INFO - Processing row 74 of 99 (74.7%)
-2025-02-08 09:06:25,362 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,363 - logs - INFO - Processing row 75 of 99 (75.8%)
-2025-02-08 09:06:25,363 - logs - INFO - Using cached data for strike 155, expiry 2022-01-28
-2025-02-08 09:06:25,364 - logs - INFO - Processing row 76 of 99 (76.8%)
-2025-02-08 09:06:25,364 - logs - INFO - Fetching new data for strike: 160, expiry: 2022-01-28, start: 2022-01-27, end: 2022-01-27
-2025-02-08 09:06:25,365 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:26,227 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220128C00160000/range/1/minute/2022-01-27/2022-01-27?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:26,736 - logs - INFO - Cached 387 bars of data
-2025-02-08 09:06:26,737 - logs - INFO - Processing row 77 of 99 (77.8%)
-2025-02-08 09:06:26,737 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:06:26,740 - logs - INFO - Processing row 78 of 99 (78.8%)
-2025-02-08 09:06:26,740 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:06:26,741 - logs - INFO - Processing row 79 of 99 (79.8%)
-2025-02-08 09:06:26,741 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:06:26,744 - logs - INFO - Processing row 80 of 99 (80.8%)
-2025-02-08 09:06:26,744 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:06:26,746 - logs - INFO - Processing row 81 of 99 (81.8%)
-2025-02-08 09:06:26,746 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:06:26,748 - logs - INFO - Processing row 82 of 99 (82.8%)
-2025-02-08 09:06:26,748 - logs - INFO - Using cached data for strike 160, expiry 2022-01-28
-2025-02-08 09:06:26,749 - logs - INFO - Processing row 83 of 99 (83.8%)
-2025-02-08 09:06:26,749 - logs - INFO - Fetching new data for strike: 160, expiry: 2022-02-04, start: 2022-01-28, end: 2022-02-04
-2025-02-08 09:06:26,750 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:28,093 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220204C00160000/range/1/minute/2022-01-28/2022-02-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:28,612 - logs - INFO - Cached 860 bars of data
-2025-02-08 09:06:28,614 - logs - INFO - Processing row 84 of 99 (84.8%)
-2025-02-08 09:06:28,614 - logs - INFO - Fetching new data for strike: 165, expiry: 2022-02-04, start: 2022-01-28, end: 2022-02-04
-2025-02-08 09:06:28,615 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:29,487 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220204C00165000/range/1/minute/2022-01-28/2022-02-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:30,024 - logs - INFO - Cached 1296 bars of data
-2025-02-08 09:06:30,026 - logs - INFO - Processing row 85 of 99 (85.9%)
-2025-02-08 09:06:30,027 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:06:30,028 - logs - INFO - Processing row 86 of 99 (86.9%)
-2025-02-08 09:06:30,029 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:06:30,031 - logs - INFO - Processing row 87 of 99 (87.9%)
-2025-02-08 09:06:30,031 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:06:30,032 - logs - INFO - Processing row 88 of 99 (88.9%)
-2025-02-08 09:06:30,033 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:06:30,034 - logs - INFO - Processing row 89 of 99 (89.9%)
-2025-02-08 09:06:30,034 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:06:30,035 - logs - INFO - Processing row 90 of 99 (90.9%)
-2025-02-08 09:06:30,036 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:06:30,036 - logs - INFO - Processing row 91 of 99 (91.9%)
-2025-02-08 09:06:30,036 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:06:30,038 - logs - INFO - Processing row 92 of 99 (92.9%)
-2025-02-08 09:06:30,038 - logs - INFO - Using cached data for strike 165, expiry 2022-02-04
-2025-02-08 09:06:30,038 - logs - INFO - Processing row 93 of 99 (93.9%)
-2025-02-08 09:06:30,040 - logs - INFO - Fetching new data for strike: 170, expiry: 2022-02-11, start: 2022-02-04, end: 2022-02-10
-2025-02-08 09:06:30,041 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-08 09:06:30,900 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:AAPL220211C00170000/range/1/minute/2022-02-04/2022-02-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-08 09:06:31,442 - logs - INFO - Cached 1451 bars of data
-2025-02-08 09:06:31,444 - logs - INFO - Processing row 94 of 99 (94.9%)
-2025-02-08 09:06:31,445 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:06:31,446 - logs - INFO - Processing row 95 of 99 (96.0%)
-2025-02-08 09:06:31,446 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:06:31,448 - logs - INFO - Processing row 96 of 99 (97.0%)
-2025-02-08 09:06:31,448 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:06:31,449 - logs - INFO - Processing row 97 of 99 (98.0%)
-2025-02-08 09:06:31,450 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:06:31,452 - logs - INFO - Processing row 98 of 99 (99.0%)
-2025-02-08 09:06:31,452 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:06:31,453 - logs - INFO - Processing row 99 of 99 (100.0%)
-2025-02-08 09:06:31,454 - logs - INFO - Using cached data for strike 170, expiry 2022-02-11
-2025-02-08 09:06:31,487 - logs - INFO - Results saved to AAPL P test_1mC2.0_e9.xlsx
-2025-02-10 05:01:22,016 - logs - INFO - Processing 5 rows...
-2025-02-10 05:01:22,020 - logs - INFO - Processing row 1 of 5 (20.0%)
-2025-02-10 05:01:22,020 - logs - INFO - Fetching new data for strike: 395, expiry: 2022-11-11, start: 2022-11-11, end: 2022-11-11
-2025-02-10 05:01:22,024 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:01:23,190 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221111C00395000/range/1/minute/2022-11-11/2022-11-11?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:01:23,720 - logs - INFO - Cached 390 bars of data
-2025-02-10 05:01:23,726 - logs - INFO - Processing row 2 of 5 (40.0%)
-2025-02-10 05:01:23,726 - logs - INFO - Fetching new data for strike: 396, expiry: 2022-11-11, start: 2022-11-11, end: 2022-11-11
-2025-02-10 05:01:23,727 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:01:24,617 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221111C00396000/range/1/minute/2022-11-11/2022-11-11?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:01:25,127 - logs - INFO - Cached 390 bars of data
-2025-02-10 05:01:25,129 - logs - INFO - Processing row 3 of 5 (60.0%)
-2025-02-10 05:01:25,129 - logs - INFO - Fetching new data for strike: 397, expiry: 2022-11-14, start: 2022-11-14, end: 2022-11-14
-2025-02-10 05:01:25,131 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:01:26,054 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221114C00397000/range/1/minute/2022-11-14/2022-11-14?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:01:26,568 - logs - INFO - Cached 384 bars of data
-2025-02-10 05:01:26,569 - logs - INFO - Processing row 4 of 5 (80.0%)
-2025-02-10 05:01:26,569 - logs - INFO - Fetching new data for strike: 396, expiry: 2022-11-14, start: 2022-11-14, end: 2022-11-14
-2025-02-10 05:01:26,572 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:01:27,439 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221114C00396000/range/1/minute/2022-11-14/2022-11-14?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:01:27,953 - logs - INFO - Cached 353 bars of data
-2025-02-10 05:01:27,955 - logs - INFO - Processing row 5 of 5 (100.0%)
-2025-02-10 05:01:27,955 - logs - INFO - Using cached data for strike: 397, expiry: 2022-11-14, start: 2022-11-14, end: 2022-11-14
-2025-02-10 05:01:27,986 - logs - INFO - Results saved to SPY C daily1_1mC2.0_e7.xlsx
-2025-02-10 05:15:26,526 - logs - INFO - Processing 17 rows...
-2025-02-10 05:15:26,529 - logs - INFO - Processing row 1 of 17 (5.9%)
-2025-02-10 05:15:26,530 - logs - INFO - Fetching new data for strike: 519, expiry: 2025-01-31, start: 2025-01-29, end: 2025-01-29
-2025-02-10 05:15:26,531 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:27,710 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00519000/range/1/minute/2025-01-29/2025-01-29?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:28,221 - logs - INFO - Cached 282 bars of data
-2025-02-10 05:15:28,224 - logs - INFO - Processing row 2 of 17 (11.8%)
-2025-02-10 05:15:28,224 - logs - INFO - Fetching new data for strike: 521, expiry: 2025-01-31, start: 2025-01-29, end: 2025-01-29
-2025-02-10 05:15:28,226 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:29,117 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00521000/range/1/minute/2025-01-29/2025-01-29?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:29,626 - logs - INFO - Cached 363 bars of data
-2025-02-10 05:15:29,628 - logs - INFO - Processing row 3 of 17 (17.6%)
-2025-02-10 05:15:29,628 - logs - INFO - Using cached data for strike: 521, expiry: 2025-01-31, start: 2025-01-30, end: 2025-01-30
-2025-02-10 05:15:29,629 - logs - INFO - No data found for this start time
-2025-02-10 05:15:29,630 - logs - INFO - Processing row 4 of 17 (23.5%)
-2025-02-10 05:15:29,630 - logs - INFO - Fetching new data for strike: 520, expiry: 2025-01-31, start: 2025-01-30, end: 2025-01-30
-2025-02-10 05:15:29,631 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:30,509 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00520000/range/1/minute/2025-01-30/2025-01-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:31,022 - logs - INFO - Cached 381 bars of data
-2025-02-10 05:15:31,024 - logs - INFO - Processing row 5 of 17 (29.4%)
-2025-02-10 05:15:31,025 - logs - INFO - Fetching new data for strike: 522, expiry: 2025-01-31, start: 2025-01-30, end: 2025-01-30
-2025-02-10 05:15:31,026 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:31,897 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00522000/range/1/minute/2025-01-30/2025-01-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:32,425 - logs - INFO - Cached 399 bars of data
-2025-02-10 05:15:32,428 - logs - INFO - Processing row 6 of 17 (35.3%)
-2025-02-10 05:15:32,428 - logs - INFO - Fetching new data for strike: 523, expiry: 2025-01-31, start: 2025-01-30, end: 2025-01-30
-2025-02-10 05:15:32,429 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:33,328 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00523000/range/1/minute/2025-01-30/2025-01-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:33,836 - logs - INFO - Cached 400 bars of data
-2025-02-10 05:15:33,839 - logs - INFO - Processing row 7 of 17 (41.2%)
-2025-02-10 05:15:33,843 - logs - INFO - Fetching new data for strike: 531, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:15:33,844 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:34,766 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00531000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:35,276 - logs - INFO - Cached 379 bars of data
-2025-02-10 05:15:35,279 - logs - INFO - Processing row 8 of 17 (47.1%)
-2025-02-10 05:15:35,279 - logs - INFO - Fetching new data for strike: 530, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:15:35,280 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:36,201 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00530000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:36,713 - logs - INFO - Cached 392 bars of data
-2025-02-10 05:15:36,715 - logs - INFO - Processing row 9 of 17 (52.9%)
-2025-02-10 05:15:36,715 - logs - INFO - Fetching new data for strike: 529, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:15:36,717 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:37,614 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00529000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:38,123 - logs - INFO - Cached 380 bars of data
-2025-02-10 05:15:38,124 - logs - INFO - Processing row 10 of 17 (58.8%)
-2025-02-10 05:15:38,125 - logs - INFO - Fetching new data for strike: 528, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:15:38,125 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:39,004 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00528000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:39,514 - logs - INFO - Cached 379 bars of data
-2025-02-10 05:15:39,516 - logs - INFO - Processing row 11 of 17 (64.7%)
-2025-02-10 05:15:39,516 - logs - INFO - Using cached data for strike: 528, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:15:39,517 - logs - INFO - Processing row 12 of 17 (70.6%)
-2025-02-10 05:15:39,518 - logs - INFO - Fetching new data for strike: 526, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:15:39,519 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:40,408 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00526000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:40,915 - logs - INFO - Cached 319 bars of data
-2025-02-10 05:15:40,916 - logs - INFO - Processing row 13 of 17 (76.5%)
-2025-02-10 05:15:40,917 - logs - INFO - Fetching new data for strike: 524, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:15:40,918 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:41,832 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00524000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:42,341 - logs - INFO - Cached 311 bars of data
-2025-02-10 05:15:42,342 - logs - INFO - Processing row 14 of 17 (82.4%)
-2025-02-10 05:15:42,343 - logs - INFO - Fetching new data for strike: 524, expiry: 2025-02-07, start: 2025-02-07, end: 2025-02-07
-2025-02-10 05:15:42,343 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:43,225 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250207C00524000/range/1/minute/2025-02-07/2025-02-07?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:43,735 - logs - INFO - Cached 392 bars of data
-2025-02-10 05:15:43,738 - logs - INFO - Processing row 15 of 17 (88.2%)
-2025-02-10 05:15:43,738 - logs - INFO - Using cached data for strike: 524, expiry: 2025-02-07, start: 2025-02-07, end: 2025-02-07
-2025-02-10 05:15:43,740 - logs - INFO - Processing row 16 of 17 (94.1%)
-2025-02-10 05:15:43,740 - logs - INFO - Fetching new data for strike: 523, expiry: 2025-02-07, start: 2025-02-07, end: 2025-02-07
-2025-02-10 05:15:43,741 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:15:44,611 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250207C00523000/range/1/minute/2025-02-07/2025-02-07?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:15:45,121 - logs - INFO - Cached 376 bars of data
-2025-02-10 05:15:45,124 - logs - INFO - Processing row 17 of 17 (100.0%)
-2025-02-10 05:15:45,125 - logs - INFO - Using cached data for strike: 523, expiry: 2025-02-07, start: 2025-02-07, end: 2025-02-07
-2025-02-10 05:15:45,153 - logs - INFO - Results saved to QQQ C 10m white daily test_1mC2.0_e7.xlsx
-2025-02-10 05:30:10,907 - logs - INFO - Processing 17 rows...
-2025-02-10 05:30:10,911 - logs - INFO - Processing row 1 of 17 (5.9%)
-2025-02-10 05:30:10,911 - logs - INFO - Fetching new data for strike: 519, expiry: 2025-01-31, start: 2025-01-29, end: 2025-01-29
-2025-02-10 05:30:10,912 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:12,372 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00519000/range/1/minute/2025-01-29/2025-01-29?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:12,997 - logs - INFO - Cached 282 bars of data
-2025-02-10 05:30:12,998 - logs - INFO - Processing row 2 of 17 (11.8%)
-2025-02-10 05:30:13,000 - logs - INFO - Fetching new data for strike: 521, expiry: 2025-01-31, start: 2025-01-29, end: 2025-01-29
-2025-02-10 05:30:13,001 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:14,031 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00521000/range/1/minute/2025-01-29/2025-01-29?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:14,540 - logs - INFO - Cached 363 bars of data
-2025-02-10 05:30:14,542 - logs - INFO - Processing row 3 of 17 (17.6%)
-2025-02-10 05:30:14,542 - logs - INFO - Fetching new data for strike: 521, expiry: 2025-01-31, start: 2025-01-30, end: 2025-01-30
-2025-02-10 05:30:14,543 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:15,446 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00521000/range/1/minute/2025-01-30/2025-01-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:15,959 - logs - INFO - Cached 386 bars of data
-2025-02-10 05:30:15,962 - logs - INFO - Processing row 4 of 17 (23.5%)
-2025-02-10 05:30:15,962 - logs - INFO - Fetching new data for strike: 520, expiry: 2025-01-31, start: 2025-01-30, end: 2025-01-30
-2025-02-10 05:30:15,964 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:16,862 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00520000/range/1/minute/2025-01-30/2025-01-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:17,372 - logs - INFO - Cached 381 bars of data
-2025-02-10 05:30:17,374 - logs - INFO - Processing row 5 of 17 (29.4%)
-2025-02-10 05:30:17,375 - logs - INFO - Fetching new data for strike: 522, expiry: 2025-01-31, start: 2025-01-30, end: 2025-01-30
-2025-02-10 05:30:17,376 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:18,441 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00522000/range/1/minute/2025-01-30/2025-01-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:19,048 - logs - INFO - Cached 399 bars of data
-2025-02-10 05:30:19,049 - logs - INFO - Processing row 6 of 17 (35.3%)
-2025-02-10 05:30:19,050 - logs - INFO - Fetching new data for strike: 523, expiry: 2025-01-31, start: 2025-01-30, end: 2025-01-30
-2025-02-10 05:30:19,051 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:19,959 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00523000/range/1/minute/2025-01-30/2025-01-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:20,470 - logs - INFO - Cached 400 bars of data
-2025-02-10 05:30:20,472 - logs - INFO - Processing row 7 of 17 (41.2%)
-2025-02-10 05:30:20,473 - logs - INFO - Fetching new data for strike: 531, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:30:20,474 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:21,371 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00531000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:21,877 - logs - INFO - Cached 379 bars of data
-2025-02-10 05:30:21,878 - logs - INFO - Processing row 8 of 17 (47.1%)
-2025-02-10 05:30:21,879 - logs - INFO - Fetching new data for strike: 530, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:30:21,880 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:22,818 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00530000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:23,327 - logs - INFO - Cached 392 bars of data
-2025-02-10 05:30:23,330 - logs - INFO - Processing row 9 of 17 (52.9%)
-2025-02-10 05:30:23,330 - logs - INFO - Fetching new data for strike: 529, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:30:23,331 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:24,280 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00529000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:24,791 - logs - INFO - Cached 380 bars of data
-2025-02-10 05:30:24,792 - logs - INFO - Processing row 10 of 17 (58.8%)
-2025-02-10 05:30:24,794 - logs - INFO - Fetching new data for strike: 528, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:30:24,795 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:25,687 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00528000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:26,200 - logs - INFO - Cached 379 bars of data
-2025-02-10 05:30:26,201 - logs - INFO - Processing row 11 of 17 (64.7%)
-2025-02-10 05:30:26,203 - logs - INFO - Using cached data for strike: 528, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:30:26,204 - logs - INFO - Processing row 12 of 17 (70.6%)
-2025-02-10 05:30:26,205 - logs - INFO - Fetching new data for strike: 526, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:30:26,205 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:27,121 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00526000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:27,632 - logs - INFO - Cached 319 bars of data
-2025-02-10 05:30:27,632 - logs - INFO - Processing row 13 of 17 (76.5%)
-2025-02-10 05:30:27,634 - logs - INFO - Fetching new data for strike: 524, expiry: 2025-01-31, start: 2025-01-31, end: 2025-01-31
-2025-02-10 05:30:27,635 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:28,515 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250131C00524000/range/1/minute/2025-01-31/2025-01-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:29,024 - logs - INFO - Cached 311 bars of data
-2025-02-10 05:30:29,026 - logs - INFO - Processing row 14 of 17 (82.4%)
-2025-02-10 05:30:29,027 - logs - INFO - Fetching new data for strike: 524, expiry: 2025-02-07, start: 2025-02-07, end: 2025-02-07
-2025-02-10 05:30:29,028 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:29,939 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250207C00524000/range/1/minute/2025-02-07/2025-02-07?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:30,445 - logs - INFO - Cached 392 bars of data
-2025-02-10 05:30:30,447 - logs - INFO - Processing row 15 of 17 (88.2%)
-2025-02-10 05:30:30,447 - logs - INFO - Using cached data for strike: 524, expiry: 2025-02-07, start: 2025-02-07, end: 2025-02-07
-2025-02-10 05:30:30,450 - logs - INFO - Processing row 16 of 17 (94.1%)
-2025-02-10 05:30:30,451 - logs - INFO - Fetching new data for strike: 523, expiry: 2025-02-07, start: 2025-02-07, end: 2025-02-07
-2025-02-10 05:30:30,451 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
-2025-02-10 05:30:31,346 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:QQQ250207C00523000/range/1/minute/2025-02-07/2025-02-07?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/11" 200 None
-2025-02-10 05:30:31,873 - logs - INFO - Cached 376 bars of data
-2025-02-10 05:30:31,875 - logs - INFO - Processing row 17 of 17 (100.0%)
-2025-02-10 05:30:31,875 - logs - INFO - Using cached data for strike: 523, expiry: 2025-02-07, start: 2025-02-07, end: 2025-02-07
-2025-02-10 05:30:31,916 - logs - INFO - Results saved to QQQ C 10m white daily test_1mC2.0_e10.xlsx
+2025-06-18 22:40:51,904 - logs - ERROR - Usage: python engine12.py <timeframe> <option_type> <phase_index_setting> <input_file>
+2025-06-18 22:40:51,906 - logs - ERROR - Example: python engine12.py 1m C 0.05 'SPY_Weekly.xlsx'
+2025-06-18 22:44:04,165 - logs - INFO - Starting Engine 12
+2025-06-18 22:44:04,166 - logs - INFO - Number of arguments: 7
+2025-06-18 22:44:04,167 - logs - ERROR - Usage: python engine12.py <timeframe> <option_type> <phase_index_setting> <input_file>
+2025-06-18 22:44:04,169 - logs - ERROR - Example: python engine12.py 1m C 0.05 'SPY_Weekly.xlsx'
+2025-06-18 22:45:09,082 - logs - INFO - Starting Engine 12
+2025-06-18 22:45:09,082 - logs - INFO - Number of arguments: 5
+2025-06-18 22:45:09,089 - logs - ERROR - Error processing data: Missing optional dependency 'openpyxl'.  Use pip or conda to install openpyxl.
+2025-06-18 22:45:34,073 - logs - INFO - Starting Engine 12
+2025-06-18 22:45:34,074 - logs - INFO - Number of arguments: 5
+2025-06-18 22:45:34,324 - logs - INFO - Processing 110 rows...
+2025-06-18 22:45:34,328 - logs - INFO - Processing row 1 of 110 (0.9%)
+2025-06-18 22:45:34,329 - logs - INFO - Fetching new data for strike: 378, expiry: 2022-11-11, start: 2022-11-07, end: 2022-11-07
+2025-06-18 22:45:34,335 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:34,423 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221111C00378000/range/1/minute/2022-11-07/2022-11-07?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:34,956 - logs - INFO - Cached 369 bars of data
+2025-06-18 22:45:34,958 - logs - INFO - No data found for this period
+2025-06-18 22:45:34,961 - logs - INFO - Processing row 2 of 110 (1.8%)
+2025-06-18 22:45:34,962 - logs - INFO - Fetching new data for strike: 397, expiry: 2022-11-18, start: 2022-11-14, end: 2022-11-14
+2025-06-18 22:45:34,967 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:35,040 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221118C00397000/range/1/minute/2022-11-14/2022-11-14?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:35,568 - logs - INFO - Cached 348 bars of data
+2025-06-18 22:45:35,570 - logs - INFO - No data found for this period
+2025-06-18 22:45:35,573 - logs - INFO - Processing row 3 of 110 (2.7%)
+2025-06-18 22:45:35,574 - logs - INFO - Fetching new data for strike: 395, expiry: 2022-11-25, start: 2022-11-21, end: 2022-11-21
+2025-06-18 22:45:35,579 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:35,643 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221125C00395000/range/1/minute/2022-11-21/2022-11-21?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:36,164 - logs - INFO - Cached 388 bars of data
+2025-06-18 22:45:36,167 - logs - INFO - No data found for this period
+2025-06-18 22:45:36,169 - logs - INFO - Processing row 4 of 110 (3.6%)
+2025-06-18 22:45:36,173 - logs - INFO - Fetching new data for strike: 400, expiry: 2022-12-02, start: 2022-11-28, end: 2022-11-28
+2025-06-18 22:45:36,176 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:36,243 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221202C00400000/range/1/minute/2022-11-28/2022-11-28?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:36,766 - logs - INFO - Cached 390 bars of data
+2025-06-18 22:45:36,772 - logs - INFO - No data found for this period
+2025-06-18 22:45:36,775 - logs - INFO - Processing row 5 of 110 (4.5%)
+2025-06-18 22:45:36,777 - logs - INFO - Fetching new data for strike: 404, expiry: 2022-12-09, start: 2022-12-05, end: 2022-12-05
+2025-06-18 22:45:36,785 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:36,858 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221209C00404000/range/1/minute/2022-12-05/2022-12-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:37,395 - logs - INFO - Cached 384 bars of data
+2025-06-18 22:45:37,407 - logs - INFO - No data found for this period
+2025-06-18 22:45:37,413 - logs - INFO - Processing row 6 of 110 (5.5%)
+2025-06-18 22:45:37,420 - logs - INFO - Fetching new data for strike: 395, expiry: 2022-12-16, start: 2022-12-12, end: 2022-12-12
+2025-06-18 22:45:37,427 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:37,505 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221216C00395000/range/1/minute/2022-12-12/2022-12-12?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:38,035 - logs - INFO - Cached 369 bars of data
+2025-06-18 22:45:38,040 - logs - INFO - No data found for this period
+2025-06-18 22:45:38,043 - logs - INFO - Processing row 7 of 110 (6.4%)
+2025-06-18 22:45:38,049 - logs - INFO - Fetching new data for strike: 384, expiry: 2022-12-23, start: 2022-12-19, end: 2022-12-19
+2025-06-18 22:45:38,059 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:38,133 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221223C00384000/range/1/minute/2022-12-19/2022-12-19?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:38,670 - logs - INFO - Cached 373 bars of data
+2025-06-18 22:45:38,673 - logs - INFO - No data found for this period
+2025-06-18 22:45:38,675 - logs - INFO - Processing row 8 of 110 (7.3%)
+2025-06-18 22:45:38,678 - logs - INFO - Fetching new data for strike: 383, expiry: 2022-12-30, start: 2022-12-27, end: 2022-12-27
+2025-06-18 22:45:38,686 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:38,759 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY221230C00383000/range/1/minute/2022-12-27/2022-12-27?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:39,293 - logs - INFO - Cached 384 bars of data
+2025-06-18 22:45:39,301 - logs - INFO - No data found for this period
+2025-06-18 22:45:39,304 - logs - INFO - Processing row 9 of 110 (8.2%)
+2025-06-18 22:45:39,307 - logs - INFO - Fetching new data for strike: 385, expiry: 2023-01-06, start: 2023-01-03, end: 2023-01-03
+2025-06-18 22:45:39,309 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:39,383 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230106C00385000/range/1/minute/2023-01-03/2023-01-03?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:39,910 - logs - INFO - Cached 388 bars of data
+2025-06-18 22:45:39,914 - logs - INFO - No data found for this period
+2025-06-18 22:45:39,917 - logs - INFO - Processing row 10 of 110 (9.1%)
+2025-06-18 22:45:39,918 - logs - INFO - Fetching new data for strike: 391, expiry: 2023-01-13, start: 2023-01-09, end: 2023-01-09
+2025-06-18 22:45:39,919 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:39,986 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230113C00391000/range/1/minute/2023-01-09/2023-01-09?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:40,515 - logs - INFO - Cached 321 bars of data
+2025-06-18 22:45:40,520 - logs - INFO - No data found for this period
+2025-06-18 22:45:40,525 - logs - INFO - Processing row 11 of 110 (10.0%)
+2025-06-18 22:45:40,528 - logs - INFO - Fetching new data for strike: 399, expiry: 2023-01-20, start: 2023-01-17, end: 2023-01-17
+2025-06-18 22:45:40,537 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:40,619 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230120C00399000/range/1/minute/2023-01-17/2023-01-17?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:41,152 - logs - INFO - Cached 386 bars of data
+2025-06-18 22:45:41,157 - logs - INFO - No data found for this period
+2025-06-18 22:45:41,157 - logs - INFO - Processing row 12 of 110 (10.9%)
+2025-06-18 22:45:41,161 - logs - INFO - Fetching new data for strike: 397, expiry: 2023-01-27, start: 2023-01-23, end: 2023-01-23
+2025-06-18 22:45:41,164 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:41,237 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230127C00397000/range/1/minute/2023-01-23/2023-01-23?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:41,760 - logs - INFO - Cached 258 bars of data
+2025-06-18 22:45:41,766 - logs - INFO - No data found for this period
+2025-06-18 22:45:41,770 - logs - INFO - Processing row 13 of 110 (11.8%)
+2025-06-18 22:45:41,772 - logs - INFO - Fetching new data for strike: 403, expiry: 2023-02-03, start: 2023-01-30, end: 2023-01-30
+2025-06-18 22:45:41,779 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:41,852 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230203C00403000/range/1/minute/2023-01-30/2023-01-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:42,372 - logs - INFO - Cached 372 bars of data
+2025-06-18 22:45:42,380 - logs - INFO - No data found for this period
+2025-06-18 22:45:42,383 - logs - INFO - Processing row 14 of 110 (12.7%)
+2025-06-18 22:45:42,383 - logs - INFO - Fetching new data for strike: 410, expiry: 2023-02-10, start: 2023-02-06, end: 2023-02-06
+2025-06-18 22:45:42,383 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:42,456 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230210C00410000/range/1/minute/2023-02-06/2023-02-06?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:42,981 - logs - INFO - Cached 387 bars of data
+2025-06-18 22:45:42,988 - logs - INFO - No data found for this period
+2025-06-18 22:45:42,991 - logs - INFO - Processing row 15 of 110 (13.6%)
+2025-06-18 22:45:42,993 - logs - INFO - Fetching new data for strike: 409, expiry: 2023-02-17, start: 2023-02-13, end: 2023-02-13
+2025-06-18 22:45:43,006 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:43,093 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230217C00409000/range/1/minute/2023-02-13/2023-02-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:43,630 - logs - INFO - Cached 249 bars of data
+2025-06-18 22:45:43,635 - logs - INFO - No data found for this period
+2025-06-18 22:45:43,635 - logs - INFO - Processing row 16 of 110 (14.5%)
+2025-06-18 22:45:43,643 - logs - INFO - Fetching new data for strike: 404, expiry: 2023-02-24, start: 2023-02-21, end: 2023-02-21
+2025-06-18 22:45:43,649 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:43,725 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230224C00404000/range/1/minute/2023-02-21/2023-02-21?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:44,248 - logs - INFO - Cached 382 bars of data
+2025-06-18 22:45:44,255 - logs - INFO - No data found for this period
+2025-06-18 22:45:44,257 - logs - INFO - Processing row 17 of 110 (15.5%)
+2025-06-18 22:45:44,258 - logs - INFO - Fetching new data for strike: 400, expiry: 2023-03-03, start: 2023-02-27, end: 2023-02-27
+2025-06-18 22:45:44,262 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:44,335 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230303C00400000/range/1/minute/2023-02-27/2023-02-27?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:44,864 - logs - INFO - Cached 389 bars of data
+2025-06-18 22:45:44,871 - logs - INFO - No data found for this period
+2025-06-18 22:45:44,873 - logs - INFO - Processing row 18 of 110 (16.4%)
+2025-06-18 22:45:44,876 - logs - INFO - Fetching new data for strike: 406, expiry: 2023-03-10, start: 2023-03-06, end: 2023-03-06
+2025-06-18 22:45:44,881 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:44,951 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230310C00406000/range/1/minute/2023-03-06/2023-03-06?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:45,493 - logs - INFO - Cached 373 bars of data
+2025-06-18 22:45:45,495 - logs - INFO - No data found for this period
+2025-06-18 22:45:45,495 - logs - INFO - Processing row 19 of 110 (17.3%)
+2025-06-18 22:45:45,503 - logs - INFO - Fetching new data for strike: 382, expiry: 2023-03-17, start: 2023-03-13, end: 2023-03-13
+2025-06-18 22:45:45,503 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:45,565 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230317C00382000/range/1/minute/2023-03-13/2023-03-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:46,105 - logs - INFO - Cached 258 bars of data
+2025-06-18 22:45:46,106 - logs - INFO - No data found for this period
+2025-06-18 22:45:46,113 - logs - INFO - Processing row 20 of 110 (18.2%)
+2025-06-18 22:45:46,113 - logs - INFO - Fetching new data for strike: 391, expiry: 2023-03-24, start: 2023-03-20, end: 2023-03-20
+2025-06-18 22:45:46,122 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:46,188 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230324C00391000/range/1/minute/2023-03-20/2023-03-20?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:46,715 - logs - INFO - Cached 261 bars of data
+2025-06-18 22:45:46,715 - logs - INFO - No data found for this period
+2025-06-18 22:45:46,715 - logs - INFO - Processing row 21 of 110 (19.1%)
+2025-06-18 22:45:46,723 - logs - INFO - Fetching new data for strike: 399, expiry: 2023-03-31, start: 2023-03-27, end: 2023-03-27
+2025-06-18 22:45:46,723 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:46,794 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230331C00399000/range/1/minute/2023-03-27/2023-03-27?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:47,324 - logs - INFO - Cached 355 bars of data
+2025-06-18 22:45:47,324 - logs - INFO - No data found for this period
+2025-06-18 22:45:47,333 - logs - INFO - Processing row 22 of 110 (20.0%)
+2025-06-18 22:45:47,333 - logs - INFO - Fetching new data for strike: 409, expiry: 2023-04-07, start: 2023-04-03, end: 2023-04-03
+2025-06-18 22:45:47,340 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:47,398 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230407C00409000/range/1/minute/2023-04-03/2023-04-03?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 145
+2025-06-18 22:45:47,400 - logs - INFO - No data found from polygon, retrying...
+2025-06-18 22:45:50,904 - logs - INFO - No data found from polygon
+2025-06-18 22:45:50,904 - logs - INFO - Processing row 23 of 110 (20.9%)
+2025-06-18 22:45:50,904 - logs - INFO - Fetching new data for strike: 407, expiry: 2023-04-14, start: 2023-04-10, end: 2023-04-10
+2025-06-18 22:45:50,913 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:50,983 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230414C00407000/range/1/minute/2023-04-10/2023-04-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:51,514 - logs - INFO - Cached 325 bars of data
+2025-06-18 22:45:51,520 - logs - INFO - No data found for this period
+2025-06-18 22:45:51,524 - logs - INFO - Processing row 24 of 110 (21.8%)
+2025-06-18 22:45:51,527 - logs - INFO - Fetching new data for strike: 413, expiry: 2023-04-21, start: 2023-04-17, end: 2023-04-17
+2025-06-18 22:45:51,535 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:51,605 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230421C00413000/range/1/minute/2023-04-17/2023-04-17?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:52,126 - logs - INFO - Cached 382 bars of data
+2025-06-18 22:45:52,131 - logs - INFO - No data found for this period
+2025-06-18 22:45:52,133 - logs - INFO - Processing row 25 of 110 (22.7%)
+2025-06-18 22:45:52,136 - logs - INFO - Fetching new data for strike: 412, expiry: 2023-04-28, start: 2023-04-24, end: 2023-04-24
+2025-06-18 22:45:52,140 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:52,210 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230428C00412000/range/1/minute/2023-04-24/2023-04-24?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:52,734 - logs - INFO - Cached 385 bars of data
+2025-06-18 22:45:52,740 - logs - INFO - No data found for this period
+2025-06-18 22:45:52,743 - logs - INFO - Processing row 26 of 110 (23.6%)
+2025-06-18 22:45:52,746 - logs - INFO - Fetching new data for strike: 416, expiry: 2023-05-05, start: 2023-05-01, end: 2023-05-01
+2025-06-18 22:45:52,755 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:52,820 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230505C00416000/range/1/minute/2023-05-01/2023-05-01?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:53,343 - logs - INFO - Cached 369 bars of data
+2025-06-18 22:45:53,343 - logs - INFO - No data found for this period
+2025-06-18 22:45:53,343 - logs - INFO - Processing row 27 of 110 (24.5%)
+2025-06-18 22:45:53,349 - logs - INFO - Fetching new data for strike: 413, expiry: 2023-05-12, start: 2023-05-08, end: 2023-05-08
+2025-06-18 22:45:53,356 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:53,425 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230512C00413000/range/1/minute/2023-05-08/2023-05-08?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:53,953 - logs - INFO - Cached 369 bars of data
+2025-06-18 22:45:53,957 - logs - INFO - No data found for this period
+2025-06-18 22:45:53,958 - logs - INFO - Processing row 28 of 110 (25.5%)
+2025-06-18 22:45:53,961 - logs - INFO - Fetching new data for strike: 413, expiry: 2023-05-19, start: 2023-05-15, end: 2023-05-15
+2025-06-18 22:45:53,967 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:54,033 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230519C00413000/range/1/minute/2023-05-15/2023-05-15?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:54,578 - logs - INFO - Cached 384 bars of data
+2025-06-18 22:45:54,585 - logs - INFO - No data found for this period
+2025-06-18 22:45:54,588 - logs - INFO - Processing row 29 of 110 (26.4%)
+2025-06-18 22:45:54,591 - logs - INFO - Fetching new data for strike: 419, expiry: 2023-05-26, start: 2023-05-22, end: 2023-05-22
+2025-06-18 22:45:54,594 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:54,659 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230526C00419000/range/1/minute/2023-05-22/2023-05-22?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:55,187 - logs - INFO - Cached 370 bars of data
+2025-06-18 22:45:55,193 - logs - INFO - No data found for this period
+2025-06-18 22:45:55,195 - logs - INFO - Processing row 30 of 110 (27.3%)
+2025-06-18 22:45:55,198 - logs - INFO - Fetching new data for strike: 423, expiry: 2023-06-02, start: 2023-05-30, end: 2023-05-30
+2025-06-18 22:45:55,205 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:55,283 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230602C00423000/range/1/minute/2023-05-30/2023-05-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:55,828 - logs - INFO - Cached 366 bars of data
+2025-06-18 22:45:55,834 - logs - INFO - No data found for this period
+2025-06-18 22:45:55,837 - logs - INFO - Processing row 31 of 110 (28.2%)
+2025-06-18 22:45:55,838 - logs - INFO - Fetching new data for strike: 429, expiry: 2023-06-09, start: 2023-06-05, end: 2023-06-05
+2025-06-18 22:45:55,844 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:55,914 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230609C00429000/range/1/minute/2023-06-05/2023-06-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:56,450 - logs - INFO - Cached 382 bars of data
+2025-06-18 22:45:56,453 - logs - INFO - No data found for this period
+2025-06-18 22:45:56,453 - logs - INFO - Processing row 32 of 110 (29.1%)
+2025-06-18 22:45:56,461 - logs - INFO - Fetching new data for strike: 431, expiry: 2023-06-16, start: 2023-06-12, end: 2023-06-12
+2025-06-18 22:45:56,467 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:56,547 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230616C00431000/range/1/minute/2023-06-12/2023-06-12?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:57,074 - logs - INFO - Cached 370 bars of data
+2025-06-18 22:45:57,074 - logs - INFO - No data found for this period
+2025-06-18 22:45:57,074 - logs - INFO - Processing row 33 of 110 (30.0%)
+2025-06-18 22:45:57,085 - logs - INFO - Fetching new data for strike: 438, expiry: 2023-06-23, start: 2023-06-20, end: 2023-06-20
+2025-06-18 22:45:57,089 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:57,162 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230623C00438000/range/1/minute/2023-06-20/2023-06-20?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:57,677 - logs - INFO - Cached 390 bars of data
+2025-06-18 22:45:57,682 - logs - INFO - No data found for this period
+2025-06-18 22:45:57,684 - logs - INFO - Processing row 34 of 110 (30.9%)
+2025-06-18 22:45:57,685 - logs - INFO - Fetching new data for strike: 433, expiry: 2023-06-30, start: 2023-06-26, end: 2023-06-26
+2025-06-18 22:45:57,688 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:57,754 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230630C00433000/range/1/minute/2023-06-26/2023-06-26?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:58,274 - logs - INFO - Cached 382 bars of data
+2025-06-18 22:45:58,279 - logs - INFO - No data found for this period
+2025-06-18 22:45:58,285 - logs - INFO - Processing row 35 of 110 (31.8%)
+2025-06-18 22:45:58,295 - logs - INFO - Fetching new data for strike: 443, expiry: 2023-07-07, start: 2023-07-03, end: 2023-07-03
+2025-06-18 22:45:58,301 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:58,367 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230707C00443000/range/1/minute/2023-07-03/2023-07-03?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:58,879 - logs - INFO - Cached 216 bars of data
+2025-06-18 22:45:58,882 - logs - INFO - No data found for this period
+2025-06-18 22:45:58,885 - logs - INFO - Processing row 36 of 110 (32.7%)
+2025-06-18 22:45:58,886 - logs - INFO - Fetching new data for strike: 439, expiry: 2023-07-14, start: 2023-07-10, end: 2023-07-10
+2025-06-18 22:45:58,888 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:58,953 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230714C00439000/range/1/minute/2023-07-10/2023-07-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:45:59,483 - logs - INFO - Cached 387 bars of data
+2025-06-18 22:45:59,489 - logs - INFO - No data found for this period
+2025-06-18 22:45:59,489 - logs - INFO - Processing row 37 of 110 (33.6%)
+2025-06-18 22:45:59,493 - logs - INFO - Fetching new data for strike: 450, expiry: 2023-07-21, start: 2023-07-17, end: 2023-07-17
+2025-06-18 22:45:59,501 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:45:59,575 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230721C00450000/range/1/minute/2023-07-17/2023-07-17?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:00,110 - logs - INFO - Cached 382 bars of data
+2025-06-18 22:46:00,116 - logs - INFO - No data found for this period
+2025-06-18 22:46:00,118 - logs - INFO - Processing row 38 of 110 (34.5%)
+2025-06-18 22:46:00,123 - logs - INFO - Fetching new data for strike: 454, expiry: 2023-07-28, start: 2023-07-24, end: 2023-07-24
+2025-06-18 22:46:00,127 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:00,199 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230728C00454000/range/1/minute/2023-07-24/2023-07-24?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:00,731 - logs - INFO - Cached 374 bars of data
+2025-06-18 22:46:00,736 - logs - INFO - No data found for this period
+2025-06-18 22:46:00,737 - logs - INFO - Processing row 39 of 110 (35.5%)
+2025-06-18 22:46:00,739 - logs - INFO - Fetching new data for strike: 458, expiry: 2023-08-04, start: 2023-07-31, end: 2023-07-31
+2025-06-18 22:46:00,743 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:00,803 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230804C00458000/range/1/minute/2023-07-31/2023-07-31?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:01,324 - logs - INFO - Cached 381 bars of data
+2025-06-18 22:46:01,333 - logs - INFO - No data found for this period
+2025-06-18 22:46:01,336 - logs - INFO - Processing row 40 of 110 (36.4%)
+2025-06-18 22:46:01,337 - logs - INFO - Fetching new data for strike: 449, expiry: 2023-08-11, start: 2023-08-07, end: 2023-08-07
+2025-06-18 22:46:01,343 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:01,411 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230811C00449000/range/1/minute/2023-08-07/2023-08-07?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:01,950 - logs - INFO - Cached 342 bars of data
+2025-06-18 22:46:01,962 - logs - INFO - No data found for this period
+2025-06-18 22:46:01,967 - logs - INFO - Processing row 41 of 110 (37.3%)
+2025-06-18 22:46:01,970 - logs - INFO - Fetching new data for strike: 445, expiry: 2023-08-18, start: 2023-08-14, end: 2023-08-14
+2025-06-18 22:46:01,975 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:02,044 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230818C00445000/range/1/minute/2023-08-14/2023-08-14?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:02,586 - logs - INFO - Cached 358 bars of data
+2025-06-18 22:46:02,586 - logs - INFO - No data found for this period
+2025-06-18 22:46:02,586 - logs - INFO - Processing row 42 of 110 (38.2%)
+2025-06-18 22:46:02,595 - logs - INFO - Fetching new data for strike: 438, expiry: 2023-08-25, start: 2023-08-21, end: 2023-08-21
+2025-06-18 22:46:02,600 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:02,668 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230825C00438000/range/1/minute/2023-08-21/2023-08-21?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:03,203 - logs - INFO - Cached 376 bars of data
+2025-06-18 22:46:03,209 - logs - INFO - No data found for this period
+2025-06-18 22:46:03,211 - logs - INFO - Processing row 43 of 110 (39.1%)
+2025-06-18 22:46:03,213 - logs - INFO - Fetching new data for strike: 443, expiry: 2023-09-01, start: 2023-08-28, end: 2023-08-28
+2025-06-18 22:46:03,218 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:03,288 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230901C00443000/range/1/minute/2023-08-28/2023-08-28?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:03,813 - logs - INFO - Cached 373 bars of data
+2025-06-18 22:46:03,819 - logs - INFO - No data found for this period
+2025-06-18 22:46:03,821 - logs - INFO - Processing row 44 of 110 (40.0%)
+2025-06-18 22:46:03,822 - logs - INFO - Fetching new data for strike: 451, expiry: 2023-09-08, start: 2023-09-05, end: 2023-09-05
+2025-06-18 22:46:03,826 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:03,890 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230908C00451000/range/1/minute/2023-09-05/2023-09-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:04,440 - logs - INFO - Cached 382 bars of data
+2025-06-18 22:46:04,445 - logs - INFO - No data found for this period
+2025-06-18 22:46:04,447 - logs - INFO - Processing row 45 of 110 (40.9%)
+2025-06-18 22:46:04,448 - logs - INFO - Fetching new data for strike: 449, expiry: 2023-09-15, start: 2023-09-11, end: 2023-09-11
+2025-06-18 22:46:04,451 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:04,518 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230915C00449000/range/1/minute/2023-09-11/2023-09-11?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:05,048 - logs - INFO - Cached 359 bars of data
+2025-06-18 22:46:05,053 - logs - INFO - No data found for this period
+2025-06-18 22:46:05,053 - logs - INFO - Processing row 46 of 110 (41.8%)
+2025-06-18 22:46:05,058 - logs - INFO - Fetching new data for strike: 444, expiry: 2023-09-22, start: 2023-09-18, end: 2023-09-18
+2025-06-18 22:46:05,058 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:05,130 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230922C00444000/range/1/minute/2023-09-18/2023-09-18?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:05,658 - logs - INFO - Cached 368 bars of data
+2025-06-18 22:46:05,663 - logs - INFO - No data found for this period
+2025-06-18 22:46:05,666 - logs - INFO - Processing row 47 of 110 (42.7%)
+2025-06-18 22:46:05,668 - logs - INFO - Fetching new data for strike: 430, expiry: 2023-09-29, start: 2023-09-25, end: 2023-09-25
+2025-06-18 22:46:05,675 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:05,759 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY230929C00430000/range/1/minute/2023-09-25/2023-09-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:06,280 - logs - INFO - Cached 360 bars of data
+2025-06-18 22:46:06,287 - logs - INFO - No data found for this period
+2025-06-18 22:46:06,289 - logs - INFO - Processing row 48 of 110 (43.6%)
+2025-06-18 22:46:06,289 - logs - INFO - Fetching new data for strike: 427, expiry: 2023-10-06, start: 2023-10-02, end: 2023-10-02
+2025-06-18 22:46:06,295 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:06,358 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231006C00427000/range/1/minute/2023-10-02/2023-10-02?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:06,888 - logs - INFO - Cached 378 bars of data
+2025-06-18 22:46:06,893 - logs - INFO - No data found for this period
+2025-06-18 22:46:06,893 - logs - INFO - Processing row 49 of 110 (44.5%)
+2025-06-18 22:46:06,893 - logs - INFO - Fetching new data for strike: 428, expiry: 2023-10-13, start: 2023-10-09, end: 2023-10-09
+2025-06-18 22:46:06,904 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:06,973 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231013C00428000/range/1/minute/2023-10-09/2023-10-09?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:07,501 - logs - INFO - Cached 330 bars of data
+2025-06-18 22:46:07,505 - logs - INFO - No data found for this period
+2025-06-18 22:46:07,507 - logs - INFO - Processing row 50 of 110 (45.5%)
+2025-06-18 22:46:07,508 - logs - INFO - Fetching new data for strike: 434, expiry: 2023-10-20, start: 2023-10-16, end: 2023-10-16
+2025-06-18 22:46:07,513 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:07,583 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231020C00434000/range/1/minute/2023-10-16/2023-10-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:08,108 - logs - INFO - Cached 230 bars of data
+2025-06-18 22:46:08,115 - logs - INFO - No data found for this period
+2025-06-18 22:46:08,117 - logs - INFO - Processing row 51 of 110 (46.4%)
+2025-06-18 22:46:08,118 - logs - INFO - Fetching new data for strike: 420, expiry: 2023-10-27, start: 2023-10-23, end: 2023-10-23
+2025-06-18 22:46:08,123 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:08,190 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231027C00420000/range/1/minute/2023-10-23/2023-10-23?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:08,717 - logs - INFO - Cached 324 bars of data
+2025-06-18 22:46:08,721 - logs - INFO - No data found for this period
+2025-06-18 22:46:08,725 - logs - INFO - Processing row 52 of 110 (47.3%)
+2025-06-18 22:46:08,727 - logs - INFO - Fetching new data for strike: 414, expiry: 2023-11-03, start: 2023-10-30, end: 2023-10-30
+2025-06-18 22:46:08,735 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:08,800 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231103C00414000/range/1/minute/2023-10-30/2023-10-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:09,336 - logs - INFO - Cached 359 bars of data
+2025-06-18 22:46:09,341 - logs - INFO - No data found for this period
+2025-06-18 22:46:09,344 - logs - INFO - Processing row 53 of 110 (48.2%)
+2025-06-18 22:46:09,346 - logs - INFO - Fetching new data for strike: 436, expiry: 2023-11-10, start: 2023-11-06, end: 2023-11-06
+2025-06-18 22:46:09,351 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:09,419 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231110C00436000/range/1/minute/2023-11-06/2023-11-06?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:09,963 - logs - INFO - Cached 375 bars of data
+2025-06-18 22:46:09,970 - logs - INFO - No data found for this period
+2025-06-18 22:46:09,973 - logs - INFO - Processing row 54 of 110 (49.1%)
+2025-06-18 22:46:09,976 - logs - INFO - Fetching new data for strike: 440, expiry: 2023-11-17, start: 2023-11-13, end: 2023-11-13
+2025-06-18 22:46:09,976 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:10,053 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231117C00440000/range/1/minute/2023-11-13/2023-11-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:10,583 - logs - INFO - Cached 387 bars of data
+2025-06-18 22:46:10,593 - logs - INFO - No data found for this period
+2025-06-18 22:46:10,593 - logs - INFO - Processing row 55 of 110 (50.0%)
+2025-06-18 22:46:10,600 - logs - INFO - Fetching new data for strike: 451, expiry: 2023-11-24, start: 2023-11-20, end: 2023-11-20
+2025-06-18 22:46:10,603 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:10,663 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231124C00451000/range/1/minute/2023-11-20/2023-11-20?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:11,208 - logs - INFO - Cached 320 bars of data
+2025-06-18 22:46:11,213 - logs - INFO - No data found for this period
+2025-06-18 22:46:11,213 - logs - INFO - Processing row 56 of 110 (50.9%)
+2025-06-18 22:46:11,217 - logs - INFO - Fetching new data for strike: 455, expiry: 2023-12-01, start: 2023-11-27, end: 2023-11-27
+2025-06-18 22:46:11,217 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:11,288 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231201C00455000/range/1/minute/2023-11-27/2023-11-27?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:11,823 - logs - INFO - Cached 383 bars of data
+2025-06-18 22:46:11,828 - logs - INFO - No data found for this period
+2025-06-18 22:46:11,828 - logs - INFO - Processing row 57 of 110 (51.8%)
+2025-06-18 22:46:11,831 - logs - INFO - Fetching new data for strike: 456, expiry: 2023-12-08, start: 2023-12-04, end: 2023-12-04
+2025-06-18 22:46:11,836 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:11,904 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231208C00456000/range/1/minute/2023-12-04/2023-12-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:12,430 - logs - INFO - Cached 379 bars of data
+2025-06-18 22:46:12,436 - logs - INFO - No data found for this period
+2025-06-18 22:46:12,443 - logs - INFO - Processing row 58 of 110 (52.7%)
+2025-06-18 22:46:12,443 - logs - INFO - Fetching new data for strike: 460, expiry: 2023-12-15, start: 2023-12-11, end: 2023-12-11
+2025-06-18 22:46:12,443 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:12,515 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231215C00460000/range/1/minute/2023-12-11/2023-12-11?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:13,043 - logs - INFO - Cached 372 bars of data
+2025-06-18 22:46:13,043 - logs - INFO - No data found for this period
+2025-06-18 22:46:13,043 - logs - INFO - Processing row 59 of 110 (53.6%)
+2025-06-18 22:46:13,043 - logs - INFO - Fetching new data for strike: 471, expiry: 2023-12-22, start: 2023-12-18, end: 2023-12-18
+2025-06-18 22:46:13,053 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:13,123 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231222C00471000/range/1/minute/2023-12-18/2023-12-18?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:13,660 - logs - INFO - Cached 311 bars of data
+2025-06-18 22:46:13,665 - logs - INFO - No data found for this period
+2025-06-18 22:46:13,667 - logs - INFO - Processing row 60 of 110 (54.5%)
+2025-06-18 22:46:13,667 - logs - INFO - Fetching new data for strike: 475, expiry: 2023-12-29, start: 2023-12-26, end: 2023-12-26
+2025-06-18 22:46:13,673 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:13,742 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY231229C00475000/range/1/minute/2023-12-26/2023-12-26?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:14,285 - logs - INFO - Cached 387 bars of data
+2025-06-18 22:46:14,291 - logs - INFO - No data found for this period
+2025-06-18 22:46:14,293 - logs - INFO - Processing row 61 of 110 (55.5%)
+2025-06-18 22:46:14,294 - logs - INFO - Fetching new data for strike: 473, expiry: 2024-01-05, start: 2024-01-02, end: 2024-01-02
+2025-06-18 22:46:14,298 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:14,364 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240105C00473000/range/1/minute/2024-01-02/2024-01-02?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:14,894 - logs - INFO - Cached 387 bars of data
+2025-06-18 22:46:14,899 - logs - INFO - No data found for this period
+2025-06-18 22:46:14,900 - logs - INFO - Processing row 62 of 110 (56.4%)
+2025-06-18 22:46:14,901 - logs - INFO - Fetching new data for strike: 469, expiry: 2024-01-12, start: 2024-01-08, end: 2024-01-08
+2025-06-18 22:46:14,904 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:14,970 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240112C00469000/range/1/minute/2024-01-08/2024-01-08?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:15,493 - logs - INFO - Cached 283 bars of data
+2025-06-18 22:46:15,506 - logs - INFO - No data found for this period
+2025-06-18 22:46:15,510 - logs - INFO - Processing row 63 of 110 (57.3%)
+2025-06-18 22:46:15,511 - logs - INFO - Fetching new data for strike: 476, expiry: 2024-01-19, start: 2024-01-16, end: 2024-01-16
+2025-06-18 22:46:15,517 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:15,585 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240119C00476000/range/1/minute/2024-01-16/2024-01-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:16,123 - logs - INFO - Cached 388 bars of data
+2025-06-18 22:46:16,128 - logs - INFO - No data found for this period
+2025-06-18 22:46:16,131 - logs - INFO - Processing row 64 of 110 (58.2%)
+2025-06-18 22:46:16,134 - logs - INFO - Fetching new data for strike: 485, expiry: 2024-01-26, start: 2024-01-22, end: 2024-01-22
+2025-06-18 22:46:16,141 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:16,203 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240126C00485000/range/1/minute/2024-01-22/2024-01-22?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:16,733 - logs - INFO - Cached 386 bars of data
+2025-06-18 22:46:16,738 - logs - INFO - No data found for this period
+2025-06-18 22:46:16,742 - logs - INFO - Processing row 65 of 110 (59.1%)
+2025-06-18 22:46:16,744 - logs - INFO - Fetching new data for strike: 488, expiry: 2024-02-02, start: 2024-01-29, end: 2024-01-29
+2025-06-18 22:46:16,752 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:16,816 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240202C00488000/range/1/minute/2024-01-29/2024-01-29?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:17,361 - logs - INFO - Cached 374 bars of data
+2025-06-18 22:46:17,372 - logs - INFO - No data found for this period
+2025-06-18 22:46:17,374 - logs - INFO - Processing row 66 of 110 (60.0%)
+2025-06-18 22:46:17,377 - logs - INFO - Fetching new data for strike: 494, expiry: 2024-02-09, start: 2024-02-05, end: 2024-02-05
+2025-06-18 22:46:17,383 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:17,451 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240209C00494000/range/1/minute/2024-02-05/2024-02-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:17,991 - logs - INFO - Cached 381 bars of data
+2025-06-18 22:46:17,995 - logs - INFO - No data found for this period
+2025-06-18 22:46:18,000 - logs - INFO - Processing row 67 of 110 (60.9%)
+2025-06-18 22:46:18,001 - logs - INFO - Fetching new data for strike: 502, expiry: 2024-02-16, start: 2024-02-12, end: 2024-02-12
+2025-06-18 22:46:18,006 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:18,082 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240216C00502000/range/1/minute/2024-02-12/2024-02-12?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:18,620 - logs - INFO - Cached 378 bars of data
+2025-06-18 22:46:18,628 - logs - INFO - No data found for this period
+2025-06-18 22:46:18,632 - logs - INFO - Processing row 68 of 110 (61.8%)
+2025-06-18 22:46:18,634 - logs - INFO - Fetching new data for strike: 498, expiry: 2024-02-23, start: 2024-02-20, end: 2024-02-20
+2025-06-18 22:46:18,640 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:18,708 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240223C00498000/range/1/minute/2024-02-20/2024-02-20?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:19,238 - logs - INFO - Cached 386 bars of data
+2025-06-18 22:46:19,243 - logs - INFO - No data found for this period
+2025-06-18 22:46:19,246 - logs - INFO - Processing row 69 of 110 (62.7%)
+2025-06-18 22:46:19,250 - logs - INFO - Fetching new data for strike: 509, expiry: 2024-03-01, start: 2024-02-26, end: 2024-02-26
+2025-06-18 22:46:19,255 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:19,323 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240301C00509000/range/1/minute/2024-02-26/2024-02-26?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:19,861 - logs - INFO - Cached 369 bars of data
+2025-06-18 22:46:19,870 - logs - INFO - No data found for this period
+2025-06-18 22:46:19,874 - logs - INFO - Processing row 70 of 110 (63.6%)
+2025-06-18 22:46:19,877 - logs - INFO - Fetching new data for strike: 513, expiry: 2024-03-08, start: 2024-03-04, end: 2024-03-04
+2025-06-18 22:46:19,883 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:19,951 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240308C00513000/range/1/minute/2024-03-04/2024-03-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:20,481 - logs - INFO - Cached 380 bars of data
+2025-06-18 22:46:20,487 - logs - INFO - No data found for this period
+2025-06-18 22:46:20,488 - logs - INFO - Processing row 71 of 110 (64.5%)
+2025-06-18 22:46:20,490 - logs - INFO - Fetching new data for strike: 511, expiry: 2024-03-15, start: 2024-03-11, end: 2024-03-11
+2025-06-18 22:46:20,491 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:20,558 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240315C00511000/range/1/minute/2024-03-11/2024-03-11?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:21,093 - logs - INFO - Cached 382 bars of data
+2025-06-18 22:46:21,097 - logs - INFO - No data found for this period
+2025-06-18 22:46:21,099 - logs - INFO - Processing row 72 of 110 (65.5%)
+2025-06-18 22:46:21,100 - logs - INFO - Fetching new data for strike: 514, expiry: 2024-03-22, start: 2024-03-18, end: 2024-03-18
+2025-06-18 22:46:21,104 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:21,167 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240322C00514000/range/1/minute/2024-03-18/2024-03-18?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:21,690 - logs - INFO - Cached 381 bars of data
+2025-06-18 22:46:21,695 - logs - INFO - No data found for this period
+2025-06-18 22:46:21,697 - logs - INFO - Processing row 73 of 110 (66.4%)
+2025-06-18 22:46:21,699 - logs - INFO - Fetching new data for strike: 520, expiry: 2024-03-29, start: 2024-03-25, end: 2024-03-25
+2025-06-18 22:46:21,702 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:21,758 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240329C00520000/range/1/minute/2024-03-25/2024-03-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 145
+2025-06-18 22:46:21,758 - logs - INFO - No data found from polygon, retrying...
+2025-06-18 22:46:25,264 - logs - INFO - No data found from polygon
+2025-06-18 22:46:25,267 - logs - INFO - Processing row 74 of 110 (67.3%)
+2025-06-18 22:46:25,267 - logs - INFO - Fetching new data for strike: 524, expiry: 2024-04-05, start: 2024-04-01, end: 2024-04-01
+2025-06-18 22:46:25,274 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:25,354 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240405C00524000/range/1/minute/2024-04-01/2024-04-01?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:25,875 - logs - INFO - Cached 368 bars of data
+2025-06-18 22:46:25,882 - logs - INFO - No data found for this period
+2025-06-18 22:46:25,888 - logs - INFO - Processing row 75 of 110 (68.2%)
+2025-06-18 22:46:25,893 - logs - INFO - Fetching new data for strike: 520, expiry: 2024-04-12, start: 2024-04-08, end: 2024-04-08
+2025-06-18 22:46:25,900 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:25,966 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240412C00520000/range/1/minute/2024-04-08/2024-04-08?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:26,553 - logs - INFO - Cached 379 bars of data
+2025-06-18 22:46:26,557 - logs - INFO - No data found for this period
+2025-06-18 22:46:26,560 - logs - INFO - Processing row 76 of 110 (69.1%)
+2025-06-18 22:46:26,579 - logs - INFO - Fetching new data for strike: 516, expiry: 2024-04-19, start: 2024-04-15, end: 2024-04-15
+2025-06-18 22:46:26,583 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:26,649 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240419C00516000/range/1/minute/2024-04-15/2024-04-15?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:27,181 - logs - INFO - Cached 370 bars of data
+2025-06-18 22:46:27,190 - logs - INFO - No data found for this period
+2025-06-18 22:46:27,196 - logs - INFO - Processing row 77 of 110 (70.0%)
+2025-06-18 22:46:27,198 - logs - INFO - Fetching new data for strike: 498, expiry: 2024-04-26, start: 2024-04-22, end: 2024-04-22
+2025-06-18 22:46:27,206 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:27,274 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240426C00498000/range/1/minute/2024-04-22/2024-04-22?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:27,795 - logs - INFO - Cached 338 bars of data
+2025-06-18 22:46:27,800 - logs - INFO - No data found for this period
+2025-06-18 22:46:27,801 - logs - INFO - Processing row 78 of 110 (70.9%)
+2025-06-18 22:46:27,802 - logs - INFO - Fetching new data for strike: 511, expiry: 2024-05-03, start: 2024-04-29, end: 2024-04-29
+2025-06-18 22:46:27,805 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:27,868 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240503C00511000/range/1/minute/2024-04-29/2024-04-29?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:28,389 - logs - INFO - Cached 327 bars of data
+2025-06-18 22:46:28,394 - logs - INFO - No data found for this period
+2025-06-18 22:46:28,400 - logs - INFO - Processing row 79 of 110 (71.8%)
+2025-06-18 22:46:28,401 - logs - INFO - Fetching new data for strike: 514, expiry: 2024-05-10, start: 2024-05-06, end: 2024-05-06
+2025-06-18 22:46:28,403 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:28,469 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240510C00514000/range/1/minute/2024-05-06/2024-05-06?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:29,999 - logs - INFO - Cached 365 bars of data
+2025-06-18 22:46:29,005 - logs - INFO - No data found for this period
+2025-06-18 22:46:29,006 - logs - INFO - Processing row 80 of 110 (72.7%)
+2025-06-18 22:46:29,009 - logs - INFO - Fetching new data for strike: 523, expiry: 2024-05-17, start: 2024-05-13, end: 2024-05-13
+2025-06-18 22:46:29,014 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:29,254 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240517C00523000/range/1/minute/2024-05-13/2024-05-13?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:29,783 - logs - INFO - Cached 310 bars of data
+2025-06-18 22:46:29,789 - logs - INFO - No data found for this period
+2025-06-18 22:46:29,793 - logs - INFO - Processing row 81 of 110 (73.6%)
+2025-06-18 22:46:29,795 - logs - INFO - Fetching new data for strike: 530, expiry: 2024-05-24, start: 2024-05-20, end: 2024-05-20
+2025-06-18 22:46:29,803 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:29,963 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240524C00530000/range/1/minute/2024-05-20/2024-05-20?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:30,493 - logs - INFO - Cached 368 bars of data
+2025-06-18 22:46:30,498 - logs - INFO - No data found for this period
+2025-06-18 22:46:30,503 - logs - INFO - Processing row 82 of 110 (74.5%)
+2025-06-18 22:46:30,506 - logs - INFO - Fetching new data for strike: 531, expiry: 2024-05-31, start: 2024-05-28, end: 2024-05-28
+2025-06-18 22:46:30,508 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:30,586 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240531C00531000/range/1/minute/2024-05-28/2024-05-28?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:31,114 - logs - INFO - Cached 382 bars of data
+2025-06-18 22:46:31,123 - logs - INFO - No data found for this period
+2025-06-18 22:46:31,127 - logs - INFO - Processing row 83 of 110 (75.5%)
+2025-06-18 22:46:31,133 - logs - INFO - Fetching new data for strike: 530, expiry: 2024-06-07, start: 2024-06-03, end: 2024-06-03
+2025-06-18 22:46:31,138 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:31,207 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240607C00530000/range/1/minute/2024-06-03/2024-06-03?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:31,752 - logs - INFO - Cached 387 bars of data
+2025-06-18 22:46:31,763 - logs - INFO - No data found for this period
+2025-06-18 22:46:31,766 - logs - INFO - Processing row 84 of 110 (76.4%)
+2025-06-18 22:46:31,773 - logs - INFO - Fetching new data for strike: 534, expiry: 2024-06-14, start: 2024-06-10, end: 2024-06-10
+2025-06-18 22:46:31,783 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:31,852 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240614C00534000/range/1/minute/2024-06-10/2024-06-10?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:32,390 - logs - INFO - Cached 339 bars of data
+2025-06-18 22:46:32,399 - logs - INFO - No data found for this period
+2025-06-18 22:46:32,403 - logs - INFO - Processing row 85 of 110 (77.3%)
+2025-06-18 22:46:32,406 - logs - INFO - Fetching new data for strike: 543, expiry: 2024-06-21, start: 2024-06-17, end: 2024-06-17
+2025-06-18 22:46:32,413 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:32,479 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240621C00543000/range/1/minute/2024-06-17/2024-06-17?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:33,013 - logs - INFO - Cached 348 bars of data
+2025-06-18 22:46:33,016 - logs - INFO - No data found for this period
+2025-06-18 22:46:33,016 - logs - INFO - Processing row 86 of 110 (78.2%)
+2025-06-18 22:46:33,016 - logs - INFO - Fetching new data for strike: 545, expiry: 2024-06-28, start: 2024-06-24, end: 2024-06-24
+2025-06-18 22:46:33,024 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:33,093 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240628C00545000/range/1/minute/2024-06-24/2024-06-24?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:33,618 - logs - INFO - Cached 367 bars of data
+2025-06-18 22:46:33,624 - logs - INFO - No data found for this period
+2025-06-18 22:46:33,626 - logs - INFO - Processing row 87 of 110 (79.1%)
+2025-06-18 22:46:33,627 - logs - INFO - Fetching new data for strike: 546, expiry: 2024-07-05, start: 2024-07-01, end: 2024-07-01
+2025-06-18 22:46:33,632 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:33,695 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240705C00546000/range/1/minute/2024-07-01/2024-07-01?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:34,229 - logs - INFO - Cached 364 bars of data
+2025-06-18 22:46:34,238 - logs - INFO - No data found for this period
+2025-06-18 22:46:34,243 - logs - INFO - Processing row 88 of 110 (80.0%)
+2025-06-18 22:46:34,245 - logs - INFO - Fetching new data for strike: 556, expiry: 2024-07-12, start: 2024-07-08, end: 2024-07-08
+2025-06-18 22:46:34,246 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:34,333 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240712C00556000/range/1/minute/2024-07-08/2024-07-08?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:34,873 - logs - INFO - Cached 349 bars of data
+2025-06-18 22:46:34,882 - logs - INFO - No data found for this period
+2025-06-18 22:46:34,885 - logs - INFO - Processing row 89 of 110 (80.9%)
+2025-06-18 22:46:34,887 - logs - INFO - Fetching new data for strike: 563, expiry: 2024-07-19, start: 2024-07-15, end: 2024-07-15
+2025-06-18 22:46:34,894 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:34,963 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240719C00563000/range/1/minute/2024-07-15/2024-07-15?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:35,504 - logs - INFO - Cached 384 bars of data
+2025-06-18 22:46:35,511 - logs - INFO - No data found for this period
+2025-06-18 22:46:35,516 - logs - INFO - Processing row 90 of 110 (81.8%)
+2025-06-18 22:46:35,520 - logs - INFO - Fetching new data for strike: 553, expiry: 2024-07-26, start: 2024-07-22, end: 2024-07-22
+2025-06-18 22:46:35,527 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:35,599 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240726C00553000/range/1/minute/2024-07-22/2024-07-22?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:36,133 - logs - INFO - Cached 340 bars of data
+2025-06-18 22:46:36,139 - logs - INFO - No data found for this period
+2025-06-18 22:46:36,143 - logs - INFO - Processing row 91 of 110 (82.7%)
+2025-06-18 22:46:36,143 - logs - INFO - Fetching new data for strike: 547, expiry: 2024-08-02, start: 2024-07-29, end: 2024-07-29
+2025-06-18 22:46:36,150 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:36,220 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240802C00547000/range/1/minute/2024-07-29/2024-07-29?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:36,759 - logs - INFO - Cached 356 bars of data
+2025-06-18 22:46:36,763 - logs - INFO - No data found for this period
+2025-06-18 22:46:36,766 - logs - INFO - Processing row 92 of 110 (83.6%)
+2025-06-18 22:46:36,766 - logs - INFO - Fetching new data for strike: 512, expiry: 2024-08-09, start: 2024-08-05, end: 2024-08-05
+2025-06-18 22:46:36,774 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:36,837 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240809C00512000/range/1/minute/2024-08-05/2024-08-05?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 914
+2025-06-18 22:46:37,357 - logs - INFO - Cached 42 bars of data
+2025-06-18 22:46:37,365 - logs - INFO - No data found for this period
+2025-06-18 22:46:37,368 - logs - INFO - Processing row 93 of 110 (84.5%)
+2025-06-18 22:46:37,371 - logs - INFO - Fetching new data for strike: 535, expiry: 2024-08-16, start: 2024-08-12, end: 2024-08-12
+2025-06-18 22:46:37,377 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:37,446 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240816C00535000/range/1/minute/2024-08-12/2024-08-12?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:37,988 - logs - INFO - Cached 373 bars of data
+2025-06-18 22:46:37,995 - logs - INFO - No data found for this period
+2025-06-18 22:46:38,999 - logs - INFO - Processing row 94 of 110 (85.5%)
+2025-06-18 22:46:38,003 - logs - INFO - Fetching new data for strike: 555, expiry: 2024-08-23, start: 2024-08-19, end: 2024-08-19
+2025-06-18 22:46:38,008 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:38,078 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240823C00555000/range/1/minute/2024-08-19/2024-08-19?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:38,615 - logs - INFO - Cached 340 bars of data
+2025-06-18 22:46:38,623 - logs - INFO - No data found for this period
+2025-06-18 22:46:38,626 - logs - INFO - Processing row 95 of 110 (86.4%)
+2025-06-18 22:46:38,628 - logs - INFO - Fetching new data for strike: 564, expiry: 2024-08-30, start: 2024-08-26, end: 2024-08-26
+2025-06-18 22:46:38,633 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:38,700 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240830C00564000/range/1/minute/2024-08-26/2024-08-26?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:39,230 - logs - INFO - Cached 355 bars of data
+2025-06-18 22:46:39,233 - logs - INFO - No data found for this period
+2025-06-18 22:46:39,233 - logs - INFO - Processing row 96 of 110 (87.3%)
+2025-06-18 22:46:39,233 - logs - INFO - Fetching new data for strike: 561, expiry: 2024-09-06, start: 2024-09-03, end: 2024-09-03
+2025-06-18 22:46:39,248 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:39,314 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240906C00561000/range/1/minute/2024-09-03/2024-09-03?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:39,861 - logs - INFO - Cached 371 bars of data
+2025-06-18 22:46:39,873 - logs - INFO - No data found for this period
+2025-06-18 22:46:39,875 - logs - INFO - Processing row 97 of 110 (88.2%)
+2025-06-18 22:46:39,878 - logs - INFO - Fetching new data for strike: 545, expiry: 2024-09-13, start: 2024-09-09, end: 2024-09-09
+2025-06-18 22:46:39,882 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:39,948 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240913C00545000/range/1/minute/2024-09-09/2024-09-09?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:40,508 - logs - INFO - Cached 351 bars of data
+2025-06-18 22:46:40,534 - logs - INFO - No data found for this period
+2025-06-18 22:46:40,548 - logs - INFO - Processing row 98 of 110 (89.1%)
+2025-06-18 22:46:40,568 - logs - INFO - Fetching new data for strike: 562, expiry: 2024-09-20, start: 2024-09-16, end: 2024-09-16
+2025-06-18 22:46:40,593 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:40,698 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240920C00562000/range/1/minute/2024-09-16/2024-09-16?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:41,235 - logs - INFO - Cached 383 bars of data
+2025-06-18 22:46:41,243 - logs - INFO - No data found for this period
+2025-06-18 22:46:41,246 - logs - INFO - Processing row 99 of 110 (90.0%)
+2025-06-18 22:46:41,249 - logs - INFO - Fetching new data for strike: 570, expiry: 2024-09-27, start: 2024-09-23, end: 2024-09-23
+2025-06-18 22:46:41,255 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:41,322 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY240927C00570000/range/1/minute/2024-09-23/2024-09-23?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:41,864 - logs - INFO - Cached 385 bars of data
+2025-06-18 22:46:41,874 - logs - INFO - No data found for this period
+2025-06-18 22:46:41,876 - logs - INFO - Processing row 100 of 110 (90.9%)
+2025-06-18 22:46:41,882 - logs - INFO - Fetching new data for strike: 571, expiry: 2024-10-04, start: 2024-09-30, end: 2024-09-30
+2025-06-18 22:46:41,890 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:41,957 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241004C00571000/range/1/minute/2024-09-30/2024-09-30?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:42,480 - logs - INFO - Cached 338 bars of data
+2025-06-18 22:46:42,485 - logs - INFO - No data found for this period
+2025-06-18 22:46:42,487 - logs - INFO - Processing row 101 of 110 (91.8%)
+2025-06-18 22:46:42,489 - logs - INFO - Fetching new data for strike: 572, expiry: 2024-10-11, start: 2024-10-07, end: 2024-10-07
+2025-06-18 22:46:42,492 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:42,559 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241011C00572000/range/1/minute/2024-10-07/2024-10-07?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:43,103 - logs - INFO - Cached 378 bars of data
+2025-06-18 22:46:43,109 - logs - INFO - No data found for this period
+2025-06-18 22:46:43,112 - logs - INFO - Processing row 102 of 110 (92.7%)
+2025-06-18 22:46:43,115 - logs - INFO - Fetching new data for strike: 582, expiry: 2024-10-18, start: 2024-10-14, end: 2024-10-14
+2025-06-18 22:46:43,119 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:43,195 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241018C00582000/range/1/minute/2024-10-14/2024-10-14?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:43,732 - logs - INFO - Cached 293 bars of data
+2025-06-18 22:46:43,740 - logs - INFO - No data found for this period
+2025-06-18 22:46:43,742 - logs - INFO - Processing row 103 of 110 (93.6%)
+2025-06-18 22:46:43,743 - logs - INFO - Fetching new data for strike: 584, expiry: 2024-10-25, start: 2024-10-21, end: 2024-10-21
+2025-06-18 22:46:43,747 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:43,813 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241025C00584000/range/1/minute/2024-10-21/2024-10-21?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:44,336 - logs - INFO - Cached 380 bars of data
+2025-06-18 22:46:44,343 - logs - INFO - No data found for this period
+2025-06-18 22:46:44,346 - logs - INFO - Processing row 104 of 110 (94.5%)
+2025-06-18 22:46:44,348 - logs - INFO - Fetching new data for strike: 583, expiry: 2024-11-01, start: 2024-10-28, end: 2024-10-28
+2025-06-18 22:46:44,355 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:44,420 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241101C00583000/range/1/minute/2024-10-28/2024-10-28?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:44,948 - logs - INFO - Cached 299 bars of data
+2025-06-18 22:46:44,955 - logs - INFO - No data found for this period
+2025-06-18 22:46:44,959 - logs - INFO - Processing row 105 of 110 (95.5%)
+2025-06-18 22:46:44,961 - logs - INFO - Fetching new data for strike: 572, expiry: 2024-11-08, start: 2024-11-04, end: 2024-11-04
+2025-06-18 22:46:44,966 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:45,031 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241108C00572000/range/1/minute/2024-11-04/2024-11-04?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:45,563 - logs - INFO - Cached 261 bars of data
+2025-06-18 22:46:45,566 - logs - INFO - No data found for this period
+2025-06-18 22:46:45,571 - logs - INFO - Processing row 106 of 110 (96.4%)
+2025-06-18 22:46:45,572 - logs - INFO - Fetching new data for strike: 600, expiry: 2024-11-15, start: 2024-11-11, end: 2024-11-11
+2025-06-18 22:46:45,576 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:45,643 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241115C00600000/range/1/minute/2024-11-11/2024-11-11?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:46,188 - logs - INFO - Cached 391 bars of data
+2025-06-18 22:46:46,198 - logs - INFO - No data found for this period
+2025-06-18 22:46:46,201 - logs - INFO - Processing row 107 of 110 (97.3%)
+2025-06-18 22:46:46,203 - logs - INFO - Fetching new data for strike: 587, expiry: 2024-11-22, start: 2024-11-18, end: 2024-11-18
+2025-06-18 22:46:46,209 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:46,278 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241122C00587000/range/1/minute/2024-11-18/2024-11-18?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:46,811 - logs - INFO - Cached 286 bars of data
+2025-06-18 22:46:46,817 - logs - INFO - No data found for this period
+2025-06-18 22:46:46,820 - logs - INFO - Processing row 108 of 110 (98.2%)
+2025-06-18 22:46:46,821 - logs - INFO - Fetching new data for strike: 600, expiry: 2024-11-29, start: 2024-11-25, end: 2024-11-25
+2025-06-18 22:46:46,825 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:46,892 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241129C00600000/range/1/minute/2024-11-25/2024-11-25?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:47,436 - logs - INFO - Cached 404 bars of data
+2025-06-18 22:46:47,445 - logs - INFO - No data found for this period
+2025-06-18 22:46:47,449 - logs - INFO - Processing row 109 of 110 (99.1%)
+2025-06-18 22:46:47,453 - logs - INFO - Fetching new data for strike: 603, expiry: 2024-12-06, start: 2024-12-02, end: 2024-12-02
+2025-06-18 22:46:47,485 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:47,552 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241206C00603000/range/1/minute/2024-12-02/2024-12-02?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:48,077 - logs - INFO - Cached 352 bars of data
+2025-06-18 22:46:48,082 - logs - INFO - No data found for this period
+2025-06-18 22:46:48,086 - logs - INFO - Processing row 110 of 110 (100.0%)
+2025-06-18 22:46:48,087 - logs - INFO - Fetching new data for strike: 608, expiry: 2024-12-13, start: 2024-12-09, end: 2024-12-09
+2025-06-18 22:46:48,091 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.polygon.io:443
+2025-06-18 22:46:48,157 - urllib3.connectionpool - DEBUG - https://api.polygon.io:443 "GET /v2/aggs/ticker/O:SPY241213C00608000/range/1/minute/2024-12-09/2024-12-09?adjusted=true&sort=asc&apiKey=_gClIMBNzOb6jgnPTg4_xvQ08RSnKELi HTTP/1.1" 200 None
+2025-06-18 22:46:48,702 - logs - INFO - Cached 377 bars of data
+2025-06-18 22:46:48,708 - logs - INFO - No data found for this period
+2025-06-18 22:46:48,710 - logs - INFO - No data was retrieved

@@ -359,6 +359,7 @@ def thread_exit_orders():
                         order['side'] = "SELL"
                     else:
                         order['side'] = "BUY"
+                    order['type'] = "MARKET"
 
                     try:
                         response = requests.post(opend_address, json=order, headers=headers)
@@ -744,8 +745,9 @@ def thread_exit_orders():
                                 flag_in_exiting = True
                                 break
                         if flag_in_exiting == False:
-                            send_order(order, api_key)
-                            processed_list.append(order_id)
+                            is_success = send_naked_order_limit(order, api_key)
+                            if is_success:
+                                processed_list.append(order_id)
 
                 for order_id in processed_list:
                     del naked_todo_orders[order_id]
@@ -901,9 +903,26 @@ def retry_buy_order(fixed_multiple, symbol, datetmp, option_value, strikeprice, 
         logger.error(f"Buy order failed: {e} : {code_name}")
         return jsonify({"error": str(e)}), 500
 
-
-def send_order(order_data, api_key):
+def send_naked_order_limit(order_data, api_key):
     headers = {"Content-Type": "application/json", "api-key": api_key}
+
+    if order_data['side'] == "BUY":
+        ask_price_list = get_ask_price([order_data['symbol']], api_key)
+        if order_data['symbol'] in ask_price_list:
+            order_data['price'] = ask_price_list[order_data['symbol']] + 0.1
+        else:
+            logger.error(f"[-] send_naked_order_limit: ask price of {order_data['symbol']} is not in ask_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
+            return False
+    else:
+        bid_price_list = get_bid_price([order_data['symbol']], api_key)
+        if order_data['symbol'] in bid_price_list:
+            order_data['price'] = bid_price_list[order_data['symbol']] - 0.1
+        else:
+            logger.error(f"[-] send_naked_order_limit: bid price of {order_data['symbol']} is not in bid_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
+            return False
+
+    order_data['type'] = "NORMAL"
+
     try:
         fastapi_url = "http://" + api_keys[api_key]["opend-address"]
         response = requests.post(fastapi_url, json=order_data, headers=headers)
@@ -913,23 +932,23 @@ def send_order(order_data, api_key):
 
         
         if "Open position failed" in str(response_json):
-            logger.error(f"send_order: Open position failed: {response_json} : {order_data['symbol']}")
+            logger.error(f"send_naked_order_limit: Open position failed: {response_json} : {order_data['symbol']}")
             return False
 
         try:
             json_object = json.loads(response_json)
         except Exception as e:
-            logger.error(f"[-] send_order: error {e} : {order_data['symbol']}")
+            logger.error(f"[-] send_naked_order_limit: error {e} : {order_data['symbol']}")
             return False
 
         order_id = json_object[0]["order_id"] + api_keys[api_key]["id"]
         naked_pending_orders[order_id] = order_data
 
-        logger.info(f"[-] send_order: Buy pending order placed. Order ID: {order_id} : {order_data['symbol']}")
+        logger.info(f"[-] send_naked_order_limit: Buy pending order placed. Order ID: {order_id} : {order_data['symbol']}")
 
         return True
     except Exception as e:
-        logger.error(f"[-] send_order: error {e} : {order_data['symbol']}")
+        logger.error(f"[-] send_naked_order_limit: error {e} : {order_data['symbol']}")
         return False
 
 def forward_order1(data, api_key):
@@ -1014,7 +1033,7 @@ def forward_order1(data, api_key):
             "type": data.get("type"),
             "api_key": api_key,
             "order_tag": ordertag,
-            'multiple_exit_level': multiple_exit_level,
+            "multiple_exit_level": multiple_exit_level,
 		}
         
         if flag_in_exiting == True:
@@ -1022,10 +1041,12 @@ def forward_order1(data, api_key):
             naked_todo_orders[now_time] = order_data
             return jsonify({"success": "naked order is in exiting, so added to naked_todo_orders"}), 200
 
-        if send_order(order_data, api_key):
-            return jsonify({"success": "naked order is not in exiting, so sent to naked_pending_orders"}), 200
-        else:
-            return jsonify({"error": "Failed to send naked order"}), 500
+        while True:
+            is_success = send_naked_order_limit(order_data, api_key)
+            if is_success:
+                return jsonify({"success": "naked order is not in exiting, so sent to naked_pending_orders"}), 200
+            else:
+                time.sleep(10)
 
     # Covered Strategy
     if flag_in_exiting == True:

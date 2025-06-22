@@ -1,0 +1,94 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © CryptoTaoist
+
+//@version=4
+study("TV Phase_Index_v5", overlay=false)
+XPercent = input(0.001, title="XPercent (%)")
+MinChangePerc = input(0.0001, title="MinChangePerc (%)")
+UseFloatingPrice = input(true, title="UseFloatingPrice")
+
+Phase_Index_v5() =>
+    CurrentPhase = 0
+    LastHigherPrice = 0.0
+    LastLowerPrice = 0.0
+    LastClosePrice = 0.0
+    
+    CurrentPhase := nz(CurrentPhase[1])
+    LastHigherPrice := nz(LastHigherPrice[1])
+    LastLowerPrice := nz(LastLowerPrice[1])
+    LastClosePrice := nz(LastClosePrice[1])
+    if CurrentPhase==0
+    	if UseFloatingPrice==false
+    		price1 = LastClosePrice*(1 + XPercent)
+    		price2 = LastClosePrice*(1 - XPercent)
+            if close>=price1
+                CurrentPhase := -1
+    			LastClosePrice := close
+    			LastHigherPrice := close
+    		else if close <= price2
+    		    CurrentPhase := -1
+    			LastClosePrice := close
+    			LastLowerPrice := close
+    	else	
+    	    if  LastHigherPrice== 0 or LastHigherPrice < close 
+    	        LastHigherPrice := close
+    		
+    		if LastLowerPrice == 0 or LastLowerPrice > close 
+    		    LastLowerPrice := close
+    
+    		price1 = LastLowerPrice*(1 + XPercent)
+    		price2 = LastHigherPrice*(1 - XPercent)
+            
+            
+    		if close >= price1
+    			CurrentPhase := -1
+    			LastClosePrice := close
+    			LastHigherPrice := close
+    		
+    		else if close <= price2
+    			CurrentPhase := 1
+    			LastClosePrice := close
+    			LastLowerPrice := close
+    
+    else if CurrentPhase < 0
+    	if LastClosePrice < close
+    	    LastClosePrice := close
+    
+    	if LastHigherPrice > 0 and close > LastHigherPrice and MinChangePerc > 0
+    		changePerc = (close - LastHigherPrice) / LastHigherPrice
+    
+    		num = floor(changePerc / MinChangePerc)
+    
+    		if (num >= 1)
+    			CurrentPhase := CurrentPhase - num
+    			LastHigherPrice := close
+    
+    	if close <= LastClosePrice * (1 - XPercent)
+    		CurrentPhase := 1
+    		LastLowerPrice := close
+    		LastClosePrice := close
+    
+    else if CurrentPhase > 0
+    	if LastClosePrice > close 
+    	    LastClosePrice := close
+    
+    	if LastLowerPrice > 0 and MinChangePerc > 0 and close < LastLowerPrice
+    		changePerc = (LastLowerPrice - close) / LastLowerPrice
+    
+    		num = floor(changePerc / MinChangePerc)
+    
+    		if (num >= 1)
+    			CurrentPhase := CurrentPhase + num
+    			LastLowerPrice := close
+    
+    	if close >= LastClosePrice * (1 + XPercent)
+    		CurrentPhase := -1
+    		LastHigherPrice := close
+    		LastClosePrice := close
+    		
+	-CurrentPhase
+			
+PhaseValue = Phase_Index_v5()
+
+plot(PhaseValue, color = PhaseValue>0 ? color.lime : color.red, style = plot.style_histogram)
+plot(close)
