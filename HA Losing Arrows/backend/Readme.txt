@@ -600,3 +600,12 @@ If naked SELL then limit order 10 cents < bid price.
 
 If you get an order rejection on the limit order then must check price again and do again until filled.
 limit order when done this way should fill right away.  so if it didn't fill after 10 secs, then must cancel the first limit order, check the price again, and then execute the new limit order at new price.
+
+
+=============================
+[app_test_v5]
+
+Right now we do limit order at price lower than bid for buying and higher than offer for selling in the limit order naked strategy.
+I want to try to get the middle price between best bid and offer.  and if it doesn't execute in 10 seconds then lower the bid or increase the offer by 10 cents each 10 seconds until filled.
+and if selling then lower the price by 10cents every 10 seconds until filled, if buying raise the price by 10cents every 10 seconds until filled.
+but for selling don't really need to worry about it.  just do the buying strategy.

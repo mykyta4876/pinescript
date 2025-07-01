@@ -368,3 +368,10 @@ After any exit above, then if there is a new phase index -1 again before end tim
 
 3) New Column 3:  At each step 2 above also note down in a new column 3 the difference of:   Close price of Step 2 minus Close Price of Step 1.
  And finally if any open position in column 1 and makes it all the way to end time without any column 2 greater close price, then note this final value in Column 3:   Close price of Step 1 minus Final close price at end time.
+
+=============================================
+Also I need one more thing.  I need some way to differentiate the trades.  right now it just gives all in one big sheet.  can we add the trade number at first column and all rows for trade 1 for example have the number "1" in the column, and then all rows for trade 2 have number "2" in the column, etc...
+
+i can add a column with "trade" and just include the number and you can print in in front of all rows related to that trade?
+
+ok and you will print the trade number for all rows for each trade yes?
