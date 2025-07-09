@@ -20,9 +20,9 @@ api_all_keys = {"a1b2c345-6def-789g-hijk-123456789lmn": "paper",    # execute th
 
 api_keys = {
     "fb7c1234-25ae-48b6-9f7f-9b3f98d76543": {"id":"ryanoakes-real", "opend-address":"34.71.74.2"}, 
-    "a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429": {"id":"ryanoakes-paper", "opend-address":"34.71.74.2"}, 
+    #"a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429": {"id":"ryanoakes-paper", "opend-address":"34.71.74.2"}, 
     "7d4f8a12-1b3c-45e9-9b1a-2a6e0fc2e975": {"id":"enlixir-real", "opend-address":"34.73.25.174"}, 
-    "d45a6e79-927b-4f3e-889d-3c65a8f0738c": {"id":"enlixir-paper", "opend-address":"34.73.25.174"}
+    #"d45a6e79-927b-4f3e-889d-3c65a8f0738c": {"id":"enlixir-paper", "opend-address":"34.73.25.174"}
     }
 
 # In-memory store for orders
@@ -903,26 +903,8 @@ def retry_buy_order(fixed_multiple, symbol, datetmp, option_value, strikeprice, 
         logger.error(f"Buy order failed: {e} : {code_name}")
         return jsonify({"error": str(e)}), 500
 
-def send_naked_order_limit(order_data, api_key):
+def send_order_limit(order_data, api_key):
     headers = {"Content-Type": "application/json", "api-key": api_key}
-
-    if order_data['side'] == "BUY":
-        ask_price_list = get_ask_price([order_data['symbol']], api_key)
-        if order_data['symbol'] in ask_price_list:
-            order_data['price'] = ask_price_list[order_data['symbol']] + 0.1
-        else:
-            logger.error(f"[-] send_naked_order_limit: ask price of {order_data['symbol']} is not in ask_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
-            return False
-    else:
-        bid_price_list = get_bid_price([order_data['symbol']], api_key)
-        if order_data['symbol'] in bid_price_list:
-            order_data['price'] = bid_price_list[order_data['symbol']] - 0.1
-        else:
-            logger.error(f"[-] send_naked_order_limit: bid price of {order_data['symbol']} is not in bid_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
-            return False
-
-    order_data['type'] = "NORMAL"
-
     try:
         fastapi_url = "http://" + api_keys[api_key]["opend-address"]
         response = requests.post(fastapi_url, json=order_data, headers=headers)
@@ -950,6 +932,32 @@ def send_naked_order_limit(order_data, api_key):
     except Exception as e:
         logger.error(f"[-] send_naked_order_limit: error {e} : {order_data['symbol']}")
         return False
+
+
+def send_naked_order_limit(order_data, api_key):
+    middle_price_list = get_middle_price([order_data['symbol']], api_key)
+
+    if not order_data['symbol'] in middle_price_list:
+        logger.error(f"[-] send_naked_order_limit: middle price of {order_data['symbol']} is not in middle_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
+        return False
+    
+    middle_price = middle_price_list[order_data['symbol']]
+    order_data['type'] = "NORMAL"
+
+    if order_data['side'] == "BUY":
+        order_data['price'] = middle_price + 0.1
+        while send_order_limit(order_data, api_key) == False:
+            time.sleep(10)
+            logger.info(f"[-] send_naked_order_limit: retrying to send order, acc:{api_keys[api_key]['id']}, order:{order_data}")
+            order_data['price'] = order_data['price'] + 0.1
+        return True
+    else:
+        bid_price_list = get_bid_price([order_data['symbol']], api_key)
+        if order_data['symbol'] in bid_price_list:
+            order_data['price'] = bid_price_list[order_data['symbol']] - 0.1
+        else:
+            logger.error(f"[-] send_naked_order_limit: bid price of {order_data['symbol']} is not in bid_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
+            return False
 
 def forward_order1(data, api_key):
     if api_key not in api_keys:
@@ -1215,6 +1223,17 @@ def get_ask_price(code_list, api_key):
     logger.info(f"[-] get_ask_price: Successfully got ask prices: {ask_price_list}")
     return ask_price_list
     
+def get_middle_price(code_list, api_key):
+    snapshot = get_snapshot(code_list, api_key)
+    
+    middle_price_list = {}
+    for snapshot_item in snapshot:
+        if snapshot_item['code'] in code_list:
+            middle_price_list[snapshot_item['code']] = (snapshot_item['bid_price'] + snapshot_item['ask_price']) / 2
+
+    logger.info(f"[-] get_middle_price: Successfully got middle prices: {middle_price_list}")
+    return middle_price_list
+
 def get_ask_volume(code_list, api_key):
     snapshot = get_snapshot(code_list, api_key)
     

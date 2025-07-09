@@ -20,9 +20,9 @@ api_all_keys = {"a1b2c345-6def-789g-hijk-123456789lmn": "paper",    # execute th
 
 api_keys = {
     "fb7c1234-25ae-48b6-9f7f-9b3f98d76543": {"id":"ryanoakes-real", "opend-address":"34.71.74.2"}, 
-    "a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429": {"id":"ryanoakes-paper", "opend-address":"34.71.74.2"}, 
+    #"a9f8f651-4d3e-46f1-8d6b-c2f1f3b76429": {"id":"ryanoakes-paper", "opend-address":"34.71.74.2"}, 
     "7d4f8a12-1b3c-45e9-9b1a-2a6e0fc2e975": {"id":"enlixir-real", "opend-address":"34.73.25.174"}, 
-    "d45a6e79-927b-4f3e-889d-3c65a8f0738c": {"id":"enlixir-paper", "opend-address":"34.73.25.174"}
+    #"d45a6e79-927b-4f3e-889d-3c65a8f0738c": {"id":"enlixir-paper", "opend-address":"34.73.25.174"}
     }
 
 # In-memory store for orders

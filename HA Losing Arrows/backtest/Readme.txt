@@ -306,6 +306,7 @@ Updates:
 3) We always use close price for the "Final closing price" column.
 
 ===========================================
+[engine10]
 # Build engine10, same as engine7 except:
 Now we going to check when any close price < open price * multiplier (will use fraction multipliers less than 1, like 0.5) then note down the close price and the time stamp, same as engine7.  only change is from > to <.  all else same.  
 
