@@ -609,3 +609,7 @@ Right now we do limit order at price lower than bid for buying and higher than o
 I want to try to get the middle price between best bid and offer.  and if it doesn't execute in 10 seconds then lower the bid or increase the offer by 10 cents each 10 seconds until filled.
 and if selling then lower the price by 10cents every 10 seconds until filled, if buying raise the price by 10cents every 10 seconds until filled.
 but for selling don't really need to worry about it.  just do the buying strategy.
+
+
+2025-07-11 10:33:00,880 - urllib3.connectionpool - DEBUG - http://34.73.25.174:80 "POST /order_list/ HTTP/11" 200 5839
+2025-07-11 10:33:02,134 - logs - INFO - [-] thread_exit_orders: start
