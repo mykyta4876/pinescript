@@ -773,10 +773,10 @@ def thread_exit_orders():
                 logger.info(f"[-] thread_exit_orders: {api_info['id']} finished")
             
             start_time = now_time
-            now_time = datetime.now()
+            now_time = datetime.now().astimezone(pytz.timezone('US/Eastern'))
             while now_time - start_time < timedelta(seconds=180):
                 time.sleep(10)
-                now_time = datetime.now()
+                now_time = datetime.now().astimezone(pytz.timezone('US/Eastern'))
         except Exception as e:
             logger.error(f"[-] thread_exit_orders: error: {e}")
             time.sleep(10)
@@ -953,7 +953,7 @@ def send_naked_order_limit(order_data, api_key, start_time, period):
         order_data['price'] = middle_price + 0.1
         while send_order_limit(order_data, api_key) == False:
             time.sleep(10)
-            now_time = datetime.now()
+            now_time = datetime.now().astimezone(pytz.timezone('US/Eastern'))
             if now_time - start_time > timedelta(seconds=period):
                 logger.error(f"[-] send_naked_order_limit: exceed {period} seconds, acc:{api_keys[api_key]['id']}, order:{order_data}")
                 return False
