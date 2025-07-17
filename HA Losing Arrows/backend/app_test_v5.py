@@ -359,32 +359,12 @@ def thread_exit_orders():
                         order['side'] = "SELL"
                     else:
                         order['side'] = "BUY"
-                    order['type'] = "MARKET"
-
-                    try:
-                        response = requests.post(opend_address, json=order, headers=headers)
-                        response.raise_for_status()
-                        response_json = response.json()
-                        time.sleep(3)
-
-                        if "Open position failed" in str(response_json):
-                            logger.error(f"[-] thread_exit_orders: NAKED: Open position failed: {response_json}, acc:{api_info['id']}, order:{order}")
-                            continue
-
-                        try:
-                            json_object = json.loads(response_json)
-                        except Exception as e:
-                            logger.error(f"[-] thread_exit_orders: NAKED: error: {e}, acc:{api_info['id']}, order:{order}")
-                            continue
-
-                        if "order_id" in json_object[0]:
-                            logger.info(f"[-] thread_exit_orders: NAKED: Placed the pending exit order of {order_id} successfully. ID: {json_object[0]['order_id']}, acc:{api_info['id']}, order:{order}")
-                            processed_list.append(order_id)
-                        else:
-                            logger.error(f"[-] thread_exit_orders: NAKED: Order response missing 'order_id', acc:{api_info['id']}, order:{order}")
-
-                    except requests.exceptions.RequestException as e:
-                        logger.error(f"[-] thread_exit_orders: NAKED: FastAPI request failed: {e}, acc:{api_info['id']}, order:{order}")
+                    
+                    is_success = send_naked_order_limit(order, api_key, now_time, 180)
+                    if is_success:
+                        processed_list.append(order_id)
+                    else:
+                        logger.error(f"[-] thread_exit_orders: NAKED: Failed to place the pending exit order of {order_id}, acc:{api_info['id']}, order:{order}")
 
                 for order_id in processed_list:
                     del naked_exit_todo_orders[order_id]
