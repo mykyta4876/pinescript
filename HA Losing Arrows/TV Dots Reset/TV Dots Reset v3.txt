@@ -1,0 +1,154 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © CryptoTaoist
+
+//@version=5
+
+indicator("TV_Running_4775_Dots_Reset_v3", overlay=true, max_bars_back=5000)
+
+Lots = input(1.0, title="Lots")
+TickSize = input(1.0, title="TickSize")
+TickValue = input(1.0, title="TickValue")
+
+MultiplierA = input(0.5, title="MultiplierA")
+MultiplierB = input(0.7, title="MultiplierB")
+
+ShowProfitCut1 = input(true, title="ShowProfitCut1")
+ShowProfitCut2 = input(true, title="ShowProfitCut2")
+
+TimeSetting = input("=====Time Settings=====", title="Time Settings")
+StartDay = input(0, title="Start day (YYYYMMDD)")
+StartTime = input(0, title="Start time (HHmm)")
+EndDay = input(0, title="End day (YYYYMMDD)")
+EndTime = input(0, title="End time (HHmm)")
+
+// === Spread Filter Settings ===
+useSpreadFilter = input.bool(true, title="Use EMA % Spread Filter?")
+shortLen = input.int(14, title="Short EMA Length")
+longLen  = input.int(100, title="Long EMA Length")
+bbLen    = input.int(20, title="Basis Length")
+
+emaShort  = ta.ema(close, shortLen)
+emaLong   = ta.ema(close, longLen)
+spreadPct = (emaShort - emaLong) / emaLong * 100
+basis     = ta.sma(spreadPct, bbLen)
+
+filterAbove = not useSpreadFilter or spreadPct <= basis  // Allow up arrows only if spread is low
+filterBelow = not useSpreadFilter or spreadPct >= basis  // Allow down arrows only if spread is high
+
+
+IsTradingTime(dbegin, tbegin, dend, tend) =>
+    yyyymmdd = year * 10000 + month * 100 + dayofmonth
+    hhmm = 100 * hour + minute
+    v1 = dbegin > 0 ? yyyymmdd >= dbegin and hhmm >= tbegin : true
+    v2 = dend > 0 ? yyyymmdd <= dend and (tend == 0 or hhmm <= tend) : true
+
+    v1 and v2
+
+EntrySignal() =>
+
+    upArrow = close > open
+    downArrow = close < open
+
+    [upArrow, downArrow]
+
+CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition) =>
+    sum = 0.0
+    totalbuypositions = 0.0
+
+    if calc
+        sum := (close - nettedLongAvg) / TickSize * nettedLongPosition * TickValue
+        totalbuypositions := nettedLongPosition
+        totalbuypositions
+    else
+        sum := sum[1]
+        totalbuypositions := totalbuypositions[1]
+        totalbuypositions
+
+    [sum, totalbuypositions]
+
+CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition) =>
+    sum = 0.0
+    totalsellpositions = 0.0
+
+    if calc
+        sum := (nettedShortAvg - close) / TickSize * nettedShortPosition * TickValue
+        totalsellpositions := nettedShortPosition
+        totalsellpositions
+    else
+        sum := sum[1]
+        totalsellpositions := totalsellpositions[1]
+        totalsellpositions
+
+    [sum, totalsellpositions]
+
+
+Running_4775_Dots_v2_Reset(multiplier)=>
+
+    tradingTime = IsTradingTime(StartDay, StartTime, EndDay, EndTime)
+    
+    [upArrow, downArrow] = EntrySignal()
+    
+    buy = upArrow and tradingTime
+    sell = downArrow and tradingTime
+    
+    
+    buyProfitCutoff = false
+    sellProfitCutoff = false
+    
+    nettedLongPosition = 0.0
+    nettedShortPosition = 0.0
+    
+    nettedLongAvg = 0.0
+    nettedShortAvg = 0.0
+    
+    nettedLongPosition := buy ? nz(nettedLongPosition[1], 0) + Lots : nz(nettedLongPosition[1], 0)
+    nettedLongAvg := buy ? (nz(nettedLongPosition[1], 0) * nz(nettedLongAvg[1], 0) + Lots * close) / 
+       (nz(nettedLongPosition[1], 0) + Lots) : nz(nettedLongAvg[1], 0)
+    
+    buyProfitCut = 0.0
+    buyProfitCut := nettedLongPosition[1]==0 and nettedLongPosition>0 ? close*multiplier : nettedLongPosition==0 ? 0 : nz(buyProfitCut[1])
+    
+    nettedShortPosition := sell ? nz(nettedShortPosition[1], 0) + Lots : nz(nettedShortPosition[1], 0)
+    nettedShortAvg := sell ? 
+       (nz(nettedShortPosition[1], 0) * nz(nettedShortAvg[1], 0) + Lots * close) / 
+       (nz(nettedShortPosition[1], 0) + Lots) : nz(nettedShortAvg[1], 0)
+    
+    sellProfitCut = 0.0
+    sellProfitCut := nettedShortPosition[1]==0 and nettedShortPosition>0 ? close*multiplier : nettedShortPosition==0 ? 0 : nz(sellProfitCut[1])
+    
+    
+    
+    calc = tradingTime
+    [buyProfit, totalbuypositions] = CalculateBuyProfit(calc, nettedLongAvg, nettedLongPosition)
+    [sellProfit, totalsellpositions] = CalculateSellProfit(calc, nettedShortAvg, nettedShortPosition)
+    
+    
+    buyProfitCutoff := buyProfitCut>0 and buyProfit >= buyProfitCut
+    sellProfitCutoff := sellProfitCut>0 and sellProfit >= sellProfitCut
+    
+    exitbuy = buyProfitCutoff
+    exitsell = sellProfitCutoff
+    
+    
+    nettedLongPosition := exitbuy or exitsell ? 0 : nettedLongPosition
+    nettedLongAvg := exitbuy or exitsell ? 0 : nettedLongAvg
+    
+    nettedShortPosition := exitbuy or exitsell ? 0 : nettedShortPosition
+    nettedShortAvg := exitbuy or exitsell ? 0 : nettedShortAvg
+    
+    [buyProfitCutoff,sellProfitCutoff]
+
+[buyProfitCutoff1,sellProfitCutoff1] = Running_4775_Dots_v2_Reset(MultiplierA)
+[buyProfitCutoff2,sellProfitCutoff2] = Running_4775_Dots_v2_Reset(MultiplierB)
+
+plotshape(ShowProfitCut1 and buyProfitCutoff1 and filterAbove, title="Buy Profit Cutoff 1",
+     style=shape.circle, location=location.abovebar, color=color.green, size=size.tiny)
+
+plotshape(ShowProfitCut1 and sellProfitCutoff1 and filterBelow, title="Sell Profit Cutoff 1",
+     style=shape.circle, location=location.belowbar, color=color.red, size=size.tiny)
+
+plotshape(ShowProfitCut2 and buyProfitCutoff2 and filterAbove, title="Buy Profit Cutoff 2",
+     style=shape.circle, location=location.abovebar, color=color.purple, size=size.small)
+
+plotshape(ShowProfitCut2 and sellProfitCutoff2 and filterBelow, title="Sell Profit Cutoff 2",
+     style=shape.circle, location=location.belowbar, color=color.lime, size=size.small)

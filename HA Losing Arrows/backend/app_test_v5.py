@@ -41,6 +41,7 @@ order_pair_map = {}
 naked_todo_orders = {}
 naked_pending_orders = {}
 naked_exit_todo_orders = {}
+naked_exit_pending_orders = {}
 
 executor = ThreadPoolExecutor(max_workers=1)
 
@@ -69,6 +70,7 @@ def save_orders_into_jsonfile():
     global exit_buy_pending_orders
     global naked_pending_orders
     global naked_exit_todo_orders
+    global naked_exit_pending_orders
     global order_pair_map
 
     total_orders = {}
@@ -81,8 +83,9 @@ def save_orders_into_jsonfile():
     total_orders['exit_buy_pending_orders'] = exit_buy_pending_orders
     total_orders['naked_pending_orders'] = naked_pending_orders
     total_orders['naked_exit_todo_orders'] = naked_exit_todo_orders
+    total_orders['naked_exit_pending_orders'] = naked_exit_pending_orders
 
-    count = len(sell_todo_orders) + len(buy_pending_orders) + len(exit_sell_todo_orders) + len(exit_sell_pending_orders) + len(exit_buy_todo_orders) + len(exit_buy_pending_orders) + len(naked_pending_orders) + len(naked_exit_todo_orders)
+    count = len(sell_todo_orders) + len(buy_pending_orders) + len(exit_sell_todo_orders) + len(exit_sell_pending_orders) + len(exit_buy_todo_orders) + len(exit_buy_pending_orders) + len(naked_pending_orders) + len(naked_exit_todo_orders) + len(naked_exit_pending_orders) + len(naked_exit_pending_orders)
     if count == 0:
         order_pair_map = {}
     total_orders['order_pair_map'] = order_pair_map
@@ -105,6 +108,7 @@ def load_orders_from_jsonfile():
     global exit_buy_pending_orders
     global naked_pending_orders
     global naked_exit_todo_orders
+    global naked_exit_pending_orders
     global order_pair_map
 
     if not os.path.exists("orders.json"):
@@ -123,6 +127,7 @@ def load_orders_from_jsonfile():
     exit_buy_pending_orders = total_orders['exit_buy_pending_orders']
     naked_pending_orders = total_orders['naked_pending_orders']
     naked_exit_todo_orders = total_orders['naked_exit_todo_orders']
+    naked_exit_pending_orders = total_orders['naked_exit_pending_orders']
     order_pair_map = total_orders['order_pair_map']
     logger.info(f"[-] load_orders_from_jsonfile: Orders loaded")
 
@@ -200,6 +205,32 @@ def merge_orders(input_data, max_quantity=5):
 
     return result
 
+def get_order_list(api_key):
+    global api_keys
+    order_list = []
+
+    headers = {"Content-Type": "application/json", "api-key": api_key}
+    opend_address = "http://" + api_keys[api_key]["opend-address"]
+    while True:
+        try:
+            response = requests.post(opend_address + "/order_list/", json=None, headers=headers)
+            response.raise_for_status()
+            response_json = response.json()
+            time.sleep(2)
+
+            try:
+                order_list = json.loads(response_json)
+                break
+            except Exception as e:
+                logger.error(f"[-] thread_exit_orders: order_list: error: {e}, acc:{api_keys[api_key]['id']}")
+                break
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[-] thread_exit_orders: order_list: error: {e}, acc:{api_keys[api_key]['id']}")
+            break
+    
+    return order_list
+
 def thread_exit_orders():
     global buy_pending_orders
     global sell_todo_orders
@@ -210,6 +241,7 @@ def thread_exit_orders():
     global exit_buy_pending_orders
     global naked_pending_orders
     global naked_exit_todo_orders
+    global naked_exit_pending_orders
     global order_pair_map
     global orders
     symbol_list = []
@@ -300,29 +332,10 @@ def thread_exit_orders():
                     logger.info(f"[-] thread_exit_orders: {api_info['id']} has no orders")
                     continue
 
-                json_object_order_list = []
-                headers = {"Content-Type": "application/json", "api-key": api_key}
-                opend_address = "http://" + api_info["opend-address"]
-                while True:
-                    try:
-                        response = requests.post(opend_address + "/order_list/", json=None, headers=headers)
-                        response.raise_for_status()
-                        response_json = response.json()
-                        time.sleep(2)
-
-                        try:
-                            json_object_order_list = json.loads(response_json)
-                            break
-                        except Exception as e:
-                            logger.error(f"[-] thread_exit_orders: order_list: error: {e}, acc:{api_info['id']}")
-                            break
-
-                    except requests.exceptions.RequestException as e:
-                        logger.error(f"[-] thread_exit_orders: order_list: error: {e}, acc:{api_info['id']}")
-                        break
-                
+                json_object_order_list = get_order_list(api_key)
                 logger.info(f"[-] thread_exit_orders: {api_info['id']} ### Finished the step - getting order list")
 
+                """
                 # confirm the pending naked orders
                 naked_pending_orders_copy = naked_pending_orders.copy()
                 
@@ -339,6 +352,7 @@ def thread_exit_orders():
                 for order_id in processed_list:
                     if order_id in naked_pending_orders:
                         del naked_pending_orders[order_id]
+                """
 
                 # place the exit orders for naked orders
                 naked_exit_todo_orders_copy = naked_exit_todo_orders.copy()
@@ -360,14 +374,17 @@ def thread_exit_orders():
                     else:
                         order['side'] = "BUY"
                     
-                    is_success = send_naked_order_limit(order, api_key, now_time, 180)
+                    is_success, order_id = send_naked_order_limit(order, api_key, now_time, 180)
                     if is_success:
                         processed_list.append(order_id)
                     else:
                         logger.error(f"[-] thread_exit_orders: NAKED: Failed to place the pending exit order of {order_id}, acc:{api_info['id']}, order:{order}")
 
+                """
                 for order_id in processed_list:
+                    naked_exit_pending_orders[order_id] = naked_exit_todo_orders[order_id]
                     del naked_exit_todo_orders[order_id]
+                """
 
                 if len(symbol_list) > 0:
                     symbol_last_time_after_lmin = symbol_last_time + timedelta(minutes=1)
@@ -510,12 +527,13 @@ def thread_exit_orders():
                 
                 logger.info(f"[-] thread_exit_orders: {api_info['id']} ### Finished the step - confirming sell orders (coverd strategy)")
 
+                """
                 naked_pending_orders_copy = naked_pending_orders.copy()
                 for p_order_id, p_order in naked_pending_orders_copy.items():
                     p_order_only_id = p_order_id.replace(api_keys[api_key]["id"], "")
                     for l_order in json_object_order_list:
                         if l_order['order_id'] == p_order_only_id and l_order['order_status'] == "FILLED_ALL":
-                            logger.info(f"[-] thread_exit_orders: Sell pending order {p_order_id} is FILLED_ALL, fill price:{l_order['dealt_avg_price']}")
+                            logger.info(f"[-] thread_exit_orders: Naked entry pending order {p_order_id} is FILLED_ALL, fill price:{l_order['dealt_avg_price']}")
                             if p_order_id in orders:
                                 orders[p_order_id]['entry_price'] = l_order['dealt_avg_price']
                             
@@ -525,7 +543,20 @@ def thread_exit_orders():
                             if p_order['symbol'] not in symbol_list:
                                 symbol_list.append(p_order['symbol'])
                 
-                logger.info(f"[-] thread_exit_orders: {api_info['id']} ### Finished the step - confirming sell orders (naked strategy)")
+                logger.info(f"[-] thread_exit_orders: {api_info['id']} ### Finished the step - confirming entry orders (naked strategy)")
+
+                naked_exit_pending_orders_copy = naked_exit_pending_orders.copy()
+                for p_order_id, p_order in naked_exit_pending_orders_copy.items():
+                    p_order_only_id = p_order_id.replace(api_keys[api_key]["id"], "")
+                    for l_order in json_object_order_list:
+                        if l_order['order_id'] == p_order_only_id and l_order['order_status'] == "FILLED_ALL":
+                            logger.info(f"[-] thread_exit_orders: Naked exit pending order {p_order_id} is FILLED_ALL, fill price:{l_order['dealt_avg_price']}")
+                            
+                            if p_order_id in naked_exit_pending_orders:
+                                del naked_exit_pending_orders[p_order_id]
+                            
+                logger.info(f"[-] thread_exit_orders: {api_info['id']} ### Finished the step - confirming exit orders (naked strategy)")
+                """
 
                 exit_sell_todo_orders_copy = exit_sell_todo_orders.copy()
                 for order_id, order in exit_sell_todo_orders_copy.items():
@@ -725,11 +756,12 @@ def thread_exit_orders():
                                 flag_in_exiting = True
                                 break
                         if flag_in_exiting == False:
-                            is_success = send_naked_order_limit(order, api_key, now_time, 180)
+                            is_success, order_id = send_naked_order_limit(order, api_key, now_time, 180)
                             if is_success:
                                 processed_list.append(order_id)
 
                 for order_id in processed_list:
+                    # naked_pending_orders[order_id] = order
                     del naked_todo_orders[order_id]
 
                 # Covered Strategy - handle entry order
@@ -738,7 +770,11 @@ def thread_exit_orders():
                 for order_id, order in buy_todo_orders_copy.items():
                     if order['api_key'] == api_key:
                         flag_in_exiting = False
-                        for exit_order_id, exit_order in naked_exit_todo_orders.items():
+                        for exit_order_id, exit_order in exit_buy_todo_orders.items():
+                            if exit_order['symbol'].find(order['symbol']) != -1 and exit_order['api_key'] == api_key:
+                                flag_in_exiting = True
+                                break
+                        for exit_order_id, exit_order in exit_sell_todo_orders.items():
                             if exit_order['symbol'].find(order['symbol']) != -1 and exit_order['api_key'] == api_key:
                                 flag_in_exiting = True
                                 break
@@ -899,27 +935,27 @@ def send_order_limit(order_data, api_key):
 
         
         if "Open position failed" in str(response_json):
-            logger.error(f"send_naked_order_limit: Open position failed: {response_json} : {order_data['symbol']}")
-            return False
+            logger.error(f"send_order_limit: Open position failed: {response_json} : {order_data['symbol']}")
+            return False, ""
 
         try:
             json_object = json.loads(response_json)
         except Exception as e:
-            logger.error(f"[-] send_naked_order_limit: error {e} : {order_data['symbol']}")
+            logger.error(f"[-] send_order_limit: error {e} : {order_data['symbol']}")
             return False
 
         order_id = json_object[0]["order_id"] + api_keys[api_key]["id"]
-        naked_pending_orders[order_id] = order_data
 
-        logger.info(f"[-] send_naked_order_limit: Buy pending order placed. Order ID: {order_id} : {order_data['symbol']}")
+        logger.info(f"[-] send_order_limit: Buy pending order placed. Order ID: {order_id} : {order_data['symbol']}")
 
-        return True
+        return True, order_id
     except Exception as e:
-        logger.error(f"[-] send_naked_order_limit: error {e} : {order_data['symbol']}")
-        return False
+        logger.error(f"[-] send_order_limit: error {e} : {order_data['symbol']}")
+        return False, ""
 
 
 def send_naked_order_limit(order_data, api_key, start_time, period):
+    order_data['type'] = "NORMAL"
     middle_price_list = get_middle_price([order_data['symbol']], api_key)
 
     if not order_data['symbol'] in middle_price_list:
@@ -927,10 +963,46 @@ def send_naked_order_limit(order_data, api_key, start_time, period):
         return False
     
     middle_price = middle_price_list[order_data['symbol']]
+
+    while True:
+        is_success_placed, order_id = send_order_limit(order_data, api_key)
+        if is_success_placed:
+            time.sleep(10)
+            order_list = get_order_list(api_key)
+            p_order_only_id = order_id.replace(api_keys[api_key]["id"], "")
+            for l_order in order_list:
+                if l_order['order_id'] == p_order_only_id and l_order['order_status'] == "FILLED_ALL":
+                    logger.info(f"[-] send_naked_order_limit: order {order_id} is FILLED_ALL, acc:{api_keys[api_key]['id']}, order:{order_data}")
+                    return True, order_id
+        else:
+            time.sleep(10)
+            
+        if order_data['side'] == "BUY":
+            order_data['price'] = middle_price + 0.1
+        else:
+            order_data['price'] = middle_price - 0.1
+
+        now_time = datetime.now().astimezone(pytz.timezone('US/Eastern'))
+        if now_time - start_time > timedelta(seconds=period):
+            logger.error(f"[-] send_naked_order_limit: exceed {period} seconds, acc:{api_keys[api_key]['id']}, order:{order_data}")
+            return False, ""
+
+        logger.info(f"[-] send_naked_order_limit: retrying to send order, acc:{api_keys[api_key]['id']}, order:{order_data}")
+
+
+def send_naked_order_limit_v2(order_data, api_key, start_time, period):
     order_data['type'] = "NORMAL"
 
     if order_data['side'] == "BUY":
+        middle_price_list = get_middle_price([order_data['symbol']], api_key)
+
+        if not order_data['symbol'] in middle_price_list:
+            logger.error(f"[-] send_naked_order_limit: middle price of {order_data['symbol']} is not in middle_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
+            return False
+        
+        middle_price = middle_price_list[order_data['symbol']]
         order_data['price'] = middle_price + 0.1
+
         while send_order_limit(order_data, api_key) == False:
             time.sleep(10)
             now_time = datetime.now().astimezone(pytz.timezone('US/Eastern'))
@@ -944,6 +1016,7 @@ def send_naked_order_limit(order_data, api_key, start_time, period):
         bid_price_list = get_bid_price([order_data['symbol']], api_key)
         if order_data['symbol'] in bid_price_list:
             order_data['price'] = bid_price_list[order_data['symbol']] - 0.1
+            send_order_limit(order_data, api_key)
         else:
             logger.error(f"[-] send_naked_order_limit: bid price of {order_data['symbol']} is not in bid_price_list, acc:{api_keys[api_key]['id']}, order:{order_data}")
             return False
@@ -1035,14 +1108,15 @@ def forward_order1(data, api_key):
             "multiple_exit_level": multiple_exit_level,
 		}
         
-        now_time = datetime.now()
+        now_time = datetime.now().astimezone(pytz.timezone('US/Eastern'))
         now_time_str = now_time.strftime("%Y-%m-%d %H:%M:%S")
         if flag_in_exiting == True:
             naked_todo_orders[now_time_str] = order_data
             return jsonify({"success": "naked order is in exiting, so added to naked_todo_orders"}), 200
 
-        is_success = send_naked_order_limit(order_data, api_key, now_time, 180)
+        is_success, order_id = send_naked_order_limit(order_data, api_key, now_time, 180)
         if is_success:
+            # naked_pending_orders[order_id] = order_data
             return jsonify({"success": "naked order is not in exiting, so sent to naked_pending_orders"}), 200
 
         return jsonify({"error": "failed to send to naked_pending_orders"}), 200
